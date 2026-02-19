@@ -1,0 +1,103 @@
+apiVersion: v1
+entries:
+  celerdata:
+  - apiVersion: v2
+    appVersion: 3.5-latest
+    created: "2026-02-19T16:54:19.234231+08:00"
+    description: A Helm chart for CelerData cluster
+    digest: 35f50f730f1a40fabb6d4d5f7505c2c2e1b08f63b32cd8c037b95de3a98dc25a
+    home: https://github.com/celerdata/celerdata-kubernetes-operator
+    keywords:
+    - operator
+    - celerdata
+    - database
+    - olap
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@celerdata.com
+      name: Ray Yan
+    name: celerdata
+    sources:
+    - https://github.com/StarRocks/starrocks
+    type: application
+    urls:
+    - https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.11.4/celerdata-1.11.4.tgz
+    version: 1.11.4
+  kube-celerdata:
+  - apiVersion: v2
+    appVersion: 3.5-latest
+    created: "2026-02-19T16:54:15.024427+08:00"
+    dependencies:
+    - name: operator
+      repository: file://charts/operator
+      version: 1.11.4
+    - name: celerdata
+      repository: file://charts/celerdata
+      version: 1.11.4
+    description: kube-celerdata includes two subcharts, operator and celerdata
+    digest: 915d54b580525afebc1ef039f265c2f3c2cf06e4ec2db798318d9f7dcb26e4c9
+    home: https://github.com/celerdata/celerdata-kubernetes-operator
+    keywords:
+    - operator
+    - celerdata
+    - database
+    - olap
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@celerdata.com
+      name: Ray Yan
+    name: kube-celerdata
+    sources:
+    - https://github.com/StarRocks/starrocks
+    type: application
+    urls:
+    - https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.11.4/kube-celerdata-1.11.4.tgz
+    version: 1.11.4
+  operator:
+  - apiVersion: v2
+    appVersion: 1.11.4
+    created: "2026-02-19T16:54:17.213062+08:00"
+    description: A Helm chart for CelerData operator
+    digest: 66ea2f0866d63c91ecff44538db28014cab689eb58be789fd5f381acbae9f9d9
+    home: https://github.com/celerdata/celerdata-kubernetes-operator
+    keywords:
+    - operator
+    - celerdata
+    - database
+    - olap
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@celerdata.com
+      name: Ray Yan
+    name: operator
+    sources:
+    - https://github.com/StarRocks/starrocks
+    type: application
+    urls:
+    - https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.11.4/operator-1.11.4.tgz
+    version: 1.11.4
+  warehouse:
+  - apiVersion: v2
+    appVersion: 3.5-latest
+    created: "2026-02-19T16:54:21.437783+08:00"
+    description: Warehouse is currently a feature of the CelerData Enterprise Edition.
+    digest: a557ed85adc40b048ec8e432ec31288922d26a4078998a60bb7a19113aab7e98
+    home: https://github.com/celerdata/celerdata-kubernetes-operator
+    keywords:
+    - operator
+    - celerdata
+    - database
+    - olap
+    - multi-warehouse
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@celerdata.com
+      name: Ray Yan
+    name: warehouse
+    sources:
+    - https://github.com/StarRocks/starrocks
+    type: application
+    urls:
+    - https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.11.4/warehouse-1.11.4.tgz
+    version: 1.11.4
+generated: "2026-02-19T16:54:21.437223+08:00"

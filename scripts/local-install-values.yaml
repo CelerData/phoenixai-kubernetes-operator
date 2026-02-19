@@ -1,0 +1,45 @@
+operator:
+  celerDataOperator:
+    image:
+      repository: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/operator
+      tag: v1.8.6
+
+celerdata:
+  celerDataFeSpec:
+    image:
+      repository: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/fe-ubuntu
+      tag: 3.1.2
+    resources:
+      limits:
+        cpu: 2
+        memory: 4Gi
+      requests:
+        cpu: 1
+        memory: 2Gi
+    service:
+      type: NodePort
+      ports:
+      - name: query   # fill the name from the fe service ports
+        containerPort: 9030
+        nodePort: 30002
+        port: 9030
+  celerDataBeSpec:
+    image:
+      repository: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/be-ubuntu
+      tag: 3.1.2
+    resources:
+      limits:
+        cpu: 2
+        memory: 4Gi
+      requests:
+        cpu: 1
+        memory: 2Gi
+  celerDataFeProxySpec:
+    enabled: true
+    service:
+      type: NodePort
+      ports:
+      - name: http-port   # fill the name from the fe proxy service ports
+        nodePort: 30001
+        containerPort: 8080
+        port: 8080        

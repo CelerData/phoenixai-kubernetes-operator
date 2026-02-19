@@ -1,0 +1,13 @@
+{{- if and .Values.spec .Values.spec.config }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "celerdatawarehouse.configmap.name" . }}
+  namespace: {{ template "celerdatawarehouse.namespace" . }}
+  labels:
+    warehouse: {{ template "celerdatawarehouse.name" . }}
+    app: "warehouse"
+data:
+  {{- include "celerdatawarehouse.config" . | nindent 2 }}
+
+{{- end }}

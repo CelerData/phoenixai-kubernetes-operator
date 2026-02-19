@@ -1,0 +1,2615 @@
+<p>Packages:</p>
+<ul>
+<li>
+<a href="#celerdata.com%2fv1">celerdata.com/v1</a>
+</li>
+</ul>
+<h2 id="celerdata.com/v1">celerdata.com/v1</h2>
+<div>
+</div>
+Resource Types:
+<ul></ul>
+<h3 id="celerdata.com/v1.AnnotationOperationValue">AnnotationOperationValue
+(<code>string</code> alias)</h3>
+<div>
+<p>AnnotationOperationValue present the operation for fe, cn, be.</p>
+</div>
+<h3 id="celerdata.com/v1.AutoScalerVersion">AutoScalerVersion
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.AutoScalingPolicy">AutoScalingPolicy</a>, <a href="#celerdata.com/v1.HorizontalScaler">HorizontalScaler</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr><td><p>&#34;v1&#34;</p></td>
+<td><p>AutoScalerV1 the cn service use v1 autoscaler. Reference to <a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/">https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/</a></p>
+</td>
+</tr><tr><td><p>&#34;v2&#34;</p></td>
+<td><p>AutoScalerV2 the cn service use v2. Reference to  <a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/">https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/</a></p>
+</td>
+</tr><tr><td><p>&#34;v2beta2&#34;</p></td>
+<td><p>AutoScalerV2Beta2 the cn service use v2beta2. Reference to  <a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/">https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/</a></p>
+</td>
+</tr></tbody>
+</table>
+<h3 id="celerdata.com/v1.AutoScalingPolicy">AutoScalingPolicy
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataCnSpec">CelerDataCnSpec</a>, <a href="#celerdata.com/v1.WarehouseComponentSpec">WarehouseComponentSpec</a>)
+</p>
+<div>
+<p>AutoScalingPolicy defines the auto scale</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>hpaPolicy</code><br/>
+<em>
+<a href="#celerdata.com/v1.HPAPolicy">
+HPAPolicy
+</a>
+</em>
+</td>
+<td>
+<p>the policy of autoscaling. operator use autoscaling v2.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>version</code><br/>
+<em>
+<a href="#celerdata.com/v1.AutoScalerVersion">
+AutoScalerVersion
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>version represents the autoscaler version for cn service. only support v1,v2beta2,v2</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>minReplicas</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>MinReplicas is the lower limit for the number of replicas to which the autoscaler
+can scale down. It defaults to 1 pod.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>maxReplicas</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+<p>MaxReplicas is the upper limit for the number of pods that can be set by the autoscaler;
+cannot be smaller than MinReplicas.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataBeSpec">CelerDataBeSpec
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataClusterSpec">CelerDataClusterSpec</a>)
+</p>
+<div>
+<p>CelerDataBeSpec defines the desired state of be.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>CelerDataComponentSpec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataComponentSpec">
+CelerDataComponentSpec
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>CelerDataComponentSpec</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>beEnvVars</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#envvar-v1-core">
+[]Kubernetes core/v1.EnvVar
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>beEnvVars is a slice of environment variables that are added to the pods, the default is empty.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataBeStatus">CelerDataBeStatus
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataClusterStatus">CelerDataClusterStatus</a>)
+</p>
+<div>
+<p>CelerDataBeStatus represents the status of CelerData be.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>CelerDataComponentStatus</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataComponentStatus">
+CelerDataComponentStatus
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>CelerDataComponentStatus</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataCluster">CelerDataCluster
+</h3>
+<div>
+<p>CelerDataCluster defines a CelerData cluster deployment.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>metadata</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#objectmeta-v1-meta">
+Kubernetes meta/v1.ObjectMeta
+</a>
+</em>
+</td>
+<td>
+Refer to the Kubernetes API documentation for the fields of the
+<code>metadata</code> field.
+</td>
+</tr>
+<tr>
+<td>
+<code>spec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataClusterSpec">
+CelerDataClusterSpec
+</a>
+</em>
+</td>
+<td>
+<p>Specification of the desired state of the CelerData cluster.</p>
+<br/>
+<br/>
+<table>
+<tr>
+<td>
+<code>serviceAccount</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Specify a Service Account for CelerDataCluster use k8s cluster.
+Deprecated: component use serviceAccount in own&rsquo;s field.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>celerDataFeSpec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataFeSpec">
+CelerDataFeSpec
+</a>
+</em>
+</td>
+<td>
+<p>CelerDataFeSpec define fe configuration for start fe service.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>celerDataBeSpec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataBeSpec">
+CelerDataBeSpec
+</a>
+</em>
+</td>
+<td>
+<p>CelerDataBeSpec define be configuration for start be service.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>celerDataCnSpec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataCnSpec">
+CelerDataCnSpec
+</a>
+</em>
+</td>
+<td>
+<p>CelerDataCnSpec define cn configuration for start cn service.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>celerDataFeProxySpec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataFeProxySpec">
+CelerDataFeProxySpec
+</a>
+</em>
+</td>
+<td>
+<p>CelerDataLoadSpec define a proxy for fe.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>disasterRecovery</code><br/>
+<em>
+<a href="#celerdata.com/v1.DisasterRecovery">
+DisasterRecovery
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>DisasterRecovery is used to determine whether to enter disaster recovery mode.</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataClusterStatus">
+CelerDataClusterStatus
+</a>
+</em>
+</td>
+<td>
+<p>Most recent observed status of the CelerData cluster</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataClusterSpec">CelerDataClusterSpec
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataCluster">CelerDataCluster</a>)
+</p>
+<div>
+<p>CelerDataClusterSpec defines the desired state of CelerDataCluster</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>serviceAccount</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Specify a Service Account for CelerDataCluster use k8s cluster.
+Deprecated: component use serviceAccount in own&rsquo;s field.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>celerDataFeSpec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataFeSpec">
+CelerDataFeSpec
+</a>
+</em>
+</td>
+<td>
+<p>CelerDataFeSpec define fe configuration for start fe service.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>celerDataBeSpec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataBeSpec">
+CelerDataBeSpec
+</a>
+</em>
+</td>
+<td>
+<p>CelerDataBeSpec define be configuration for start be service.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>celerDataCnSpec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataCnSpec">
+CelerDataCnSpec
+</a>
+</em>
+</td>
+<td>
+<p>CelerDataCnSpec define cn configuration for start cn service.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>celerDataFeProxySpec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataFeProxySpec">
+CelerDataFeProxySpec
+</a>
+</em>
+</td>
+<td>
+<p>CelerDataLoadSpec define a proxy for fe.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>disasterRecovery</code><br/>
+<em>
+<a href="#celerdata.com/v1.DisasterRecovery">
+DisasterRecovery
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>DisasterRecovery is used to determine whether to enter disaster recovery mode.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataClusterStatus">CelerDataClusterStatus
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataCluster">CelerDataCluster</a>)
+</p>
+<div>
+<p>CelerDataClusterStatus defines the observed state of CelerDataCluster.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>phase</code><br/>
+<em>
+<a href="#celerdata.com/v1.Phase">
+Phase
+</a>
+</em>
+</td>
+<td>
+<p>Represents the state of cluster. the possible value are: running, failed, pending</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>reason</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Reason represents the errors when calling sub-controllers</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>celerDataFeStatus</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataFeStatus">
+CelerDataFeStatus
+</a>
+</em>
+</td>
+<td>
+<p>Represents the status of fe. the status have running, failed and creating pods.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>celerDataBeStatus</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataBeStatus">
+CelerDataBeStatus
+</a>
+</em>
+</td>
+<td>
+<p>Represents the status of be. the status have running, failed and creating pods.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>celerDataCnStatus</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataCnStatus">
+CelerDataCnStatus
+</a>
+</em>
+</td>
+<td>
+<p>Represents the status of cn. the status have running, failed and creating pods.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>celerDataFeProxyStatus</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataFeProxyStatus">
+CelerDataFeProxyStatus
+</a>
+</em>
+</td>
+<td>
+<p>Represents the status of fe proxy. the status have running, failed and creating pods.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>disasterRecoveryStatus</code><br/>
+<em>
+<a href="#celerdata.com/v1.DisasterRecoveryStatus">
+DisasterRecoveryStatus
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>DisasterRecoveryStatus represents the status of disaster recovery.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataCnSpec">CelerDataCnSpec
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataClusterSpec">CelerDataClusterSpec</a>)
+</p>
+<div>
+<p>CelerDataCnSpec defines the desired state of cn.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>CelerDataComponentSpec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataComponentSpec">
+CelerDataComponentSpec
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>CelerDataComponentSpec</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>cnEnvVars</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#envvar-v1-core">
+[]Kubernetes core/v1.EnvVar
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>cnEnvVars is a slice of environment variables that are added to the pods, the default is empty.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>autoScalingPolicy</code><br/>
+<em>
+<a href="#celerdata.com/v1.AutoScalingPolicy">
+AutoScalingPolicy
+</a>
+</em>
+</td>
+<td>
+<p>AutoScalingPolicy auto scaling strategy</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataCnStatus">CelerDataCnStatus
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataClusterStatus">CelerDataClusterStatus</a>, <a href="#celerdata.com/v1.CelerDataWarehouseStatus">CelerDataWarehouseStatus</a>)
+</p>
+<div>
+<p>WarehouseComponentStatus represents the status of component.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>CelerDataComponentStatus</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataComponentStatus">
+CelerDataComponentStatus
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>CelerDataComponentStatus</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>hpaName</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>The policy name of autoScale.
+Deprecated</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>horizontalScaler</code><br/>
+<em>
+<a href="#celerdata.com/v1.HorizontalScaler">
+HorizontalScaler
+</a>
+</em>
+</td>
+<td>
+<p>HorizontalAutoscaler have the autoscaler information.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>replicas</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+<p>Replicas is the total number of non-terminated CN pods targeted.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>selector</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Selector for CN pods. The HPA will use this selector to know which pods to monitor.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataComponentSpec">CelerDataComponentSpec
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataBeSpec">CelerDataBeSpec</a>, <a href="#celerdata.com/v1.CelerDataCnSpec">CelerDataCnSpec</a>, <a href="#celerdata.com/v1.CelerDataFeSpec">CelerDataFeSpec</a>, <a href="#celerdata.com/v1.WarehouseComponentSpec">WarehouseComponentSpec</a>)
+</p>
+<div>
+<p>CelerDataComponentSpec defines the shared specification for all CelerData components except FE Proxy</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>CelerDataLoadSpec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataLoadSpec">
+CelerDataLoadSpec
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>CelerDataLoadSpec</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>runAsNonRoot</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+<p>RunAsNonRoot is used to determine whether to run CelerData as a normal user.
+If RunAsNonRoot is true, operator will set RunAsUser and RunAsGroup to 1000 in securityContext.
+default: nil</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>capabilities</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#capabilities-v1-core">
+Kubernetes core/v1.Capabilities
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>refer to <a href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container">https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container</a>
+grant certain privileges to a process without granting all the privileges of the root user</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>configMaps</code><br/>
+<em>
+<a href="#celerdata.com/v1.ConfigMapReference">
+[]ConfigMapReference
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>the reference for configMap which allow users to mount any files to container.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>secrets</code><br/>
+<em>
+<a href="#celerdata.com/v1.SecretReference">
+[]SecretReference
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>the reference for secrets.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>hostAliases</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#hostalias-v1-core">
+[]Kubernetes core/v1.HostAlias
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>HostAliases is an optional list of hosts and IPs that will be injected into the pod&rsquo;s hosts
+file if specified. This is only valid for non-hostNetwork pods.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>terminationGracePeriodSeconds</code><br/>
+<em>
+int64
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>TerminationGracePeriodSeconds defines duration in seconds the pod needs to terminate gracefully. May be decreased in delete request.
+Value must be non-negative integer. The value zero indicates stop immediately via
+the kill signal (no opportunity to shut down).
+If this value is nil, the default grace period will be used instead.
+The grace period is the duration in seconds after the processes running in the pod are sent
+a termination signal and the time when the processes are forcibly halted with a kill signal.
+Set this value longer than the expected cleanup time for your process.
+Defaults to 120 seconds.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sidecars</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#container-v1-core">
+[]Kubernetes core/v1.Container
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Sidecars is an optional list of containers that are run in the same pod as the CelerData component.
+You can use this field to launch helper containers that provide additional functionality to the main container.
+See <a href="https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#Container">https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#Container</a> for how to configure a container.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>initContainers</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#container-v1-core">
+[]Kubernetes core/v1.Container
+</a>
+</em>
+</td>
+<td>
+<p>InitContainers is an optional list of containers that are run in the same pod as the CelerData component.
+You can use this field to launch helper containers that run before the main container starts.
+See <a href="https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#Container">https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#Container</a> for how to configure a container.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>command</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Entrypoint array. Not executed within a shell.
+If this is not provided, it will use default entrypoint for different components:
+1. For FE, it will use /opt/starrocks/fe_entrypoint.sh as the entrypoint.
+2. For BE, it will use /opt/starrocks/be_entrypoint.sh as the entrypoint.
+3. For CN, it will use /opt/starrocks/cn_entrypoint.sh as the entrypoint.
+More info: <a href="https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell">https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>args</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Arguments to the entrypoint.
+If this is not provided, it will use $(FE_SERVICE_NAME) for all components.
+Variable references $(VAR_NAME) are expanded using the container&rsquo;s environment. If a variable
+cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced
+to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. &ldquo;$$(VAR_NAME)&rdquo; will
+produce the string literal &ldquo;$(VAR_NAME)&rdquo;. Escaped references will never be expanded, regardless
+of whether the variable exists or not. Cannot be updated.
+More info: <a href="https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell">https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>updateStrategy</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#statefulsetupdatestrategy-v1-apps">
+Kubernetes apps/v1.StatefulSetUpdateStrategy
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>CelerDataCluster use StatefulSet to deploy FE/BE/CN components.
+UpdateStrategy indicates the StatefulSetUpdateStrategy that will be
+employed to update Pods in the StatefulSet when a revision is made to
+Template. See <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#rolling-updates">https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#rolling-updates</a> for more details.
+Note: The maxUnavailable field is in Alpha stage and it is honored only by API servers that are running with the
+MaxUnavailableStatefulSet feature gate enabled.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>readOnlyRootFilesystem</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Whether this container has a read-only root filesystem.
+Default is false.
+Note that:
+1. This field cannot be set when spec.os.name is windows.
+2. The FE/BE/CN container should support read-only root filesystem. The newest version of FE/BE/CN is 3.3.6,
+and does not support read-only root filesystem</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sysctls</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#sysctl-v1-core">
+[]Kubernetes core/v1.Sysctl
+</a>
+</em>
+</td>
+<td>
+<p>Sysctls defines a list of namespaced sysctls for the podSecurityContext.sysctls
+See <a href="https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/">https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/</a> for more details.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>persistentVolumeClaimRetentionPolicy</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#statefulsetpersistentvolumeclaimretentionpolicy-v1-apps">
+Kubernetes apps/v1.StatefulSetPersistentVolumeClaimRetentionPolicy
+</a>
+</em>
+</td>
+<td>
+<p>PersistentVolumeClaimRetentionPolicy specifies the retention policy for PersistentVolumeClaims associated with the component.
+The WhenDeleted field is supported for all components, and it determines whether to delete PVCs when the StatefulSet is deleted.
+The WhenScaled field is only supported for the CN component.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>minReadySeconds</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>MinReadySeconds specifies the minimum number of seconds for which a newly created pod should be ready
+without any of its container crashing, for it to be considered available.
+Defaults to 0 (pod will be considered available as soon as it is ready).</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>podManagementPolicy</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#podmanagementpolicytype-v1-apps">
+Kubernetes apps/v1.PodManagementPolicyType
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>podManagementPolicy controls how pods are created during initial scale up, when replacing pods on nodes, or when scaling down.
+The default policy is Parallel which is not the same as statefulset&rsquo;s default policy which maybe a not a good choice
+to use a different default value.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataComponentStatus">CelerDataComponentStatus
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataBeStatus">CelerDataBeStatus</a>, <a href="#celerdata.com/v1.CelerDataCnStatus">CelerDataCnStatus</a>, <a href="#celerdata.com/v1.CelerDataFeProxyStatus">CelerDataFeProxyStatus</a>, <a href="#celerdata.com/v1.CelerDataFeStatus">CelerDataFeStatus</a>)
+</p>
+<div>
+<p>CelerDataComponentStatus represents the status of a CelerData component.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>serviceName</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>the name of fe service exposed for user.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>failedInstances</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>FailedInstances failed pod names.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>creatingInstances</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>CreatingInstances in creating pod names.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>runningInstances</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>RunningInstances in running status pod names.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>resourceNames</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+<p>ResourceNames the statefulset names of fe.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>phase</code><br/>
+<em>
+<a href="#celerdata.com/v1.ComponentPhase">
+ComponentPhase
+</a>
+</em>
+</td>
+<td>
+<p>Phase the value from all pods of component status. If component have one failed pod phase=failed,
+also if fe have one creating pod phase=creating, also if component all running phase=running, others unknown.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>reason</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Reason represents the reason of not running.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataFeProxySpec">CelerDataFeProxySpec
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataClusterSpec">CelerDataClusterSpec</a>)
+</p>
+<div>
+<p>CelerDataFeProxySpec defines the specification for FE Proxy
+Note: it includes CelerDataLoadSpec, not CelerDataComponentSpec</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>CelerDataLoadSpec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataLoadSpec">
+CelerDataLoadSpec
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>CelerDataLoadSpec</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>resolver</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataFeProxyStatus">CelerDataFeProxyStatus
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataClusterStatus">CelerDataClusterStatus</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>CelerDataComponentStatus</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataComponentStatus">
+CelerDataComponentStatus
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>CelerDataComponentStatus</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataFeSpec">CelerDataFeSpec
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataClusterSpec">CelerDataClusterSpec</a>)
+</p>
+<div>
+<p>CelerDataFeSpec defines the desired state of fe.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>CelerDataComponentSpec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataComponentSpec">
+CelerDataComponentSpec
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>CelerDataComponentSpec</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>feEnvVars</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#envvar-v1-core">
+[]Kubernetes core/v1.EnvVar
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>feEnvVars is a slice of environment variables that are added to the pods, the default is empty.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataFeStatus">CelerDataFeStatus
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataClusterStatus">CelerDataClusterStatus</a>)
+</p>
+<div>
+<p>CelerDataFeStatus represents the status of CelerData fe.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>CelerDataComponentStatus</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataComponentStatus">
+CelerDataComponentStatus
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>CelerDataComponentStatus</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataLoadSpec">CelerDataLoadSpec
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataComponentSpec">CelerDataComponentSpec</a>, <a href="#celerdata.com/v1.CelerDataFeProxySpec">CelerDataFeProxySpec</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>ResourceRequirements</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#resourcerequirements-v1-core">
+Kubernetes core/v1.ResourceRequirements
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>ResourceRequirements</code> are embedded into this type.)
+</p>
+<em>(Optional)</em>
+<p>defines the specification of resource cpu and mem.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>annotations</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<p>annotation for pods. user can config monitor annotation for collect to monitor system.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>podLabels</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>the pod labels for user select or classify pods.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>replicas</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Replicas is the number of desired Pods.
+When HPA policy is enabled with a fixed replica count in CelerDataCnSpec: every time
+the CelerDataCluster CR is applied, the replica count of the StatefulSet
+object in K8S will be reset to the value specified by the &lsquo;Replicas&rsquo;
+field, erasing the value previously set by HPA.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>image</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Image for a CelerData deployment.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>imagePullPolicy</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#pullpolicy-v1-core">
+Kubernetes core/v1.PullPolicy
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Image pull policy.
+One of Always, Never, IfNotPresent.
+Defaults to IfNotPresent for compatibility.
+More info: <a href="https://kubernetes.io/docs/concepts/containers/images#updating-images">https://kubernetes.io/docs/concepts/containers/images#updating-images</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>imagePullSecrets</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#localobjectreference-v1-core">
+[]Kubernetes core/v1.LocalObjectReference
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the
+images used by this PodSpec. If specified, these secrets will be passed to individual puller implementations for
+them to use.
+More info: <a href="https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod">https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>schedulerName</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>SchedulerName is the name of the kubernetes scheduler that will be used to schedule the pods.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>nodeSelector</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>(Optional) If specified, the pod&rsquo;s nodeSelector，displayName=&ldquo;Map of nodeSelectors to match when scheduling pods on nodes&rdquo;</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>affinity</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#affinity-v1-core">
+Kubernetes core/v1.Affinity
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>If specified, the pod&rsquo;s scheduling constraints.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tolerations</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#toleration-v1-core">
+[]Kubernetes core/v1.Toleration
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>(Optional) Tolerations for scheduling pods onto some dedicated nodes</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>topologySpreadConstraints</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#topologyspreadconstraint-v1-core">
+[]Kubernetes core/v1.TopologySpreadConstraint
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>(Optional) TopologySpreadConstraints for spreading pods across failure-domains
+More info: <a href="https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/">https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>service</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataService">
+CelerDataService
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Service defines the template for the associated Kubernetes Service object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>storageVolumes</code><br/>
+<em>
+<a href="#celerdata.com/v1.StorageVolume">
+[]StorageVolume
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>StorageVolumes defines the additional storage for FE meta or BE/CN storage.</p>
+<p>For FE component
+If the storage volume name is fe-meta or the volume mount path is /opt/starrocks/fe/meta,
+then it will be recognized as storing the FE meta.
+If the storage volume name is fe-log or the volume mount path is /opt/starrocks/fe/log,
+then it will be recognized as storing the FE log.</p>
+<p>For BE component
+If the storage volume name is be-storage(or be-data) or the volume mount path is /opt/starrocks/be/storage,
+then it will be recognized as storing the BE data.
+If the storage volume name is be-log or the volume mount path is /opt/starrocks/be/log,
+then it will be recognized as storing the BE log.</p>
+<p>For CN component
+If the storage volume name is cn-log or the volume mount path is /opt/starrocks/cn/log,
+then it will be recognized as storing the cn log.</p>
+<p>If operator can&rsquo;t find the above storage volume names or the volume mount paths, it will create
+default storage volumes by using emptyDir.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>serviceAccount</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>serviceAccount for access cloud service.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>configMapInfo</code><br/>
+<em>
+<a href="#celerdata.com/v1.ConfigMapInfo">
+ConfigMapInfo
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>the reference for configMap which store the config info to start CelerData. e.g. be.conf, fe.conf, cn.conf.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>startupProbeFailureSeconds</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>StartupProbeFailureSeconds defines the total failure seconds of startup Probe.
+Default failureThreshold is 60 and the periodSeconds is 5, this means the startup
+will fail if the pod can&rsquo;t start in 300 seconds. Your StartupProbeFailureSeconds is
+the total time of seconds before startupProbe give up and fail the container start.
+If startupProbeFailureSeconds can&rsquo;t be divided by defaultPeriodSeconds, the failureThreshold
+will be rounded up.
+Note: you can set it to 0 to disable the startup probe.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>livenessProbeFailureSeconds</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>LivenessProbeFailureSeconds defines the total failure seconds of liveness Probe.
+Default failureThreshold is 3 and the periodSeconds is 5, this means the liveness
+will fail if the pod can&rsquo;t respond in 15 seconds. Your LivenessProbeFailureSeconds is
+the total time of seconds before the container restart. If LivenessProbeFailureSeconds
+can&rsquo;t be divided by defaultPeriodSeconds, the failureThreshold will be rounded up.
+Note: you can set it to 0 to disable the liveness probe.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>readinessProbeFailureSeconds</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>ReadinessProbeFailureSeconds defines the total failure seconds of readiness Probe.
+Default failureThreshold is 3 and the periodSeconds is 5, this means the readiness
+will fail if the pod can&rsquo;t respond in 15 seconds. Your ReadinessProbeFailureSeconds is
+the total time of seconds before pods becomes not ready. If ReadinessProbeFailureSeconds
+can&rsquo;t be divided by defaultPeriodSeconds, the failureThreshold will be rounded up.
+Note: you can set it to 0 to disable the readiness probe.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>lifecycle</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#lifecycle-v1-core">
+Kubernetes core/v1.Lifecycle
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Lifecycle describes actions that the management system should take in response to container lifecycle events.
+By default, Operator will add corresponding preStop hooks for different components. For example, the preStop
+script for the FE Component is /opt/starrocks/fe_prestop.sh, for the BE Component is /opt/starrocks/be_prestop.sh,
+and for the CN Component is /opt/starrocks/cn_prestop.sh.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>shareProcessNamespace</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Share a single process namespace between all of the containers in a pod.
+When this is set containers will be able to view and signal processes from other containers
+in the same pod, and the first process in each container will not be assigned PID 1.
+Optional: Default to false.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataProbe">CelerDataProbe
+</h3>
+<div>
+<p>CelerDataProbe defines the mode for probe be alive.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>type</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Type identifies the mode of probe main container</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>initialDelaySeconds</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Number of seconds after the container has started before liveness probes are initiated.
+Default to 10 seconds.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>periodSeconds</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>How often (in seconds) to perform the probe.
+Default to Kubernetes default (10 seconds). Minimum value is 1.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataService">CelerDataService
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataLoadSpec">CelerDataLoadSpec</a>)
+</p>
+<div>
+<p>CelerDataService defines external service for CelerData component.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>annotations</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Annotations&rsquo; store Kubernetes Service annotations. These will be added to the external service
+only (not internal).</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>labels</code><br/>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Labels store Kubernetes Service labels. These will be added to the external service only (not
+internal). CelerData may add its own default labels.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>type</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#servicetype-v1-core">
+Kubernetes core/v1.ServiceType
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>type of service,the possible value for the service type are : ClusterIP, NodePort, LoadBalancer,ExternalName.
+More info: <a href="https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types">https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>loadBalancerIP</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Only applies to Service Type: LoadBalancer.
+This feature depends on whether the underlying cloud-provider supports specifying
+the loadBalancerIP when a load balancer is created.
+This field will be ignored if the cloud-provider does not support the feature.
+This field was under-specified and its meaning varies across implementations,
+and it cannot support dual-stack.
+As of Kubernetes v1.24, users are encouraged to use implementation-specific annotations when available.
+This field may be removed in a future API version.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>ports</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataServicePort">
+[]CelerDataServicePort
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Ports are the ports that are exposed by this service.
+You can override the default port information by specifying the same CelerDataServicePort.Name in the ports list.
+e.g. if you want to use a dedicated node port, you can just specify the CelerDataServicePort.Name and
+CelerDataServicePort.NodePort field.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>loadBalancerSourceRanges</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>If specified and supported by the platform, this will restrict traffic through the cloud-provider
+load-balancer will be restricted to the specified client IPs. This field will be ignored if the
+cloud-provider does not support the feature.
+More info: <a href="https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/">https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataServicePort">CelerDataServicePort
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataService">CelerDataService</a>)
+</p>
+<div>
+<p>CelerDataServicePort defines the port that will be exposed by this service.
+To assign a specific port or nodePort to a service, you should specify them by the corresponding name or
+containerPort in the service configuration. If both containerPort and name are specified, containerPort takes precedence.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Name of this port within the service.
+For fe, port name can be http, query, rpc, edit-log, and their default container port is 8030, 9030, 9020, 9010.
+For be, port name can be webserver, heartbeat, brpc, be, and their default container port is 8040, 9050, 8060, 9060.
+For cn, port name can be webserver, heartbeat, brpc, thrift, and their default container port is 8040, 9050, 8060, 9060.
+For fe proxy, port name can be http-port, and its default container port is 8080.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>port</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Port that will be exposed by this service.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>containerPort</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>ContainerPort of the service port.
+For fe, port name can be http, query, rpc, edit-log, and their default container port is 8030, 9030, 9020, 9010.
+For be, port name can be webserver, heartbeat, brpc, be, and their default container port is 8040, 9050, 8060, 9060.
+For cn, port name can be webserver, heartbeat, brpc, thrift, and their default container port is 8040, 9050, 8060, 9060.
+For fe proxy, port name can be http-port, and its default container port is 8080.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>nodePort</code><br/>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>NodePort is used to specify the port on each node on which the service is exposed.
+The range of valid ports is 30000-32767</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataWarehouse">CelerDataWarehouse
+</h3>
+<div>
+<p>CelerDataWarehouse defines a CelerData warehouse.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>metadata</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#objectmeta-v1-meta">
+Kubernetes meta/v1.ObjectMeta
+</a>
+</em>
+</td>
+<td>
+Refer to the Kubernetes API documentation for the fields of the
+<code>metadata</code> field.
+</td>
+</tr>
+<tr>
+<td>
+<code>spec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataWarehouseSpec">
+CelerDataWarehouseSpec
+</a>
+</em>
+</td>
+<td>
+<p>Spec represents the specification of desired state of a CelerData warehouse.</p>
+<br/>
+<br/>
+<table>
+<tr>
+<td>
+<code>celerDataCluster</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>CelerDataCluster is the name of a CelerDataCluster which the warehouse belongs to.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>template</code><br/>
+<em>
+<a href="#celerdata.com/v1.WarehouseComponentSpec">
+WarehouseComponentSpec
+</a>
+</em>
+</td>
+<td>
+<p>Template define component configuration.</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataWarehouseStatus">
+CelerDataWarehouseStatus
+</a>
+</em>
+</td>
+<td>
+<p>Status represents the recent observed status of the CelerData warehouse.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataWarehouseSpec">CelerDataWarehouseSpec
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataWarehouse">CelerDataWarehouse</a>)
+</p>
+<div>
+<p>CelerDataWarehouseSpec defines the desired state of CelerDataWarehouse</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>celerDataCluster</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>CelerDataCluster is the name of a CelerDataCluster which the warehouse belongs to.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>template</code><br/>
+<em>
+<a href="#celerdata.com/v1.WarehouseComponentSpec">
+WarehouseComponentSpec
+</a>
+</em>
+</td>
+<td>
+<p>Template define component configuration.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.CelerDataWarehouseStatus">CelerDataWarehouseStatus
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataWarehouse">CelerDataWarehouse</a>)
+</p>
+<div>
+<p>CelerDataWarehouseStatus defines the observed state of CelerDataWarehouse.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>WarehouseComponentStatus</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataCnStatus">
+CelerDataCnStatus
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>WarehouseComponentStatus</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.ComponentPhase">ComponentPhase
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataComponentStatus">CelerDataComponentStatus</a>)
+</p>
+<div>
+<p>ComponentPhase represent the component phase. e.g.
+1. CelerDataCluster contains three components: FE, CN, BE.
+2. CelerDataWarehouse reuse the CN component.
+The possible value for component phase are: reconciling, failed, running.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr><td><p>&#34;failed&#34;</p></td>
+<td><p>ComponentFailed the pod of component is failed</p>
+</td>
+</tr><tr><td><p>&#34;reconciling&#34;</p></td>
+<td><p>ComponentReconciling the CelerData component is reconciling</p>
+</td>
+</tr><tr><td><p>&#34;running&#34;</p></td>
+<td><p>ComponentRunning all components runs available.</p>
+</td>
+</tr></tbody>
+</table>
+<h3 id="celerdata.com/v1.ConfigMapInfo">ConfigMapInfo
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataLoadSpec">CelerDataLoadSpec</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>configMapName</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>the config info for start progress.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>resolveKey</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>the config response key in configmap.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.ConfigMapReference">ConfigMapReference
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataComponentSpec">CelerDataComponentSpec</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>This must match the Name of a ConfigMap or Secret in the same namespace, and
+the length of name must not more than 50 characters.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>mountPath</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Path within the container at which the volume should be mounted.  Must
+not contain &lsquo;:&rsquo;.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>subPath</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>SubPath within the volume from which the container&rsquo;s volume should be mounted.
+Defaults to &ldquo;&rdquo; (volume&rsquo;s root).</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.DRPhase">DRPhase
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.DisasterRecoveryStatus">DisasterRecoveryStatus</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr><td><p>&#34;doing&#34;</p></td>
+<td></td>
+</tr><tr><td><p>&#34;done&#34;</p></td>
+<td></td>
+</tr><tr><td><p>&#34;todo&#34;</p></td>
+<td></td>
+</tr></tbody>
+</table>
+<h3 id="celerdata.com/v1.DisasterRecovery">DisasterRecovery
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataClusterSpec">CelerDataClusterSpec</a>)
+</p>
+<div>
+<p>DisasterRecovery is used to determine whether to enter disaster recovery mode.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>enabled</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+<p>Enabled is used to determine whether to enter disaster recovery mode.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>generation</code><br/>
+<em>
+int64
+</em>
+</td>
+<td>
+<p>Generation records the generation of disaster recovery. If you want to trigger disaster recovery, you should
+increase the generation.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.DisasterRecoveryStatus">DisasterRecoveryStatus
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataClusterStatus">CelerDataClusterStatus</a>)
+</p>
+<div>
+<p>DisasterRecoveryStatus represents the status of disaster recovery.
+Note: you should create a new instance of DisasterRecoveryStatus by NewDisasterRecoveryStatus.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>phase</code><br/>
+<em>
+<a href="#celerdata.com/v1.DRPhase">
+DRPhase
+</a>
+</em>
+</td>
+<td>
+<p>the available phase include: todo, doing, done</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>reason</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>the reason of disaster recovery.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>startTimestamp</code><br/>
+<em>
+int64
+</em>
+</td>
+<td>
+<p>the unix time of starting disaster recovery.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>endTimestamp</code><br/>
+<em>
+int64
+</em>
+</td>
+<td>
+<p>the unix time of ending disaster recovery.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>observedGeneration</code><br/>
+<em>
+int64
+</em>
+</td>
+<td>
+<p>the observed generation of disaster recovery.
+If the observed generation is less than the generation, it will trigger disaster recovery.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.HPAPolicy">HPAPolicy
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.AutoScalingPolicy">AutoScalingPolicy</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>metrics</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#metricspec-v2beta2-autoscaling">
+[]Kubernetes autoscaling/v2beta2.MetricSpec
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Metrics specifies how to scale based on a single metric
+the struct copy from k8s.io/api/autoscaling/v2beta2/types.go. the redundancy code will hide the restriction about
+HorizontalPodAutoscaler version and kubernetes releases matching issue.
+the splice will have unsafe.Pointer convert, so be careful to edit the struct fields.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>behavior</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#horizontalpodautoscalerbehavior-v2beta2-autoscaling">
+Kubernetes autoscaling/v2beta2.HorizontalPodAutoscalerBehavior
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>HorizontalPodAutoscalerBehavior configures the scaling behavior of the target.
+the struct copy from k8s.io/api/autoscaling/v2beta2/types.go. the redundancy code will hide the restriction about
+HorizontalPodAutoscaler version and kubernetes releases matching issue.
+the</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.HorizontalScaler">HorizontalScaler
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataCnStatus">CelerDataCnStatus</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>the horizontal scaler name</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>version</code><br/>
+<em>
+<a href="#celerdata.com/v1.AutoScalerVersion">
+AutoScalerVersion
+</a>
+</em>
+</td>
+<td>
+<p>the horizontal version.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.MountInfo">MountInfo
+</h3>
+<div>
+<p>MountInfo
+The reason why we do not support defaultMode is that we use hash.HashObject to
+calculate the actual volume name. This volume name is used in pod template of statefulset,
+and if this MountInfo type has been changed, the volume name will be changed too, and
+that will make pods restart.
+The default mode is 0644, and in order to support to set permission information for a configMap
+or secret, we add should specify the subPath and specify a command or args in the container.
+And It will be set 0755.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>This must match the Name of a ConfigMap or Secret in the same namespace, and
+the length of name must not more than 50 characters.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>mountPath</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Path within the container at which the volume should be mounted.  Must
+not contain &lsquo;:&rsquo;.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>subPath</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>SubPath within the volume from which the container&rsquo;s volume should be mounted.
+Defaults to &ldquo;&rdquo; (volume&rsquo;s root).</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.Phase">Phase
+(<code>string</code> alias)</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataClusterStatus">CelerDataClusterStatus</a>)
+</p>
+<div>
+<p>Phase is defined under status, e.g.
+1. CelerDataClusterStatus.Phase represents the phase of CelerData cluster.
+2. CelerDataWarehouseStatus.Phase represents the phase of CelerData warehouse.
+The possible value for cluster phase are: running, failed, pending, deleting.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr><td><p>&#34;failed&#34;</p></td>
+<td><p>ClusterFailed represents CelerData cluster failed.</p>
+</td>
+</tr><tr><td><p>&#34;reconciling&#34;</p></td>
+<td><p>ClusterReconciling represents some component is reconciling</p>
+</td>
+</tr><tr><td><p>&#34;running&#34;</p></td>
+<td><p>ClusterRunning represents CelerData cluster is running.</p>
+</td>
+</tr></tbody>
+</table>
+<h3 id="celerdata.com/v1.SecretReference">SecretReference
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataComponentSpec">CelerDataComponentSpec</a>)
+</p>
+<div>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>This must match the Name of a ConfigMap or Secret in the same namespace, and
+the length of name must not more than 50 characters.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>mountPath</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Path within the container at which the volume should be mounted.  Must
+not contain &lsquo;:&rsquo;.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>subPath</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>SubPath within the volume from which the container&rsquo;s volume should be mounted.
+Defaults to &ldquo;&rdquo; (volume&rsquo;s root).</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.SpecInterface">SpecInterface
+</h3>
+<div>
+<p>SpecInterface defines the common interface that must be implemented by all CelerData component specs
+(FE, BE, CN, FE Proxy). It provides methods to configure pod and container settings like security context,
+lifecycle hooks, networking, and storage.
+All components including CelerDataFeSpec, CelerDataBeSpec, CelerDataCnSpec, CelerDataFeProxySpec have implemented
+the SpecInterface. If a method has the same implementation, we will implement in CelerDataLoadSpec which implements
+the loadInterface interface.</p>
+</div>
+<h3 id="celerdata.com/v1.StorageVolume">StorageVolume
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataLoadSpec">CelerDataLoadSpec</a>)
+</p>
+<div>
+<p>StorageVolume defines additional PVC template for StatefulSets and volumeMount for pods that mount this PVC.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>name of a storage volume.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>storageClassName</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>storageClassName is the name of the StorageClass required by the claim.
+If storageClassName is not set, the default StorageClass of kubernetes will be used.
+there are some special storageClassName: emptyDir, hostPath. In this case, It will use emptyDir or hostPath, not PVC.
+More info: <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1">https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>storageSize</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>StorageSize is a valid memory size type based on powers-of-2, so 1Mi is 1024Ki.
+Supported units:Mi, Gi, GiB, Ti, Ti, Pi, Ei, Ex: <code>512Mi</code>.
+It will take effect only when storageClassName is real storage class, not emptyDir or hostPath.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>hostPath</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#hostpathvolumesource-v1-core">
+Kubernetes core/v1.HostPathVolumeSource
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>HostPath Represents a host path mapped into a pod.
+If StorageClassName is hostPath, HostPath is required.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>mountPath</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>MountPath specify the path of volume mount.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>subPath</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>SubPath within the volume from which the container&rsquo;s volume should be mounted.
+Defaults to &ldquo;&rdquo; (volume&rsquo;s root).</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="celerdata.com/v1.WarehouseComponentSpec">WarehouseComponentSpec
+</h3>
+<p>
+(<em>Appears on:</em><a href="#celerdata.com/v1.CelerDataWarehouseSpec">CelerDataWarehouseSpec</a>)
+</p>
+<div>
+<p>WarehouseComponentSpec defines the desired state of component.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>CelerDataComponentSpec</code><br/>
+<em>
+<a href="#celerdata.com/v1.CelerDataComponentSpec">
+CelerDataComponentSpec
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>CelerDataComponentSpec</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>envVars</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#envvar-v1-core">
+[]Kubernetes core/v1.EnvVar
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>envVars is a slice of environment variables that are added to the pods, the default is empty.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>autoScalingPolicy</code><br/>
+<em>
+<a href="#celerdata.com/v1.AutoScalingPolicy">
+AutoScalingPolicy
+</a>
+</em>
+</td>
+<td>
+<p>AutoScalingPolicy defines auto scaling policy</p>
+</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<p><em>
+Generated with <code>gen-crd-api-reference-docs</code>
+on git commit <code>7dd0cf8c</code>.
+</em></p>

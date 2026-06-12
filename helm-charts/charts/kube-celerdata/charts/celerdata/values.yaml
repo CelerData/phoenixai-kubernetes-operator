@@ -51,6 +51,11 @@ datadog:
     # besides the attributes you added, the chart will append "source" and "service" attributes to the log config.
     # see https://docs.datadoghq.com/containers/kubernetes/log/?tab=operator for more details.
     logConfig: '{}' # e.g., '{"app": "celerdata", "tags": ["aa", "bb"]}'
+    # Enable multiline log parsing rules compatible with the Datadog agent.
+    # When true, a log_processing_rules entry of type "multi_line" is added to the log annotation.
+    # FE nodes use a Java (log4j) timestamp pattern; BE and CN nodes use a C++ glog timestamp pattern.
+    # If logConfig already contains "log_processing_rules", it takes priority and this flag is ignored.
+    enableMultilineLogParsing: false
   metrics:
     enabled: false
   profiling:
@@ -106,6 +111,10 @@ celerDataCluster:
   # specify the BE/CN deployment or not.
   enabledBe: true
   enabledCn: false
+  # When true, the operator waits for the FE StatefulSet to be fully rolled out (all replicas ready
+  # and at the same revision) before updating BE/CN. This prevents a bad FE rollout from cascading
+  # to BE/CN. Defaults to false for backward compatibility.
+  waitForFullRollout: false
   # Disaster recovery configuration. If you want to enable disaster recovery, you need to set the enabled field to true.
   # Note:
   #  1. If you are using an existing CelerData cluster, you need to clean up the meta of the FE component and the data of the CN
@@ -127,7 +136,7 @@ celerDataCluster:
   #   2. The values in their own spec will replace all the values in this field, not merge.
   componentValues:
     image:
-      tag: "3.5-latest"
+      tag: "4.1-latest"
     # hostAliases allows adding entries to /etc/hosts inside the containers.
     hostAliases: []
       # - ip: "127.0.0.1"

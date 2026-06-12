@@ -24,7 +24,7 @@ There are two ways to turn on the prometheus metrics scrape for the CelerData cl
 
 ### 2.1 Turn on the prometheus metrics scrape by adding annotations
 
-Follow the instructions from [CelerData Helm Chart](https://github.com/StarRocks/starrocks-kubernetes-operator/tree/main/helm-charts/charts/kube-starrocks)
+Follow the instructions from [CelerData Helm Chart](https://github.com/CelerData/celerdata-kubernetes-operator/tree/main/helm-charts/charts/kube-celerdata)
 with some customized values.
 
 Following is an example of the content of the `sr-values.yaml`.
@@ -110,7 +110,7 @@ spec:
     configMapInfo:
       configMapName: kube-celerdata-be-cm
       resolveKey: be.conf
-    image: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/be-ubuntu:3.5-latest
+    image: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/be-ubuntu:4.1-latest
     limits:
       cpu: 4
       memory: 4Gi
@@ -127,7 +127,7 @@ spec:
     configMapInfo:
       configMapName: kube-celerdata-fe-cm
       resolveKey: fe.conf
-    image: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/fe-ubuntu:3.5-latest
+    image: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/fe-ubuntu:4.1-latest
     limits:
       cpu: 4
       memory: 4Gi

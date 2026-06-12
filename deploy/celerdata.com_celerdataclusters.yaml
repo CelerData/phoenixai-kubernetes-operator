@@ -4,7 +4,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-    version: v1.11.4
+    version: v1.11.5
   name: celerdataclusters.celerdata.com
 spec:
   group: celerdata.com
@@ -7235,6 +7235,8 @@ spec:
                 type: object
               serviceAccount:
                 type: string
+              waitForFullRollout:
+                type: boolean
             type: object
           status:
             properties:

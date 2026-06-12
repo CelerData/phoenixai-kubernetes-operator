@@ -2,6 +2,28 @@ apiVersion: v1
 entries:
   celerdata:
   - apiVersion: v2
+    appVersion: 4.1-latest
+    created: "2026-06-12T14:24:31.836571+08:00"
+    description: A Helm chart for CelerData cluster
+    digest: 20ade377658b3d54fd69cdda05897d4185339e64114555e6af49f99ca5894a5d
+    home: https://github.com/celerdata/celerdata-kubernetes-operator
+    keywords:
+    - operator
+    - celerdata
+    - database
+    - olap
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@celerdata.com
+      name: Ray Yan
+    name: celerdata
+    sources:
+    - https://github.com/CelerData/celerdata-enterprise
+    type: application
+    urls:
+    - https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.11.5/celerdata-1.11.5.tgz
+    version: 1.11.5
+  - apiVersion: v2
     appVersion: 3.5-latest
     created: "2026-02-19T22:27:43.061504+08:00"
     description: A Helm chart for CelerData cluster
@@ -24,6 +46,35 @@ entries:
     - https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.11.4/celerdata-1.11.4.tgz
     version: 1.11.4
   kube-celerdata:
+  - apiVersion: v2
+    appVersion: 4.1-latest
+    created: "2026-06-12T14:24:23.935563+08:00"
+    dependencies:
+    - name: operator
+      repository: file://charts/operator
+      version: 1.11.5
+    - name: celerdata
+      repository: file://charts/celerdata
+      version: 1.11.5
+    description: kube-celerdata includes two subcharts, operator and celerdata
+    digest: 3fea0749ca20e2abec2d1931d0c5c6136ff2eebdfca3b893e8b544d72ccc9cc5
+    home: https://github.com/celerdata/celerdata-kubernetes-operator
+    keywords:
+    - operator
+    - celerdata
+    - database
+    - olap
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@celerdata.com
+      name: Ray Yan
+    name: kube-celerdata
+    sources:
+    - https://github.com/CelerData/celerdata-enterprise
+    type: application
+    urls:
+    - https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.11.5/kube-celerdata-1.11.5.tgz
+    version: 1.11.5
   - apiVersion: v2
     appVersion: 3.5-latest
     created: "2026-02-19T22:27:38.157645+08:00"
@@ -55,6 +106,28 @@ entries:
     version: 1.11.4
   operator:
   - apiVersion: v2
+    appVersion: 1.11.5
+    created: "2026-06-12T14:24:26.14998+08:00"
+    description: A Helm chart for CelerData operator
+    digest: 92501e4d1523d2f4be2eb5567903b60e7153a6a173e23ec5d87af8f7c80dd77d
+    home: https://github.com/celerdata/celerdata-kubernetes-operator
+    keywords:
+    - operator
+    - celerdata
+    - database
+    - olap
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@celerdata.com
+      name: Ray Yan
+    name: operator
+    sources:
+    - https://github.com/CelerData/celerdata-enterprise
+    type: application
+    urls:
+    - https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.11.5/operator-1.11.5.tgz
+    version: 1.11.5
+  - apiVersion: v2
     appVersion: 1.11.4
     created: "2026-02-19T22:27:40.402931+08:00"
     description: A Helm chart for CelerData operator
@@ -78,6 +151,29 @@ entries:
     version: 1.11.4
   warehouse:
   - apiVersion: v2
+    appVersion: 4.1-latest
+    created: "2026-06-12T14:24:34.133271+08:00"
+    description: Warehouse is currently a feature of the CelerData Enterprise Edition.
+    digest: 68ba713ac24fccd7f5a5c71aeef2e9e7c8485fc9929f4959e9484bc691e92df4
+    home: https://github.com/celerdata/celerdata-kubernetes-operator
+    keywords:
+    - operator
+    - celerdata
+    - database
+    - olap
+    - multi-warehouse
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@celerdata.com
+      name: Ray Yan
+    name: warehouse
+    sources:
+    - https://github.com/CelerData/celerdata-enterprise
+    type: application
+    urls:
+    - https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.11.5/warehouse-1.11.5.tgz
+    version: 1.11.5
+  - apiVersion: v2
     appVersion: 3.5-latest
     created: "2026-02-19T22:27:45.360262+08:00"
     description: Warehouse is currently a feature of the CelerData Enterprise Edition.
@@ -100,4 +196,4 @@ entries:
     urls:
     - https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.11.4/warehouse-1.11.4.tgz
     version: 1.11.4
-generated: "2026-02-19T22:27:45.35956+08:00"
+generated: "2026-06-12T14:24:34.132232+08:00"

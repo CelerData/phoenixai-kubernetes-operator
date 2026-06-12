@@ -1,5 +1,7 @@
 # CelerData-Kubernetes-Operator
 
+[![许可证](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 ## 概述
 
 CelerData Kubernetes Operator 实现了在 Kubernetes 上部署和操作 CelerData 的功能。CelerData 是一款高性能分析型数据仓库，使用向量化、MPP

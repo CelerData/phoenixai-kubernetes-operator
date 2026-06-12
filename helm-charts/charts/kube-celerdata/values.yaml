@@ -43,7 +43,7 @@ operator:
     image:
       # image sliced by "repository:tag"
       repository: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/operator
-      tag: v1.11.4
+      tag: v1.11.5
     imagePullPolicy: Always
     replicaCount: 1
     resources:
@@ -92,6 +92,16 @@ operator:
     # the operator watching all namespaces uses too many memory resources, you can set this value.
     # Defaults to all namespaces.
     watchNamespace: ""
+    # Comma-separated list of namespaces to exclude from reconciliation.
+    # When specified, the operator will not reconcile StarRocks resources in these namespaces.
+    # This is useful when multiple operators manage different sets of namespaces.
+    # Note: This is different from watchNamespace - watchNamespace limits what the operator watches,
+    # while denyList excludes specific namespaces from reconciliation even if watching all namespaces.
+    # Precedence: denyList takes precedence over watchNamespace. If a namespace appears in both
+    # watchNamespace and denyList, the operator will watch that namespace but will NOT reconcile
+    # any resources in it. Avoid configuring conflicting values between these two settings.
+    # Example: "kube-system,kube-public,monitoring"
+    denyList: ""
     # Additional operator container environment variables
     # You specify this manually like you would a raw deployment manifest.
     # Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
@@ -167,6 +177,11 @@ celerdata:
       # besides the attributes you added, the chart will append "source" and "service" attributes to the log config.
       # see https://docs.datadoghq.com/containers/kubernetes/log/?tab=operator for more details.
       logConfig: '{}' # e.g., '{"app": "celerdata", "tags": ["aa", "bb"]}'
+      # Enable multiline log parsing rules compatible with the Datadog agent.
+      # When true, a log_processing_rules entry of type "multi_line" is added to the log annotation.
+      # FE nodes use a Java (log4j) timestamp pattern; BE and CN nodes use a C++ glog timestamp pattern.
+      # If logConfig already contains "log_processing_rules", it takes priority and this flag is ignored.
+      enableMultilineLogParsing: false
     metrics:
       enabled: false
     profiling:
@@ -222,6 +237,10 @@ celerdata:
     # specify the BE/CN deployment or not.
     enabledBe: true
     enabledCn: false
+    # When true, the operator waits for the FE StatefulSet to be fully rolled out (all replicas ready
+    # and at the same revision) before updating BE/CN. This prevents a bad FE rollout from cascading
+    # to BE/CN. Defaults to false for backward compatibility.
+    waitForFullRollout: false
     # Disaster recovery configuration. If you want to enable disaster recovery, you need to set the enabled field to true.
     # Note:
     #  1. If you are using an existing CelerData cluster, you need to clean up the meta of the FE component and the data of the CN
@@ -243,7 +262,7 @@ celerdata:
     #   2. The values in their own spec will replace all the values in this field, not merge.
     componentValues:
       image:
-        tag: "3.5-latest"
+        tag: "4.1-latest"
       # hostAliases allows adding entries to /etc/hosts inside the containers.
       hostAliases: []
         # - ip: "127.0.0.1"

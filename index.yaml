@@ -3,9 +3,31 @@ entries:
   celerdata:
   - apiVersion: v2
     appVersion: 4.1-latest
-    created: "2026-06-12T14:24:31.836571+08:00"
+    created: "2026-07-15T14:59:02.424843+08:00"
     description: A Helm chart for CelerData cluster
-    digest: 20ade377658b3d54fd69cdda05897d4185339e64114555e6af49f99ca5894a5d
+    digest: 177e49de2896a8b13dd0eddcd266906d152dae8280e2d1961c29a3f376debcd8
+    home: https://github.com/celerdata/celerdata-kubernetes-operator
+    keywords:
+    - operator
+    - celerdata
+    - database
+    - olap
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@celerdata.com
+      name: Ray Yan
+    name: celerdata
+    sources:
+    - https://github.com/CelerData/celerdata-enterprise
+    type: application
+    urls:
+    - https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.11.6/celerdata-1.11.6.tgz
+    version: 1.11.6
+  - apiVersion: v2
+    appVersion: 4.1-latest
+    created: "2026-06-12T13:46:05.105603+08:00"
+    description: A Helm chart for CelerData cluster
+    digest: 9a0d3c9789fb36e9d0b6990d742517136bea766405d0dc097db33c2046b62f15
     home: https://github.com/celerdata/celerdata-kubernetes-operator
     keywords:
     - operator
@@ -25,9 +47,9 @@ entries:
     version: 1.11.5
   - apiVersion: v2
     appVersion: 3.5-latest
-    created: "2026-02-19T22:27:43.061504+08:00"
+    created: "2026-02-19T22:25:22.681707+08:00"
     description: A Helm chart for CelerData cluster
-    digest: e2a2a0181f25be83a0b938850f30f46ec31727542f4b36d2977f49d596af1c85
+    digest: 9c23bde1785167fd3d8388042694946a0466b840a55e69206d09a7f79334bb54
     home: https://github.com/celerdata/celerdata-kubernetes-operator
     keywords:
     - operator
@@ -48,7 +70,36 @@ entries:
   kube-celerdata:
   - apiVersion: v2
     appVersion: 4.1-latest
-    created: "2026-06-12T14:24:23.935563+08:00"
+    created: "2026-07-15T14:58:57.668681+08:00"
+    dependencies:
+    - name: operator
+      repository: file://charts/operator
+      version: 1.11.6
+    - name: celerdata
+      repository: file://charts/celerdata
+      version: 1.11.6
+    description: kube-celerdata includes two subcharts, operator and celerdata
+    digest: 801e82ae0b8587d0d121ef225dd35cccda955e3d8023d9baccaba8246e5da517
+    home: https://github.com/celerdata/celerdata-kubernetes-operator
+    keywords:
+    - operator
+    - celerdata
+    - database
+    - olap
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@celerdata.com
+      name: Ray Yan
+    name: kube-celerdata
+    sources:
+    - https://github.com/CelerData/celerdata-enterprise
+    type: application
+    urls:
+    - https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.11.6/kube-celerdata-1.11.6.tgz
+    version: 1.11.6
+  - apiVersion: v2
+    appVersion: 4.1-latest
+    created: "2026-06-12T13:46:00.789453+08:00"
     dependencies:
     - name: operator
       repository: file://charts/operator
@@ -57,7 +108,7 @@ entries:
       repository: file://charts/celerdata
       version: 1.11.5
     description: kube-celerdata includes two subcharts, operator and celerdata
-    digest: 3fea0749ca20e2abec2d1931d0c5c6136ff2eebdfca3b893e8b544d72ccc9cc5
+    digest: 65a921903d8d602fc3631d9f7044b721418626e1c71415fb38d4788ce2907c85
     home: https://github.com/celerdata/celerdata-kubernetes-operator
     keywords:
     - operator
@@ -77,7 +128,7 @@ entries:
     version: 1.11.5
   - apiVersion: v2
     appVersion: 3.5-latest
-    created: "2026-02-19T22:27:38.157645+08:00"
+    created: "2026-02-19T22:25:18.618939+08:00"
     dependencies:
     - name: operator
       repository: file://charts/operator
@@ -86,7 +137,7 @@ entries:
       repository: file://charts/celerdata
       version: 1.11.4
     description: kube-celerdata includes two subcharts, operator and celerdata
-    digest: 38e82ab7262f39d642682dc784d7ece3851c3b449054411bd7b823501f2e47af
+    digest: 76ff6150391a741f5851c28c8d72caf61fea8efc028872997cd15627843084a2
     home: https://github.com/celerdata/celerdata-kubernetes-operator
     keywords:
     - operator
@@ -106,10 +157,32 @@ entries:
     version: 1.11.4
   operator:
   - apiVersion: v2
-    appVersion: 1.11.5
-    created: "2026-06-12T14:24:26.14998+08:00"
+    appVersion: 1.11.6
+    created: "2026-07-15T14:59:00.005276+08:00"
     description: A Helm chart for CelerData operator
-    digest: 92501e4d1523d2f4be2eb5567903b60e7153a6a173e23ec5d87af8f7c80dd77d
+    digest: 4a570c8a6eec327043368942e1359393ce7c260d3f2a7e470145864962cf1d79
+    home: https://github.com/celerdata/celerdata-kubernetes-operator
+    keywords:
+    - operator
+    - celerdata
+    - database
+    - olap
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@celerdata.com
+      name: Ray Yan
+    name: operator
+    sources:
+    - https://github.com/CelerData/celerdata-enterprise
+    type: application
+    urls:
+    - https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.11.6/operator-1.11.6.tgz
+    version: 1.11.6
+  - apiVersion: v2
+    appVersion: 1.11.5
+    created: "2026-06-12T13:46:02.965676+08:00"
+    description: A Helm chart for CelerData operator
+    digest: f01d51034c762831196afa8ba4d1b5b13001aa3044fffdf0d73f3018058c7694
     home: https://github.com/celerdata/celerdata-kubernetes-operator
     keywords:
     - operator
@@ -129,9 +202,9 @@ entries:
     version: 1.11.5
   - apiVersion: v2
     appVersion: 1.11.4
-    created: "2026-02-19T22:27:40.402931+08:00"
+    created: "2026-02-19T22:25:20.57931+08:00"
     description: A Helm chart for CelerData operator
-    digest: 4feec31215f5c35abff564da7151c4c1a2676005c4db02e7efa6b27fcd9f6915
+    digest: c8033acf3c80afab49b55721e82f31be615ecf4449fcb7596116fb9e210b193f
     home: https://github.com/celerdata/celerdata-kubernetes-operator
     keywords:
     - operator
@@ -152,9 +225,32 @@ entries:
   warehouse:
   - apiVersion: v2
     appVersion: 4.1-latest
-    created: "2026-06-12T14:24:34.133271+08:00"
+    created: "2026-07-15T14:59:04.90221+08:00"
     description: Warehouse is currently a feature of the CelerData Enterprise Edition.
-    digest: 68ba713ac24fccd7f5a5c71aeef2e9e7c8485fc9929f4959e9484bc691e92df4
+    digest: ebe12188276b00b1f493a3ac3460699b0abf9ea388362e9655d53dd822f96255
+    home: https://github.com/celerdata/celerdata-kubernetes-operator
+    keywords:
+    - operator
+    - celerdata
+    - database
+    - olap
+    - multi-warehouse
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@celerdata.com
+      name: Ray Yan
+    name: warehouse
+    sources:
+    - https://github.com/CelerData/celerdata-enterprise
+    type: application
+    urls:
+    - https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.11.6/warehouse-1.11.6.tgz
+    version: 1.11.6
+  - apiVersion: v2
+    appVersion: 4.1-latest
+    created: "2026-06-12T13:46:07.282082+08:00"
+    description: Warehouse is currently a feature of the CelerData Enterprise Edition.
+    digest: 4cca6cad70bcefa262172c8841d26fc5dc757f8303757f19a46336f55f9d4c85
     home: https://github.com/celerdata/celerdata-kubernetes-operator
     keywords:
     - operator
@@ -175,9 +271,9 @@ entries:
     version: 1.11.5
   - apiVersion: v2
     appVersion: 3.5-latest
-    created: "2026-02-19T22:27:45.360262+08:00"
+    created: "2026-02-19T22:25:24.68251+08:00"
     description: Warehouse is currently a feature of the CelerData Enterprise Edition.
-    digest: 6a768995d7b48417f29910d8a97842f2deb78c9f5e249854ac2404cce3f58c13
+    digest: 95eb360bf569e8038f983241a9458fb34073cadeac15605f3fa59f3f77ebb56e
     home: https://github.com/celerdata/celerdata-kubernetes-operator
     keywords:
     - operator
@@ -196,4 +292,4 @@ entries:
     urls:
     - https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.11.4/warehouse-1.11.4.tgz
     version: 1.11.4
-generated: "2026-06-12T14:24:34.132232+08:00"
+generated: "2026-07-15T14:59:04.901537+08:00"

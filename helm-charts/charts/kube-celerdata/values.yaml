@@ -43,7 +43,7 @@ operator:
     image:
       # image sliced by "repository:tag"
       repository: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/operator
-      tag: v1.11.5
+      tag: v1.11.6
     imagePullPolicy: Always
     replicaCount: 1
     resources:
@@ -391,6 +391,9 @@ celerdata:
       # specifies the source IP ranges for the load balancer when the type=LoadBalancer.
       loadBalancerSourceRanges: []
         # - 10.0.0.0/8
+      # specifies how nodes distribute service traffic. Possible values: Cluster, Local.
+      # Only applies when the type is NodePort or LoadBalancer. Local preserves the client source IP.
+      externalTrafficPolicy: ""
     # imagePullSecrets allows you to use secrets to pull images for pods.
     imagePullSecrets: []
       # - name: "image-pull-secret"
@@ -720,6 +723,9 @@ celerdata:
       # Specify the source IP ranges for the load balancer when the type=LoadBalancer.
       loadBalancerSourceRanges: []
         # - 10.0.0.0/8
+      # Specify how nodes distribute service traffic. Possible values: Cluster, Local.
+      # Only applies when the type is NodePort or LoadBalancer. Local preserves the client source IP.
+      externalTrafficPolicy: ""
     # imagePullSecrets allows you to use secrets for pulling images for your pods.
     imagePullSecrets: []
       # - name: "image-pull-secret"
@@ -1085,6 +1091,9 @@ celerdata:
       # Specify the source IP ranges for the load balancer when the type=LoadBalancer.
       loadBalancerSourceRanges: []
         # - 10.0.0.0/8
+      # Specify how nodes distribute service traffic. Possible values: Cluster, Local.
+      # Only applies when the type is NodePort or LoadBalancer. Local preserves the client source IP.
+      externalTrafficPolicy: ""
     # imagePullSecrets allows you to use secrets to pull images for pods.
     imagePullSecrets: []
       # - name: "image-pull-secret"
@@ -1414,6 +1423,9 @@ celerdata:
       # Specify the source IP ranges for the load balancer when the type=LoadBalancer.
       loadBalancerSourceRanges: []
         # - 10.0.0.0/8
+      # Specify how nodes distribute service traffic. Possible values: Cluster, Local.
+      # Only applies when the type is NodePort or LoadBalancer. Local preserves the client source IP.
+      externalTrafficPolicy: ""
     # imagePullSecrets allows you to use secrets for pulling images for your pods.
     imagePullSecrets: []
     # - name: "image-pull-secret"

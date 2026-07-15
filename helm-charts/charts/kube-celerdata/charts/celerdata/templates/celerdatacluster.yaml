@@ -57,6 +57,9 @@ spec:
       loadBalancerSourceRanges:
         {{- toYaml .Values.celerDataFeSpec.service.loadBalancerSourceRanges | nindent 8 }}
       {{- end }}
+      {{- if and (or (eq "LoadBalancer" .Values.celerDataFeSpec.service.type) (eq "NodePort" .Values.celerDataFeSpec.service.type)) .Values.celerDataFeSpec.service.externalTrafficPolicy }}
+      externalTrafficPolicy: {{ .Values.celerDataFeSpec.service.externalTrafficPolicy }}
+      {{- end }}
       {{- if .Values.celerDataFeSpec.service.ports }}
       ports:
         {{- toYaml .Values.celerDataFeSpec.service.ports | nindent 8 }}
@@ -322,6 +325,9 @@ spec:
       {{- if and (eq "LoadBalancer" .Values.celerDataBeSpec.service.type) .Values.celerDataBeSpec.service.loadBalancerSourceRanges}}
       loadBalancerSourceRanges:
         {{- toYaml .Values.celerDataBeSpec.service.loadBalancerSourceRanges | nindent 8 }}
+      {{- end }}
+      {{- if and (or (eq "LoadBalancer" .Values.celerDataBeSpec.service.type) (eq "NodePort" .Values.celerDataBeSpec.service.type)) .Values.celerDataBeSpec.service.externalTrafficPolicy }}
+      externalTrafficPolicy: {{ .Values.celerDataBeSpec.service.externalTrafficPolicy }}
       {{- end }}
       {{- if .Values.celerDataBeSpec.service.ports }}
       ports:
@@ -764,6 +770,9 @@ spec:
       loadBalancerSourceRanges:
         {{- toYaml .Values.celerDataCnSpec.service.loadBalancerSourceRanges | nindent 8 }}
       {{- end }}
+      {{- if and (or (eq "LoadBalancer" .Values.celerDataCnSpec.service.type) (eq "NodePort" .Values.celerDataCnSpec.service.type)) .Values.celerDataCnSpec.service.externalTrafficPolicy }}
+      externalTrafficPolicy: {{ .Values.celerDataCnSpec.service.externalTrafficPolicy }}
+      {{- end }}
       {{- if .Values.celerDataCnSpec.service.ports }}
       ports:
         {{- toYaml .Values.celerDataCnSpec.service.ports | nindent 8 }}
@@ -917,6 +926,9 @@ spec:
       {{- if and (eq "LoadBalancer" .Values.celerDataFeProxySpec.service.type) .Values.celerDataFeProxySpec.service.loadBalancerSourceRanges}}
       loadBalancerSourceRanges:
         {{- toYaml .Values.celerDataFeProxySpec.service.loadBalancerSourceRanges | nindent 8 }}
+      {{- end }}
+      {{- if and (or (eq "LoadBalancer" .Values.celerDataFeProxySpec.service.type) (eq "NodePort" .Values.celerDataFeProxySpec.service.type)) .Values.celerDataFeProxySpec.service.externalTrafficPolicy }}
+      externalTrafficPolicy: {{ .Values.celerDataFeProxySpec.service.externalTrafficPolicy }}
       {{- end }}
       {{- if .Values.celerDataFeProxySpec.service.ports }}
       ports:

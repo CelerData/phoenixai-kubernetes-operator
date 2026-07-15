@@ -220,18 +220,10 @@ Prepare a `values.yaml` file to install, and you can refer
 to [values.yaml](../../helm-charts/charts/kube-celerdata/values.yaml) to see the default values.
 
 ```shell
+# 注意：这里有意不覆盖 operator 和 FE/BE 的镜像，chart 自身的默认值就是当前版本推荐的镜像。
 cat <<EOF >values.yaml
-operator:
-  celerDataOperator:
-    image:
-      repository: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/operator
-      tag: v1.8.6
-
 celerdata:
   celerDataFeSpec:
-    image:
-      repository: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/fe-ubuntu
-      tag: 3.1.2
     resources:
       limits:
         cpu: 2
@@ -247,9 +239,6 @@ celerdata:
         nodePort: 30002
         port: 9030
   celerDataBeSpec:
-    image:
-      repository: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/be-ubuntu
-      tag: 3.1.2
     resources:
       limits:
         cpu: 2
@@ -276,13 +265,13 @@ EOF
 # 如果你因为网络问题无法安装，可参见后面的操作
 helm install -n celerdata celerdata -f values.yaml celerdata/kube-celerdata --create-namespace
 
-############## 如果你因为网络问题无法直接安装(helm instal)，可以先下载再安装 ##############
-# 如果无法下载可以使用下面的 URL
-# HELM_CHART_URL="https://ydx-starrocks-public.oss-cn-hangzhou.aliyuncs.com"
-HELM_CHART_URL="https://github.com/celerdata/phoenixai-kubernetes-operator/releases/download/v1.8.6"
-curl -LO "$HELM_CHART_URL/kube-celerdata-1.8.6.tgz"
+############## 如果你因为网络问题无法直接安装(helm install)，可以先下载再安装 ##############
+# 从 GitHub Releases 下载 chart 包，最新版本见
+# https://github.com/celerdata/phoenixai-kubernetes-operator/releases
+CHART_VERSION=1.11.6
+curl -LO "https://github.com/celerdata/phoenixai-kubernetes-operator/releases/download/v${CHART_VERSION}/kube-celerdata-${CHART_VERSION}.tgz"
 
-helm install -n celerdata celerdata -f values.yaml ./kube-celerdata-1.8.6.tgz --create-namespace
+helm install -n celerdata celerdata -f values.yaml ./kube-celerdata-${CHART_VERSION}.tgz --create-namespace
 #############################################################
 
 # set alias for kubectl
@@ -310,8 +299,12 @@ kube-celerdata-operator-7498c7fbd-qsbgb 1/1 Running 0 3m
 执行下面的命令：
 
 ```shell
-sudo bash local-install.sh --helm-url https://ydx-starrocks-public.oss-cn-hangzhou.aliyuncs.com --kind-url https://ydx-starrocks-public.oss-cn-hangzhou.aliyuncs.com --kubectl-url https://ydx-starrocks-public.oss-cn-hangzhou.aliyuncs.com --helm-chart-url https://ydx-starrocks-public.oss-cn-hangzhou.aliyuncs.com/kube-celerdata-1.8.6.tgz
+sudo bash local-install.sh
 ```
+
+> 脚本默认使用官方的下载地址（helm/kind/kubectl 官方源 + GitHub Releases 上的 chart 包）。
+> 如果你所在的网络无法访问这些地址，可以通过 `--helm-url`、`--kind-url`、`--kubectl-url`、
+> `--helm-chart-url` 参数指定你自己的镜像地址。
 
 ## 4. 将数据加载到 CelerData
 

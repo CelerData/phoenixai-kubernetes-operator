@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # This script is used to install celerdata on local k8s cluster.
-# Make sure `docker` is installed，See [install docker](https://github.com/celerdata/phoenixai-kubernetes-operator/blob/main/doc/local_installation_how_to.md#11-install-docker) for more details.
+# Make sure `docker` is installed，See [install docker](https://github.com/celerdata/phoenixai-kubernetes-operator/blob/main/doc/cn/local_installation_how_to.md) for more details.
 #
 # It will do the following things:
 #   1. install kubectl, helm, kind on your machine.
@@ -15,14 +15,14 @@ K8S_VERSION="v1.23.4"
 HELM_URL="https://get.helm.sh"
 KIND_URL="https://kind.sigs.k8s.io/dl/v0.20.0"
 KUBECTL_URL="https://dl.k8s.io/release/v1.28.3/bin"
-HELM_CHART_URL="https://github.com/celerdata/phoenixai-kubernetes-operator/releases/download/v1.8.6/kube-celerdata-1.8.6.tgz"
+HELM_CHART_URL="https://github.com/celerdata/phoenixai-kubernetes-operator/releases/download/v1.11.6/kube-celerdata-1.11.6.tgz"
 # NOTE:
 # if you can not access the following url, you can try to use the following url.
 # And you can specify the url by command arguments.
 # HELM_URL="https://ydx-starrocks-public.oss-cn-hangzhou.aliyuncs.com"
 # KIND_URL="https://ydx-starrocks-public.oss-cn-hangzhou.aliyuncs.com"
 # KUBECTL_URL="https://ydx-starrocks-public.oss-cn-hangzhou.aliyuncs.com"
-# HELM_CHART_URL="https://ydx-starrocks-public.oss-cn-hangzhou.aliyuncs.com/kube-celerdata-1.8.6.tgz"
+# HELM_CHART_URL="https://ydx-starrocks-public.oss-cn-hangzhou.aliyuncs.com/kube-celerdata-1.11.6.tgz"
 
 # checkBinary checks if the binary is installed. If not, return 1, else return 0
 function checkBinary() {
@@ -168,18 +168,11 @@ function install() {
   helm repo add celerdata https://celerdata.github.io/phoenixai-kubernetes-operator
   helm repo update celerdata
 
+  # Operator and FE/BE images are NOT overridden here on purpose: the chart's
+  # own defaults already point at the recommended versions for this release.
   cat <<EOF >/tmp/local-install-values.yaml
-operator:
-  celerDataOperator:
-    image:
-      repository: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/operator
-      tag: v1.8.6
-
 celerdata:
   celerDataFeSpec:
-    image:
-      repository: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/fe-ubuntu
-      tag: 3.1.4
     resources:
       limits:
         cpu: 2
@@ -195,9 +188,6 @@ celerdata:
         nodePort: 30002
         port: 9030
   celerDataBeSpec:
-    image:
-      repository: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/be-ubuntu
-      tag: 3.1.4
     resources:
       limits:
         cpu: 2

@@ -1,14 +1,7 @@
-operator:
-  celerDataOperator:
-    image:
-      repository: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/operator
-      tag: v1.8.6
-
+# Operator and FE/BE images are NOT overridden here on purpose: the chart's
+# own defaults already point at the recommended versions for this release.
 celerdata:
   celerDataFeSpec:
-    image:
-      repository: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/fe-ubuntu
-      tag: 3.1.2
     resources:
       limits:
         cpu: 2
@@ -24,9 +17,6 @@ celerdata:
         nodePort: 30002
         port: 9030
   celerDataBeSpec:
-    image:
-      repository: us-west1-docker.pkg.dev/phrasal-verve-350013/celerdata/be-ubuntu
-      tag: 3.1.2
     resources:
       limits:
         cpu: 2

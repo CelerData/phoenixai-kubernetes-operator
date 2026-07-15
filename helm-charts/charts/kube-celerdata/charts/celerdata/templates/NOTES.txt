@@ -6,4 +6,4 @@ ERROR: Installation of the ServiceMonitor CR for the Prometheus operator failed.
 
 Thank you for installing {{ .Chart.Name }}-{{ .Chart.Version }} celerdata chart. Please wait for a few minutes for the cluster to be ready.
 
-Please see the values.yaml for more operation information: https://github.com/celerdata/celerdata-kubernetes-operator/blob/main/helm-charts/charts/kube-celerdata/charts/celerdata/values.yaml
+Please see the values.yaml for more operation information: https://github.com/celerdata/phoenixai-kubernetes-operator/blob/main/helm-charts/charts/kube-celerdata/charts/celerdata/values.yaml

@@ -68,7 +68,7 @@ celerDataFeProxySpec:
 ```
 
 Please
-see https://github.com/celerdata/celerdata-kubernetes-operator/blob/main/helm-charts/charts/kube-celerdata/values.yaml
+see https://github.com/celerdata/phoenixai-kubernetes-operator/blob/main/helm-charts/charts/kube-celerdata/values.yaml
 for more details about how to configure `celerDataFeProxySpec`.
 
 ## Deploy Fe Proxy Using CelerDataCluster CR

@@ -37,7 +37,7 @@ description of the CelerDataCluster CRD.
 Apply the CelerDataCluster CRD by using the following command:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/celerdata/celerdata-kubernetes-operator/main/deploy/celerdata.com_celerdataclusters.yaml
+kubectl apply -f https://raw.githubusercontent.com/celerdata/phoenixai-kubernetes-operator/main/deploy/celerdata.com_celerdataclusters.yaml
 ```
 
 ### 1.2. Deploy CelerData Operator
@@ -46,7 +46,7 @@ You can choose to deploy the CelerData Operator by using a default configuration
 
 1. **Deploy the CelerData Operator by using a default configuration file.**
    ```bash
-   kubectl apply -f https://raw.githubusercontent.com/celerdata/celerdata-kubernetes-operator/main/deploy/operator.yaml
+   kubectl apply -f https://raw.githubusercontent.com/celerdata/phoenixai-kubernetes-operator/main/deploy/operator.yaml
    ```
    The CelerData Operator is deployed to the namespace `celerdata` and manages all CelerData clusters under all
    namespaces. After `operator.yaml` is applied, The following resources will be created:
@@ -64,7 +64,7 @@ You can choose to deploy the CelerData Operator by using a default configuration
    substitute all instances of namespace to your custom namespace.
     1. Download the configuration file **operator.yaml**, which is used to deploy the CelerData Operator.
        ```bash
-       curl -O https://raw.githubusercontent.com/celerdata/celerdata-kubernetes-operator/main/deploy/operator.yaml
+       curl -O https://raw.githubusercontent.com/celerdata/phoenixai-kubernetes-operator/main/deploy/operator.yaml
        ```
     2. Modify the configuration file **operator.yaml** to suit your needs.
     3. Deploy the CelerData Operator.
@@ -84,13 +84,13 @@ You can choose to deploy the CelerData Operator by using a default configuration
 ## 2. Deploy CelerData Cluster
 
 You need to prepare a separate yaml file to deploy the CelerData FE, BE and CN components. You can directly use
-the [sample configuration files](https://github.com/celerdata/celerdata-kubernetes-operator/tree/main/examples/celerdata)
+the [sample configuration files](https://github.com/celerdata/phoenixai-kubernetes-operator/tree/main/examples/celerdata)
 provided by CelerData to deploy a CelerData cluster (an object instantiated by using the custom resource CelerData
 Cluster). For example, you can use **celerdata-fe-and-be.yaml** to deploy a CelerData cluster that consists of three FE
 nodes and three BE nodes.
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/celerdata/celerdata-kubernetes-operator/main/examples/celerdata/celerdata-fe-and-be.yaml
+kubectl apply -f https://raw.githubusercontent.com/celerdata/phoenixai-kubernetes-operator/main/examples/celerdata/celerdata-fe-and-be.yaml
 ```
 
 The following table describes a few important fields in the **celerdata-fe-and-be.yaml** file.
@@ -102,7 +102,7 @@ The following table describes a few important fields in the **celerdata-fe-and-b
 | Spec      | The expected status of the object. Valid values are `celerDataFeSpec`, `celerDataBeSpec`, and `celerDataCnSpec`.                                                                                                                                   |
 
 You can also deploy the CelerData cluster by using a modified configuration file. For supported fields and detailed
-descriptions, see [api.md](https://github.com/celerdata/celerdata-kubernetes-operator/blob/main/doc/api.md).
+descriptions, see [api.md](https://github.com/celerdata/phoenixai-kubernetes-operator/blob/main/doc/api.md).
 
 Deploying the CelerData cluster takes a while. During this period, you can use the
 command `kubectl -n celerdata get pods` to check the starting status of the CelerData cluster. If all the pods are in
@@ -137,7 +137,7 @@ celerdatacluster-sample-fe-2          1/1     Running   0          22h
 
 The components of the CelerData cluster can be accessed through their associated Services, such as the FE Service. For
 detailed descriptions of Services and their access addresses,
-see [api.md](https://github.com/celerdata/celerdata-kubernetes-operator/blob/main/doc/api.md)
+see [api.md](https://github.com/celerdata/phoenixai-kubernetes-operator/blob/main/doc/api.md)
 and [Services](https://kubernetes.io/docs/concepts/services-networking/service/).
 
 The following table describes the FE Services of the CelerData cluster. `celerdatacluster-sample-fe-service` is the

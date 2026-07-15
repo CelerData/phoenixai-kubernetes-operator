@@ -11,7 +11,7 @@ separately.
 There are three charts in this repository:
 
 ```bash
-$ helm repo add celerdata https://celerdata.github.io/celerdata-kubernetes-operator
+$ helm repo add celerdata https://celerdata.github.io/phoenixai-kubernetes-operator
 $ helm repo update celerdata
 $ helm search repo celerdata
 NAME                                    CHART VERSION    APP VERSION  DESCRIPTION

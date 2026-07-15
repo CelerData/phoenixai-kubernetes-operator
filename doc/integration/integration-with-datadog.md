@@ -45,7 +45,7 @@ helm install datadog-agent  -f datadog-values.yaml datadog/datadog
 If this is a fresh install, add the Helm CelerData Operator repo
 
 ```bash
-helm repo add celerdata https://celerdata.github.io/celerdata-kubernetes-operator
+helm repo add celerdata https://celerdata.github.io/phoenixai-kubernetes-operator
 helm repo update celerdata
 ```
 

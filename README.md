@@ -53,7 +53,7 @@ There are two ways to install Operator and CelerData Cluster.
 2. Install Operator and CelerData Cluster by Helm Chart.
 
 > Note: In every release, we will provide the latest version of the yaml Manifest and Helm Chart. You can find them
-> in https://github.com/celerdata/celerdata-kubernetes-operator/releases
+> in https://github.com/celerdata/phoenixai-kubernetes-operator/releases
 
 ## Installation by yaml Manifest
 
@@ -62,20 +62,20 @@ Please see [Deploy CelerData With Operator](./doc/deploy_celerdata_with_operator
 ### 1. Apply the CelerDataCluster CRD
 
 ```console
-kubectl apply -f https://raw.githubusercontent.com/celerdata/celerdata-kubernetes-operator/main/deploy/celerdata.com_celerdataclusters.yaml
+kubectl apply -f https://raw.githubusercontent.com/celerdata/phoenixai-kubernetes-operator/main/deploy/celerdata.com_celerdataclusters.yaml
 ```
 
 ### 2. Apply the Operator manifest
 
 Apply the Operator manifest. By default, the Operator is configured to install in the CelerData namespace. To use the
 Operator in a custom namespace, download
-the [Operator manifest](https://raw.githubusercontent.com/celerdata/celerdata-kubernetes-operator/main/deploy/operator.yaml)
+the [Operator manifest](https://raw.githubusercontent.com/celerdata/phoenixai-kubernetes-operator/main/deploy/operator.yaml)
 and edit all instances of namespace: CelerData to specify your custom namespace.
 Then apply this version of the manifest to the cluster with kubectl apply -f {local-file-path} instead of using the
 command below.
 
 ```console
-kubectl apply -f https://raw.githubusercontent.com/celerdata/celerdata-kubernetes-operator/main/deploy/operator.yaml
+kubectl apply -f https://raw.githubusercontent.com/celerdata/phoenixai-kubernetes-operator/main/deploy/operator.yaml
 ```
 
 ### 3. Deploy the CelerData cluster
@@ -200,7 +200,7 @@ kubectl delete celerdatacluster celerdatacluster-sample -n celerdata
 To delete/stop the CelerData Operate, just execute the delete command.
 
 ```console
-kubectl delete -f https://raw.githubusercontent.com/celerdata/celerdata-kubernetes-operator/main/deploy/operator.yaml
+kubectl delete -f https://raw.githubusercontent.com/celerdata/phoenixai-kubernetes-operator/main/deploy/operator.yaml
 ```
 
 

@@ -24,7 +24,7 @@ There are two ways to turn on the prometheus metrics scrape for the CelerData cl
 
 ### 2.1 Turn on the prometheus metrics scrape by adding annotations
 
-Follow the instructions from [CelerData Helm Chart](https://github.com/CelerData/celerdata-kubernetes-operator/tree/main/helm-charts/charts/kube-celerdata)
+Follow the instructions from [CelerData Helm Chart](https://github.com/celerdata/phoenixai-kubernetes-operator/tree/main/helm-charts/charts/kube-celerdata)
 with some customized values.
 
 Following is an example of the content of the `sr-values.yaml`.
@@ -145,7 +145,7 @@ spec:
 Run the following commands to deploy CelerData operator and CelerData cluster,
 
 ```shell
-helm repo add celerdata https://celerdata.github.io/celerdata-kubernetes-operator
+helm repo add celerdata https://celerdata.github.io/phoenixai-kubernetes-operator
 helm repo update celerdata
 helm install celerdata -f sr-values.yaml celerdata/kube-celerdata
 ```
@@ -172,7 +172,7 @@ Note: This only works for chart v1.8.4 and above.
 ## 3. Import CelerData Grafana Dashboard
 
 CelerData grafana dashboard configuration for kubernetes environment is available
-at https://github.com/CelerData/celerdata-kubernetes-operator/blob/main/extra/grafana/kubernetes/CelerData-Overview-kubernetes-3.0.json
+at https://github.com/celerdata/phoenixai-kubernetes-operator/blob/main/extra/grafana/kubernetes/CelerData-Overview-kubernetes-3.0.json
 
 Detailed instruction can be
 found [here](https://grafana.com/docs/grafana/latest/dashboards/manage-dashboards/#import-a-dashboard).

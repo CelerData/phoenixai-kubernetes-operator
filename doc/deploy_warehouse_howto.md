@@ -27,7 +27,7 @@ First, we need to install CelerDataWarehouse CRD and restart the CelerData opera
 
 ```console
 # install crd
-kubectl apply -f https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.9.6/celerdata.com_celerdatawarehouses.yaml
+kubectl apply -f https://github.com/celerdata/phoenixai-kubernetes-operator/releases/download/v1.9.6/celerdata.com_celerdatawarehouses.yaml
 
 # restart operator
 kubectl rollout restart deployment kube-celerdata-operator

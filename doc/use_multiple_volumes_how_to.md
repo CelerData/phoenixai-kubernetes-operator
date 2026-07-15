@@ -6,7 +6,7 @@ This document describes how to use multiple volumes to store CelerData data.
 # Deploy CelerData with Multiple Volumes By Helm Chart
 
 Based on the `storageSpec` field
-in [values.yaml](https://github.com/celerdata/celerdata-kubernetes-operator/blob/main/helm-charts/charts/kube-celerdata/values.yaml),
+in [values.yaml](https://github.com/celerdata/phoenixai-kubernetes-operator/blob/main/helm-charts/charts/kube-celerdata/values.yaml),
 we will give an example of how to use multiple volumes to store CelerData data.
 
 ```yaml

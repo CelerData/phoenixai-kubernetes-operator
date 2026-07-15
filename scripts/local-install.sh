@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 # This script is used to install celerdata on local k8s cluster.
-# Make sure `docker` is installed，See [install docker](https://github.com/celerdata/celerdata-kubernetes-operator/blob/main/doc/local_installation_how_to.md#11-install-docker) for more details.
+# Make sure `docker` is installed，See [install docker](https://github.com/celerdata/phoenixai-kubernetes-operator/blob/main/doc/local_installation_how_to.md#11-install-docker) for more details.
 #
 # It will do the following things:
 #   1. install kubectl, helm, kind on your machine.
 #   2. create a kind cluster named `celerdata`.
-#   3. install [kube-celerdata](https://github.com/celerdata/celerdata-kubernetes-operator/tree/main/helm-charts/charts/kube-celerdata) helm chart.
+#   3. install [kube-celerdata](https://github.com/celerdata/phoenixai-kubernetes-operator/tree/main/helm-charts/charts/kube-celerdata) helm chart.
 
 # specify the k8s version installed by kind
 K8S_VERSION="v1.23.4"
@@ -15,7 +15,7 @@ K8S_VERSION="v1.23.4"
 HELM_URL="https://get.helm.sh"
 KIND_URL="https://kind.sigs.k8s.io/dl/v0.20.0"
 KUBECTL_URL="https://dl.k8s.io/release/v1.28.3/bin"
-HELM_CHART_URL="https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.8.6/kube-celerdata-1.8.6.tgz"
+HELM_CHART_URL="https://github.com/celerdata/phoenixai-kubernetes-operator/releases/download/v1.8.6/kube-celerdata-1.8.6.tgz"
 # NOTE:
 # if you can not access the following url, you can try to use the following url.
 # And you can specify the url by command arguments.
@@ -165,7 +165,7 @@ nodes:
 # install installs kube-celerdata helm chart
 function install() {
   echo "Installing kube-celerdata helm chart"
-  helm repo add celerdata https://celerdata.github.io/celerdata-kubernetes-operator
+  helm repo add celerdata https://celerdata.github.io/phoenixai-kubernetes-operator
   helm repo update celerdata
 
   cat <<EOF >/tmp/local-install-values.yaml

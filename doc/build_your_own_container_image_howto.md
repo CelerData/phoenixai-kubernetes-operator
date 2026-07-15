@@ -21,7 +21,7 @@ First, we describe how to build the container image based on the latest code on 
 
 ```bash
 # clone the repository
-git clone https://github.com/celerdata/celerdata-kubernetes-operator.git
+git clone https://github.com/celerdata/phoenixai-kubernetes-operator.git
 
 # build your own image
 docker build -t meaglekey/operator:your-branch-id .
@@ -38,17 +38,17 @@ from the Operator.
 ## 2.1. Find the commit ID you want to revert
 
 First, you need to find the PR that introduced the feature you want to remove. For example, we
-find [this PR](https://github.com/celerdata/celerdata-kubernetes-operator/pull/288) by searching for `appProtocol`, and
+find [this PR](https://github.com/celerdata/phoenixai-kubernetes-operator/pull/288) by searching for `appProtocol`, and
 its PR ID is 288.
 
 Second, in the PR page, you can find the commit ID in the URL. For example, the commit ID
-of [this PR](https://github.com/celerdata/celerdata-kubernetes-operator/pull/288) is `66e2f2c`.
+of [this PR](https://github.com/celerdata/phoenixai-kubernetes-operator/pull/288) is `66e2f2c`.
 
 ## 2.2. Revert the commit
 
 ```bash
 # clone the repository
-git clone https://github.com/celerdata/celerdata-kubernetes-operator.git
+git clone https://github.com/celerdata/phoenixai-kubernetes-operator.git
 
 # checkout the latest released version, e.g., v1.9.9
 git checkout v1.9.9

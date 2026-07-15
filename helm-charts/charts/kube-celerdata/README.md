@@ -1,6 +1,6 @@
 # Deploy Operator and CelerData Cluster by kube-celerdata Chart
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Release Charts](https://img.shields.io/badge/Release-helmcharts-green.svg)](https://github.com/celerdata/celerdata-kubernetes-operator/releases)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Release Charts](https://img.shields.io/badge/Release-helmcharts-green.svg)](https://github.com/celerdata/phoenixai-kubernetes-operator/releases)
 
 [Helm](https://helm.sh/) is a package manager for Kubernetes. A [Helm Chart](https://helm.sh/docs/topics/charts/) is a Helm package and contains all of the resource definitions necessary to run an application on a Kubernetes cluster. This topic describes how to use Helm to automatically deploy a CelerData operator and cluster on a Kubernetes cluster.
 
@@ -15,7 +15,7 @@
    1. Add the Helm Chart Repo.
 
       ```Bash
-      helm repo add celerdata https://celerdata.github.io/celerdata-kubernetes-operator
+      helm repo add celerdata https://celerdata.github.io/phoenixai-kubernetes-operator
       ```
 
    2. Update the Helm Chart Repo to the latest version.
@@ -34,7 +34,7 @@
       celerdata/celerdata           1.8.0            3.1-latest   A Helm chart for CelerData cluster
       ```
 
-2. Use the default **[values.yaml](https://github.com/celerdata/celerdata-kubernetes-operator/blob/main/helm-charts/charts/kube-celerdata/values.yaml)** of the Helm Chart to deploy the CelerData Operator and CelerData cluster, or create a YAML file to customize your deployment configurations.
+2. Use the default **[values.yaml](https://github.com/celerdata/phoenixai-kubernetes-operator/blob/main/helm-charts/charts/kube-celerdata/values.yaml)** of the Helm Chart to deploy the CelerData Operator and CelerData cluster, or create a YAML file to customize your deployment configurations.
    1. Deployment with default configurations
 
       Run the following command to deploy the CelerData Operator and the CelerData cluster which consists of one FE and one BE:
@@ -51,7 +51,7 @@
       ```
 
    2. Deployment with custom configurations
-      - Create a YAML file, for example, **my-values.yaml**, and customize the configurations for the CelerData Operator and CelerData cluster in the YAML file. For the supported parameters and descriptions, see the comments in the default **[values.yaml](https://github.com/celerdata/celerdata-kubernetes-operator/blob/main/helm-charts/charts/kube-celerdata/values.yaml)** of the Helm Chart.
+      - Create a YAML file, for example, **my-values.yaml**, and customize the configurations for the CelerData Operator and CelerData cluster in the YAML file. For the supported parameters and descriptions, see the comments in the default **[values.yaml](https://github.com/celerdata/phoenixai-kubernetes-operator/blob/main/helm-charts/charts/kube-celerdata/values.yaml)** of the Helm Chart.
       - Run the following command to deploy the CelerData Operator and CelerData cluster with the custom configurations in **my-values.yaml**.
 
         ```Bash
@@ -91,4 +91,4 @@ If you need to uninstall the CelerData Operator and CelerData cluster, run the f
 helm uninstall celerdata
 ```
 
-Search Helm Chart maintained by CelerData on Artifact Hub. See [kube-celerdata](https://github.com/CelerData/celerdata-kubernetes-operator/tree/main/helm-charts/charts/kube-celerdata).
+Search Helm Chart maintained by CelerData on Artifact Hub. See [kube-celerdata](https://github.com/celerdata/phoenixai-kubernetes-operator/tree/main/helm-charts/charts/kube-celerdata).

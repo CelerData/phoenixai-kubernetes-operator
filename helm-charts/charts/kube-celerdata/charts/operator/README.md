@@ -1,6 +1,6 @@
 # Deploy Operator by operator Chart
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Release Charts](https://img.shields.io/badge/Release-helmcharts-green.svg)](https://github.com/celerdata/celerdata-kubernetes-operator/releases)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Release Charts](https://img.shields.io/badge/Release-helmcharts-green.svg)](https://github.com/celerdata/phoenixai-kubernetes-operator/releases)
 
 [Helm](https://helm.sh/) is a package manager for Kubernetes. A [Helm Chart](https://helm.sh/docs/topics/charts/) is a Helm package and contains all of the resource definitions necessary to run an application on a Kubernetes cluster. This topic describes how to use Helm to automatically deploy a CelerData operator on a Kubernetes cluster.
 
@@ -16,7 +16,7 @@
    1. Add the Helm Chart Repo.
 
       ```Bash
-      helm repo add celerdata https://celerdata.github.io/celerdata-kubernetes-operator
+      helm repo add celerdata https://celerdata.github.io/phoenixai-kubernetes-operator
       ```
 
    2. Update the Helm Chart Repo to the latest version.

@@ -149,7 +149,7 @@ celerdata:
     # The secret name that contains the password, the key of the secret is "password", and you should create it first.
     passwordSecret: ""
     # The image of the initPassword job, if it is not set, the FE image will be used.
-    # See https://github.com/celerdata/celerdata-kubernetes-operator/issues/453 for why we need to set the image.
+    # See https://github.com/celerdata/phoenixai-kubernetes-operator/issues/453 for why we need to set the image.
     image: ""
     # The annotations for the Job, not including the annotations for the pod.
     annotations: {}
@@ -197,7 +197,7 @@ celerdata:
       # Whether to expose metrics to Prometheus by ServiceMonitor.
       # Note: make sure the prometheus operator is installed in your cluster.
       # If prometheus is not installed by operator, you can add annotations on k8s service to expose metrics.
-      # See https://github.com/celerdata/celerdata-kubernetes-operator/blob/main/doc/integration/integration-prometheus-grafana.md#51-turn-on-the-prometheus-metrics-scrape-by-adding-annotations for more details.
+      # See https://github.com/celerdata/phoenixai-kubernetes-operator/blob/main/doc/integration/integration-prometheus-grafana.md#51-turn-on-the-prometheus-metrics-scrape-by-adding-annotations for more details.
       enabled: false
       # Prometheus ServiceMonitor labels
       labels: {}
@@ -620,7 +620,7 @@ celerdata:
       #   - mountPath: /opt/starrocks/fe/meta
       #     name: fe-meta # append '-meta' to the end of the name of the celerDataFeSpec.storageSpec.name
     # sidecarsMap is an optional map of containers that are run in the same pod as the celerdata component.
-    # The reason for using sidecarsMap please refer to https://github.com/celerdata/celerdata-kubernetes-operator/issues/618
+    # The reason for using sidecarsMap please refer to https://github.com/celerdata/phoenixai-kubernetes-operator/issues/618
     # sidecarsMap has higher priority than sidecars, and the key of sidecarsMap is the name of the sidecar container.
     sidecarsMap: {}
       # sidecar-container:
@@ -990,7 +990,7 @@ celerdata:
       #   - mountPath: /opt/starrocks/cn/storage
       #     name: cn-data # append '-data' to the end of the name of the celerDataCnSpec.storageSpec.name
     # sidecarsMap is an optional map of containers that are run in the same pod as the celerdata component.
-    # The reason for using sidecarsMap please refer to https://github.com/celerdata/celerdata-kubernetes-operator/issues/618
+    # The reason for using sidecarsMap please refer to https://github.com/celerdata/phoenixai-kubernetes-operator/issues/618
     # sidecarsMap has higher priority than sidecars, and the key of sidecarsMap is the name of the sidecar container.
     sidecarsMap: {}
       # sidecar-container:
@@ -1324,7 +1324,7 @@ celerdata:
       #   - mountPath: /opt/starrocks/be/storage
       #     name: be-data # append '-data' to the end of the name of the celerDataBeSpec.storageSpec.name
     # sidecarsMap is an optional map of containers that are run in the same pod as the celerdata component.
-    # The reason for using sidecarsMap please refer to https://github.com/celerdata/celerdata-kubernetes-operator/issues/618
+    # The reason for using sidecarsMap please refer to https://github.com/celerdata/phoenixai-kubernetes-operator/issues/618
     # sidecarsMap has higher priority than sidecars, and the key of sidecarsMap is the name of the sidecar container.
     sidecarsMap: {}
       # sidecar-container:

@@ -200,11 +200,11 @@ local-path-storage   local-path-provisioner-5ddd94ff66-9l2km           1/1     R
 
 ### 2.2 通过 Helm 安装 CelerData
 
-你可以在 https://github.com/celerdata/celerdata-kubernetes-operator/releases 获取 CelerData Helm Chart 的最新版本。
+你可以在 https://github.com/celerdata/phoenixai-kubernetes-operator/releases 获取 CelerData Helm Chart 的最新版本。
 
 ```shell
 # Add the Helm Chart Repo
-helm repo add celerdata https://celerdata.github.io/celerdata-kubernetes-operator
+helm repo add celerdata https://celerdata.github.io/phoenixai-kubernetes-operator
 
 # update the repo
 helm repo update celerdata
@@ -279,7 +279,7 @@ helm install -n celerdata celerdata -f values.yaml celerdata/kube-celerdata --cr
 ############## 如果你因为网络问题无法直接安装(helm instal)，可以先下载再安装 ##############
 # 如果无法下载可以使用下面的 URL
 # HELM_CHART_URL="https://ydx-starrocks-public.oss-cn-hangzhou.aliyuncs.com"
-HELM_CHART_URL="https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/v1.8.6"
+HELM_CHART_URL="https://github.com/celerdata/phoenixai-kubernetes-operator/releases/download/v1.8.6"
 curl -LO "$HELM_CHART_URL/kube-celerdata-1.8.6.tgz"
 
 helm install -n celerdata celerdata -f values.yaml ./kube-celerdata-1.8.6.tgz --create-namespace

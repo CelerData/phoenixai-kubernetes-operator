@@ -3,7 +3,7 @@
 1. Add the Helm Chart Repo.
 
    ```Bash
-   helm repo add celerdata https://celerdata.github.io/celerdata-kubernetes-operator
+   helm repo add celerdata https://celerdata.github.io/phoenixai-kubernetes-operator
    ```
 
 2. Update the Helm Chart Repo to the latest version.

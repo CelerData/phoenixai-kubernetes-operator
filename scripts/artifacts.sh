@@ -104,7 +104,7 @@ function get_package_name() {
 function helm_repo_index() {
   chart_name=$1
   release_tag=$RELEASE_TAG
-  url=https://github.com/celerdata/celerdata-kubernetes-operator/releases/download/${release_tag}
+  url=https://github.com/celerdata/phoenixai-kubernetes-operator/releases/download/${release_tag}
   if [[ $chart_name = "kube-celerdata" || $chart_name = "warehouse" ]]; then
     if [ -f $HOME_PATH/index.yaml ]; then
       helm repo index --merge $HOME_PATH/index.yaml --url $url $HOME_PATH/helm-charts/charts/$chart_name

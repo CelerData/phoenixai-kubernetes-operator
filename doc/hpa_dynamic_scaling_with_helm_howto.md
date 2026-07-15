@@ -138,7 +138,7 @@ operator:
 
 ```bash
 # Add CelerData Helm repository
-$ helm repo add celerdata https://celerdata.github.io/celerdata-kubernetes-operator
+$ helm repo add celerdata https://celerdata.github.io/phoenixai-kubernetes-operator
 $ helm repo update
 
 # Deploy the cluster

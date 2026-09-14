@@ -87,7 +87,7 @@ spec:
     feEnvVars:
     - name: STARROCKS_ROOT
       value: /opt/starrocks-artifacts
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1-latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:<database-image-tag>
     imagePullPolicy: IfNotPresent
     replicas: 1
     requests:
@@ -116,7 +116,7 @@ spec:
     cnEnvVars:
     - name: STARROCKS_ROOT
       value: /opt/starrocks-artifacts
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1-latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:<database-image-tag>
     imagePullPolicy: IfNotPresent
     replicas: 2
     requests:
@@ -208,7 +208,7 @@ phoenixai:
       value: /opt/starrocks-artifacts
     image:
       repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu
-      tag: 4.1-latest
+      tag: <database-image-tag>
     resources:
       limits:
         cpu: 2
@@ -255,7 +255,7 @@ phoenixai:
       value: /opt/starrocks-artifacts
     image:
       repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu
-      tag: 4.1-latest
+      tag: <database-image-tag>
     replicas: 1
     resources:
       limits:

@@ -32,11 +32,39 @@ decides whether this takes an afternoon or a week.
 :::caution Ask for the enterprise image tags, not just registry access
 The coordinator and compute-node images must be the enterprise builds, which come from the private
 registry your account team names — not the community StarRocks images. The tag alone does not tell
-you which you have (it reads like `4.1-latest`); what marks the build is the repository it came
-from. With community images the cluster starts and looks healthy, but **no warehouse compute pods
+you which you have; what marks the build is the repository it came from. With community images the cluster starts and looks healthy, but **no warehouse compute pods
 are ever created and nothing reports an error**. Ask your account team for the image tags that go
 with your release at the same time as the key file.
 :::
+
+## Which image versions to use
+
+Examples in these pages write versions as `<operator-image-tag>`, `<database-image-tag>` and
+`<console-image-tag>`. Substitute the ones for your release. The three are not interchangeable, and
+there is no floating tag that always means "the current one".
+
+**If you have an account team**, use the versions they named — those are the builds your release was
+qualified against.
+
+**If you are evaluating PhoenixAI**, list what your registry access can see and take the newest
+release build:
+
+```bash
+gcloud artifacts docker tags list \
+  us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu
+```
+
+Repeat for `cn-ubuntu`, `operator` and `anywhere`. Authenticate first with the key file from
+[Step 1](./install_with_helm.md#step-1--get-the-images-and-teach-kubernetes-to-pull-them).
+
+<!-- WARNING: check before publish -- verify this command against the real Artifact Registry repo,
+     with the service-account key file Step 1 creates rather than a developer's own gcloud session.
+     A customer's key may be scoped to pull only, which is not necessarily enough to list tags. If
+     it is not, name the route that does work here instead. -->
+
+**Write the version down in either case.** Pinning it in your values file is what makes the install
+reproducible, and what stops a later `helm upgrade` from moving the cluster onto a build you have
+not qualified.
 
 ## Check your environment
 

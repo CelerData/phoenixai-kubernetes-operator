@@ -32,7 +32,7 @@ metadata:
 spec:
   phoenixAIFeSpec:
     replicas: 3
-    image: starrocks/fe-ubuntu:latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:<database-image-tag>
     storageVolumes:
       - name: spiffe-workload-api
         storageClassName: csi

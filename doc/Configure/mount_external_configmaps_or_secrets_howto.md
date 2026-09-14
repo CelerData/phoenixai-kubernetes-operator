@@ -16,13 +16,13 @@ metadata:
   namespace: kb-system
 spec:
   phoenixAIFeSpec:
-    image: "us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1-latest"
+    image: "us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:<database-image-tag>"
     replicas: 1
     configMaps:
       - name: my-configmap
         mountPath: /etc/my-configmap
   phoenixAICnSpec:
-    image: "us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1-latest"
+    image: "us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:<database-image-tag>"
     replicas: 1
     configMaps:
       - name: my-configmap

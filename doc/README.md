@@ -6,24 +6,23 @@ site.
 
 ## Get started
 
-- [Console tour](./GetStarted/anywhere_console_ui_guide.md)
-- [Least Permission to Deploy PhoenixAI](./Deploy/least_permission_to_deploy_phoenixai_howto.md)
-- [Migrate from the Open-Source StarRocks Operator to PhoenixAI](./Deploy/migrate-from-starrocks-howto.md)
-
-## Quick starts
-
 - [Quick start with Amazon S3](./GetStarted/quickstart_s3.md)
 - [Quick start with MinIO](./GetStarted/quickstart_minio.md)
+- [Console tour](./GetStarted/anywhere_console_ui_guide.md)
 
 ## Deploy
 
 - [Prerequisites](./Deploy/prerequisites.md) — what to have in hand, and the checks to run first.
+- [Least privilege to deploy](./Deploy/least_permission_to_deploy_phoenixai_howto.md)
 - [Install with Helm](./Deploy/install_with_helm.md) — the complete
   step-by-step install, assuming no prior Kubernetes or Helm experience. Start here.
 - [Install with kubectl](./Deploy/install_with_kubectl.md)
-- [Deploy Multiple Clusters](./Deploy/deploy_multiple_clusters_howto.md)
-- [Deploy a Warehouse](./Deploy/deploy_warehouse_howto.md)
-- [Upgrade the Operator](./Deploy/upgrade_operator_howto.md)
+- [Migrate from the StarRocks operator](./Deploy/migrate-from-starrocks-howto.md)
+- [Console data volume](./Deploy/console_data_volume.md)
+- [Warehouses](./Deploy/deploy_warehouse_howto.md)
+- [Multiple clusters](./Deploy/deploy_multiple_clusters_howto.md)
+- [License a cluster](./Deploy/license_cluster_howto.md)
+- [Upgrade the operator](./Deploy/upgrade_operator_howto.md)
 
 ## Configure
 
@@ -55,6 +54,13 @@ site.
 - [Prometheus And Grafana](./Monitor/integration-prometheus-grafana.md)
 - [Anywhere Console monitoring](./Monitor/anywhere-monitoring.md)
 - [Datadog](./Monitor/integration-with-datadog.md)
+
+## Troubleshoot
+
+- [Health checks](./Troubleshoot/health_checks.md)
+- [Inspect cluster state](./Troubleshoot/inspect_cluster_state.md)
+- [Generating a support bundle](./Troubleshoot/generate_support_bundle.md)
+- [Reading a support bundle](./Troubleshoot/read_support_bundle.md)
 
 ## Reference
 

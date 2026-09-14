@@ -16,7 +16,8 @@ version: 2.0.0
 # Version of the deployed application — rendered verbatim as the image tag when
 # image.tag is empty, so it is spelled like the git tag that produced that image
 # (v-prefixed), not like `version:` above. Unlike `version:`, this field is a
-# free-form string, not SemVer (the sibling phoenixai subchart uses "4.1-latest").
+# free-form string, not SemVer (the sibling phoenixai subchart carries a data-plane
+# image tag, "4.1.5-ee").
 appVersion: "v2.0.0"
 
 kubeVersion: ">=1.23.0-0"

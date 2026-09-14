@@ -82,7 +82,7 @@ spec:
     envVars:
       - name: TZ
         value: UTC
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1-latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:<database-image-tag>
     replicas: 1
     limits:
       cpu: 8
@@ -119,7 +119,7 @@ spec:
   replicas: 1
   image:
     repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu
-    tag: "4.1-latest"
+    tag: "<database-image-tag>"
   resources:
     limits:
       cpu: 8
@@ -215,7 +215,7 @@ spec:
     envVars:
       - name: TZ
         value: UTC
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1.4-ee  # this line is updated
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:<new-database-image-tag>  # this line is updated
     replicas: 1
     limits:
       cpu: 8
@@ -244,7 +244,7 @@ spec:
   replicas: 1
   image:
     repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu
-    tag: "4.1.4-ee" # this line is updated
+    tag: "<new-database-image-tag>" # this line is updated
   resources:
     limits:
       cpu: 8

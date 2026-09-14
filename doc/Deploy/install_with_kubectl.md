@@ -260,18 +260,18 @@ From outside the Kubernetes cluster, you can access the PhoenixAI cluster throug
 
 #### 3.2.1. Upgrade CN nodes
 
-Run the following command to specify a new CN image file, such as `us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1-latest`:
+Run the following command to specify a new CN image file, such as `us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:<database-image-tag>`:
 
 ```bash
-kubectl -n phoenixai patch phoenixaicluster phoenixaicluster-sample --type='merge' -p '{"spec":{"phoenixAICnSpec":{"image": us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1-latest"}}}'
+kubectl -n phoenixai patch phoenixaicluster phoenixaicluster-sample --type='merge' -p '{"spec":{"phoenixAICnSpec":{"image": us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:<database-image-tag>"}}}'
 ```
 
 #### 3.2.2. Upgrade FE nodes
 
-Run the following command to specify a new FE image file, such as `us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1-latest`:
+Run the following command to specify a new FE image file, such as `us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:<database-image-tag>`:
 
 ```bash
-kubectl -n phoenixai patch phoenixaicluster phoenixaicluster-sample --type='merge' -p '{"spec":{"phoenixAIFeSpec":{"image": us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1-latest"}}}'
+kubectl -n phoenixai patch phoenixaicluster phoenixaicluster-sample --type='merge' -p '{"spec":{"phoenixAIFeSpec":{"image": us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:<database-image-tag>"}}}'
 ```
 
 The upgrade process lasts for a while. You can run the command `kubectl -n phoenixai get pods` to view the upgrade

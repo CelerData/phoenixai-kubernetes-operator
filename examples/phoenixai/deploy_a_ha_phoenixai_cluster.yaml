@@ -10,7 +10,7 @@ metadata:
   name: a-ha-phoenixai   # change the name if needed.
 spec:
   phoenixAIFeSpec:
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1-latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1.5-ee
     replicas: 3   # at least 3 FE pods
     limits:
       cpu: 8
@@ -19,7 +19,7 @@ spec:
       cpu: 8
       memory: 16Gi
   phoenixAICnSpec:
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1-latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1.5-ee
     replicas: 3 # at least 3 CN pods
     limits:
       cpu: 16

@@ -9,7 +9,7 @@ metadata:
   name: a-phoenixai-with-cn   # change the name if needed.
 spec:
   phoenixAIFeSpec:
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1-latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1.5-ee
     replicas: 3
     # If you just want to start a running PhoenixAI cluster, you can set a smaller request/limit, such as 1 core and 2GB.
     # See https://docs.starrocks.io/docs/deployment/plan_cluster/#cpu-and-memory for more information about how to configure CPU and memory in production.
@@ -32,7 +32,7 @@ spec:
       storageSize: 5Gi
       mountPath: /opt/starrocks/fe/log
   phoenixAICnSpec:
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1-latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1.5-ee
     # If you just want to start a running PhoenixAI cluster, you can set a smaller request/limit, such as 1 core and 2GB.
     # See https://docs.starrocks.io/docs/deployment/plan_cluster/#cpu-and-memory for more information about how to configure CPU and memory in production.
     limits:

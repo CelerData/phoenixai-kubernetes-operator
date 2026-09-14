@@ -11,7 +11,7 @@ metadata:
   name: a-phoenixai-with-custom-config   # change the name if needed.
 spec:
   phoenixAIFeSpec:
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1-latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1.5-ee
     replicas: 3
     limits:
       cpu: 8
@@ -23,7 +23,7 @@ spec:
       configMapName: phoenixaicluster-sample-fe-cm
       resolveKey: fe.conf
   phoenixAICnSpec:
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1-latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1.5-ee
     replicas: 1
     limits:
       cpu: 16

@@ -131,7 +131,7 @@ spec:
     configMapInfo:
       configMapName: kube-anywhere-cn-cm
       resolveKey: cn.conf
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1-latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:<database-image-tag>
     limits:
       cpu: 4
       memory: 4Gi
@@ -148,7 +148,7 @@ spec:
     configMapInfo:
       configMapName: kube-anywhere-fe-cm
       resolveKey: fe.conf
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1-latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:<database-image-tag>
     limits:
       cpu: 4
       memory: 4Gi

@@ -51,7 +51,7 @@ phoenixai:
     replicas: 1
     image:
       repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu
-      tag: 4.1-latest
+      tag: <database-image-tag>
     resources:
       requests:
         cpu: 100m
@@ -79,7 +79,7 @@ phoenixai:
   phoenixAICnSpec:
     image:
       repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu
-      tag: 4.1-latest
+      tag: <database-image-tag>
     storageSpec:
       logStorageSize: 1Gi
       name: cn
@@ -192,7 +192,7 @@ phoenixai:
     replicas: 1
     image:
       repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu
-      tag: 4.1-latest
+      tag: <database-image-tag>
     resources:
       requests:
         cpu: 100m
@@ -257,7 +257,7 @@ spec:
 
   image:
     repository: xxx/cn-ubuntu  # an enterprise image repository
-    tag: 4.1-latest
+    tag: <database-image-tag>
 
   resources:
     requests:

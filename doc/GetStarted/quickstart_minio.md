@@ -72,9 +72,11 @@ Ask your [PhoenixAI team](https://www.phoenixdata.ai/contact-sales) for two thin
    as a JSON key file they issue for you, or as a grant on a service account of your own that you
    then issue a key for. Either way you end up holding one JSON key file.
 2. **The image tags for your release** — one each for the operator, the database (FE and CN) and the
-   console. The chart carries defaults, but a default only resolves once that exact version has been
-   published. A tag the registry does not hold fails with `ImagePullBackOff` **even though your
-   credentials are correct**, and the message says nothing about a missing version.
+   console. Name all three yourself rather than relying on a chart default: a tag the registry does
+   not hold fails with `ImagePullBackOff` **even though your credentials are correct**, and the
+   message says nothing about a missing version. If nobody has named versions for you, you can
+   [list what the registry holds](../Deploy/prerequisites.md#which-image-versions-to-use) and take
+   the newest release build.
 
 The pull secret is created in [Create the namespace and the pull secret](#create-the-namespace-and-the-pull-secret),
 once the namespace exists. For the longer version — why Artifact Registry has no user name and
@@ -103,7 +105,7 @@ masks its exit status, so it appears to succeed and the pods only fail minutes l
 ```bash
 docker exec --privileged -i <kind-node> \
   ctr --namespace=k8s.io images import --digests --snapshotter=overlayfs - \
-  < fe-ubuntu-4.1.4-ee.tar.gz
+  < fe-ubuntu-<database-image-tag>.tar.gz
 ```
 
 Then set `imagePullPolicy: IfNotPresent` in the chart values so the kubelet uses the imported copy.
@@ -339,7 +341,7 @@ phoenixai:
     replicas: 3
     image:
       repository: <your-registry>/fe-ubuntu
-      tag: 4.1.4-ee
+      tag: <database-image-tag>
     config: |
       LOG_DIR = ${STARROCKS_HOME}/log
       JAVA_OPTS="-Dlog4j2.formatMsgNoLookups=true -Xmx1024m -XX:+UseG1GC"
@@ -370,7 +372,7 @@ phoenixai:
     replicas: 1
     image:
       repository: <your-registry>/cn-ubuntu
-      tag: 4.1.4-ee
+      tag: <database-image-tag>
     config: |
       sys_log_level = INFO
       thrift_port = 9060
@@ -578,7 +580,7 @@ spec:
     - name: phoenixai-registry
   image:
     repository: <your-registry>/cn-ubuntu
-    tag: 4.1.4-ee
+    tag: <database-image-tag>
   config: |
     sys_log_level = INFO
     thrift_port = 9060

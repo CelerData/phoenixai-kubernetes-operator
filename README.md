@@ -103,7 +103,7 @@ metadata:
   namespace: phoenixai
 spec:
   phoenixAIFeSpec:
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1-latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1.5-ee
     replicas: 3
     requests:
       cpu: 1
@@ -117,7 +117,7 @@ spec:
       configMapName: phoenixaicluster-sample-fe-cm   # the fe.conf with your shared-data settings
       resolveKey: fe.conf
   phoenixAICnSpec:
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1-latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1.5-ee
     replicas: 3
     requests:
       cpu: 1
@@ -195,8 +195,8 @@ mysql>
 To upgrade, just patch the PhoenixAI cluster. 
 
 ```console
-kubectl -n phoenixai patch phoenixaicluster phoenixaicluster-sample --type='merge' -p '{"spec":{"phoenixAIFeSpec":{"image":"us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1-latest"}}}'
-kubectl -n phoenixai patch phoenixaicluster phoenixaicluster-sample --type='merge' -p '{"spec":{"phoenixAICnSpec":{"image":"us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1-latest"}}}'
+kubectl -n phoenixai patch phoenixaicluster phoenixaicluster-sample --type='merge' -p '{"spec":{"phoenixAIFeSpec":{"image":"us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1.5-ee"}}}'
+kubectl -n phoenixai patch phoenixaicluster phoenixaicluster-sample --type='merge' -p '{"spec":{"phoenixAICnSpec":{"image":"us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1.5-ee"}}}'
 ```
 
 ### 6. Resize the PhoenixAI cluster

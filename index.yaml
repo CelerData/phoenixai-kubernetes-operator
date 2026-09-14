@@ -3,10 +3,10 @@ entries:
   anywhere:
   - apiVersion: v2
     appVersion: v2.0.0
-    created: "2026-09-09T16:47:36.550119+08:00"
+    created: "2026-09-14T13:34:52.942717+08:00"
     description: A Helm chart for PhoenixAI Anywhere — a read-only operations & usage
       console for PhoenixAI deployments on Kubernetes
-    digest: c02b8600d07fb0568915bff29f5ead67460b3e237d8b470f8676e9ab6b3f3be4
+    digest: 3048c94694fe42cd74bfeca0eb83bd7e5dc17615778a40f3fbc6ad9a6993ce5a
     home: https://github.com/CelerData/phoenixai-kubernetes-operator
     keywords:
     - anywhere
@@ -116,8 +116,8 @@ entries:
     version: 1.11.4
   kube-anywhere:
   - apiVersion: v2
-    appVersion: 4.1-latest
-    created: "2026-09-09T16:47:29.525795+08:00"
+    appVersion: 4.1.5-ee
+    created: "2026-09-14T13:34:46.155294+08:00"
     dependencies:
     - name: operator
       repository: file://charts/operator
@@ -130,7 +130,7 @@ entries:
       repository: file://charts/anywhere
       version: 2.0.0
     description: kube-anywhere includes three subcharts, operator, phoenixai and anywhere
-    digest: 7eae96a98efcc25b821602dc7313cd03f7a1abb9ff0eb5bf37464b3507a97404
+    digest: 8641129dfeeb7b045d523012bef2add55168fbe6e7bdc7c67fff82ff2a9d402c
     home: https://github.com/CelerData/phoenixai-kubernetes-operator
     keywords:
     - operator
@@ -270,9 +270,9 @@ entries:
   operator:
   - apiVersion: v2
     appVersion: 2.0.0
-    created: "2026-09-09T16:47:31.745053+08:00"
+    created: "2026-09-14T13:34:48.427689+08:00"
     description: A Helm chart for PhoenixAI operator
-    digest: d06066091b9fd671b8754af2ed52af5f59484b9e4274939da4e51c71d5cdaa5d
+    digest: ee1f26d2d8848f418591c3005cd3f2c0d932b294bc8e8ed3804238868a2525fc
     home: https://github.com/CelerData/phoenixai-kubernetes-operator
     keywords:
     - operator
@@ -380,10 +380,10 @@ entries:
     version: 1.11.4
   phoenixai:
   - apiVersion: v2
-    appVersion: 4.1-latest
-    created: "2026-09-09T16:47:34.087041+08:00"
+    appVersion: 4.1.5-ee
+    created: "2026-09-14T13:34:50.642688+08:00"
     description: A Helm chart for PhoenixAI cluster
-    digest: 29fa103794cc6f9c40c939a1a3aad0ec06868dcfddb03c288e1d1aad04059e24
+    digest: a1c38e14b6c69e950aea5bd6002ebf300f5b9e506ad5e744625a3d7b77db4036
     home: https://github.com/CelerData/phoenixai-kubernetes-operator
     keywords:
     - operator
@@ -403,10 +403,10 @@ entries:
     version: 2.0.0
   warehouse:
   - apiVersion: v2
-    appVersion: 4.1-latest
-    created: "2026-09-09T16:47:39.14801+08:00"
+    appVersion: 4.1.5-ee
+    created: "2026-09-14T13:34:55.580878+08:00"
     description: Warehouse is currently a feature of the PhoenixAI Enterprise Edition.
-    digest: cfd20f369415c700dccc6d1e87d23f609dec9cba92c736ecaa2d62fae8e239db
+    digest: bd181d3904d9dc2f972f623627d8c95d59d50e7b8ff110c9298e6c34c4a3bc55
     home: https://github.com/CelerData/phoenixai-kubernetes-operator
     keywords:
     - operator
@@ -517,4 +517,4 @@ entries:
     urls:
     - https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v1.11.4/warehouse-1.11.4.tgz
     version: 1.11.4
-generated: "2026-09-09T16:47:39.147347+08:00"
+generated: "2026-09-14T13:34:55.580308+08:00"

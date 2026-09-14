@@ -39,10 +39,10 @@ The kube-anywhere chart carries three subcharts:
       $ helm search repo phoenixai
       NAME                          CHART VERSION    APP VERSION  DESCRIPTION
       phoenixai/anywhere            2.0.0            v2.0.0       A Helm chart for PhoenixAI Anywhere — a read-only operations & usage console
-      phoenixai/kube-anywhere       2.0.0            4.1-latest   kube-anywhere includes three subcharts, operator, phoenixai and anywhere
+      phoenixai/kube-anywhere       2.0.0            4.1.5-ee     kube-anywhere includes three subcharts, operator, phoenixai and anywhere
       phoenixai/operator            2.0.0            2.0.0        A Helm chart for PhoenixAI operator
-      phoenixai/phoenixai           2.0.0            4.1-latest   A Helm chart for PhoenixAI cluster
-      phoenixai/warehouse           2.0.0            4.1-latest   Warehouse is a feature of the PhoenixAI Enterprise Edition
+      phoenixai/phoenixai           2.0.0            4.1.5-ee     A Helm chart for PhoenixAI cluster
+      phoenixai/warehouse           2.0.0            4.1.5-ee     Warehouse is a feature of the PhoenixAI Enterprise Edition
       ```
 
       `kube-anywhere` is the install path this guide follows: it carries the console as a

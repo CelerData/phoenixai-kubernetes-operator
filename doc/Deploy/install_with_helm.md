@@ -79,7 +79,7 @@ and moving the data across, so they are worth deciding now rather than meeting l
 
 | Decision | Written as | Why it is fixed |
 | --- | --- | --- |
-| **The database root password** | `initPassword` | The chart can set it on a first install only. A later `helm upgrade` cannot, so a cluster installed without one keeps an open `root` account until somebody changes it by hand. |
+| **The database root password** | `initPassword` | The chart can set it on a first install only, and the job that sets it belongs to that install — an upgrade started while it is still retrying removes it, leaving `root` open **and** compute nodes unable to register. Re-running the Step 4 command a minute after installing is enough to lose it, so let Step 4 finish before touching anything. |
 | **The bucket, its region and path** | `phoenixAIFeSpec.config` | `cloud_native_storage_type` and the `aws_s3_*` settings are immutable coordinator configuration. A different bucket is a different cluster. |
 | **The StorageClass for the node disks** | `storageSpec.storageClassName` | A StatefulSet's volume claims cannot be edited after it is created. Disk *sizes* can still be grown later — but only if the class you pick sets `allowVolumeExpansion: true`, so this choice decides whether growing is possible at all. |
 | **Whether names are case-sensitive** | `phoenixAIFeSpec.config` | `enable_table_name_case_insensitive` is, in the product's own words, *"Only configurable during cluster initialization, immutable once set."* Left alone, catalog, database and table names are case-**sensitive**. |
@@ -227,11 +227,11 @@ built from:
 
 ```text
 NAME                       CHART VERSION    APP VERSION  DESCRIPTION
-phoenixai/kube-anywhere    2.0.0            4.1-latest   kube-anywhere includes three subcharts, operato...
+phoenixai/kube-anywhere    2.0.0            4.1.5-ee     kube-anywhere includes three subcharts, operato...
 phoenixai/operator         2.0.0            2.0.0        A Helm chart for PhoenixAI operator
-phoenixai/phoenixai        2.0.0            4.1-latest   A Helm chart for PhoenixAI cluster
+phoenixai/phoenixai        2.0.0            4.1.5-ee     A Helm chart for PhoenixAI cluster
 phoenixai/anywhere         2.0.0            v2.0.0       A Helm chart for PhoenixAI Anywhere — a read-on...
-phoenixai/warehouse        2.0.0            4.1-latest   Warehouse is currently a feature of the Phoenix...
+phoenixai/warehouse        2.0.0            4.1.5-ee     Warehouse is currently a feature of the Phoenix...
 ```
 
 The versions above are only an example. Use whichever your own command prints, and name them
@@ -916,9 +916,14 @@ it before collecting a bundle for anything performance-related.
 
 ### You lost the console password
 
-It cannot be read back in plain text anywhere else, but it can be replaced: edit the
-`kube-anywhere-console-admin` Secret and set a new value for the `admin` key. The change applies
-within about a minute.
+It cannot be read back in plain text anywhere else, but it can be replaced — set
+`anywhere.admin.users` in `my-values.yaml` and re-run the Step 4 command, as
+[Step 6](#step-6--open-the-console) describes.
+
+Patching the `kube-anywhere-console-admin` Secret directly does apply within about a minute, which
+is worth doing if you need the console locked down immediately. It is not a fix on its own: the
+chart re-renders that Secret on every upgrade, so the next Step 4 run puts the old value back.
+Follow the patch with the values change.
 
 ## Uninstall and clean up
 

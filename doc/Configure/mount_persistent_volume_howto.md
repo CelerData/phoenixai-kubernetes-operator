@@ -28,7 +28,7 @@ metadata:
     cluster: kube-anywhere
 spec:
   phoenixAIFeSpec:
-    image: "us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1-latest"
+    image: "us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:<database-image-tag>"
     replicas: 1
     storageVolumes:
     - name: fe-meta
@@ -41,7 +41,7 @@ spec:
       storageSize: 5Gi
       mountPath: /opt/starrocks/fe/log
   phoenixAICnSpec:
-    image: "us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1-latest"
+    image: "us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:<database-image-tag>"
     replicas: 3
     storageVolumes:
     - name: cn-data
@@ -112,7 +112,7 @@ phoenixai:
    phoenixAIFeSpec:
       image:
          repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu
-         tag: 4.1-latest
+         tag: <database-image-tag>
       storageSpec:
          name: fe-data
          storageClassName: standard-rwo   # standard-rwo is the default storageClassName in GKE.
@@ -121,7 +121,7 @@ phoenixai:
    phoenixAICnSpec:
       image:
          repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu
-         tag: 4.1-latest
+         tag: <database-image-tag>
       replicas: 3
       storageSpec:
          name: cn-storage

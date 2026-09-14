@@ -8,7 +8,7 @@ spec:
   # the spec for phoenixai FE.
   phoenixAIFeSpec:
     # the image for phoenixai FE.
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1-latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1.5-ee
     # number of replicas for phoenixai FE.
     replicas: 3
     # define resources requests and limits for FE pods.
@@ -132,7 +132,7 @@ spec:
 
   # the spec for phoenixai CN.
   phoenixAICnSpec: # the image for phoenixai CN.
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1-latest
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1.5-ee
     # number of replicas to deploy for a CN statefulset.
     # comment out this line if autoScalingPolicy is enabled.
     # replicas: 1

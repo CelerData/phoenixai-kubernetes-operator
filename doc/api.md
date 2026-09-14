@@ -551,86 +551,6 @@ The possible value for cluster phase are: running, failed, pending, deleting.</p
 </td>
 </tr></tbody>
 </table>
-<h3 id="phoenixdata.ai/v1.PhoenixAIBeSpec">PhoenixAIBeSpec
-</h3>
-<p>
-(<em>Appears on:</em><a href="#phoenixdata.ai/v1.PhoenixAIClusterSpec">PhoenixAIClusterSpec</a>)
-</p>
-<div>
-<p>PhoenixAIBeSpec defines the desired state of be.</p>
-</div>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>PhoenixAIComponentSpec</code><br/>
-<em>
-<a href="#phoenixdata.ai/v1.PhoenixAIComponentSpec">
-PhoenixAIComponentSpec
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>PhoenixAIComponentSpec</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>beEnvVars</code><br/>
-<em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#envvar-v1-core">
-[]Kubernetes core/v1.EnvVar
-</a>
-</em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>beEnvVars is a slice of environment variables that are added to the pods, the default is empty.</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="phoenixdata.ai/v1.PhoenixAIBeStatus">PhoenixAIBeStatus
-</h3>
-<p>
-(<em>Appears on:</em><a href="#phoenixdata.ai/v1.PhoenixAIClusterStatus">PhoenixAIClusterStatus</a>)
-</p>
-<div>
-<p>PhoenixAIBeStatus represents the status of PhoenixAI be.</p>
-</div>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>PhoenixAIComponentStatus</code><br/>
-<em>
-<a href="#phoenixdata.ai/v1.PhoenixAIComponentStatus">
-PhoenixAIComponentStatus
-</a>
-</em>
-</td>
-<td>
-<p>
-(Members of <code>PhoenixAIComponentStatus</code> are embedded into this type.)
-</p>
-</td>
-</tr>
-</tbody>
-</table>
 <h3 id="phoenixdata.ai/v1.PhoenixAICluster">PhoenixAICluster
 </h3>
 <div>
@@ -696,19 +616,6 @@ PhoenixAIFeSpec
 </td>
 <td>
 <p>PhoenixAIFeSpec define fe configuration for start fe service.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>phoenixAIBeSpec</code><br/>
-<em>
-<a href="#phoenixdata.ai/v1.PhoenixAIBeSpec">
-PhoenixAIBeSpec
-</a>
-</em>
-</td>
-<td>
-<p>PhoenixAIBeSpec define be configuration for start be service.</p>
 </td>
 </tr>
 <tr>
@@ -830,19 +737,6 @@ PhoenixAIFeSpec
 </tr>
 <tr>
 <td>
-<code>phoenixAIBeSpec</code><br/>
-<em>
-<a href="#phoenixdata.ai/v1.PhoenixAIBeSpec">
-PhoenixAIBeSpec
-</a>
-</em>
-</td>
-<td>
-<p>PhoenixAIBeSpec define be configuration for start be service.</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>phoenixAICnSpec</code><br/>
 <em>
 <a href="#phoenixdata.ai/v1.PhoenixAICnSpec">
@@ -951,19 +845,6 @@ PhoenixAIFeStatus
 </td>
 <td>
 <p>Represents the status of fe. the status have running, failed and creating pods.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>phoenixAIBeStatus</code><br/>
-<em>
-<a href="#phoenixdata.ai/v1.PhoenixAIBeStatus">
-PhoenixAIBeStatus
-</a>
-</em>
-</td>
-<td>
-<p>Represents the status of be. the status have running, failed and creating pods.</p>
 </td>
 </tr>
 <tr>
@@ -1151,7 +1032,7 @@ string
 <h3 id="phoenixdata.ai/v1.PhoenixAIComponentSpec">PhoenixAIComponentSpec
 </h3>
 <p>
-(<em>Appears on:</em><a href="#phoenixdata.ai/v1.PhoenixAIBeSpec">PhoenixAIBeSpec</a>, <a href="#phoenixdata.ai/v1.PhoenixAICnSpec">PhoenixAICnSpec</a>, <a href="#phoenixdata.ai/v1.PhoenixAIFeSpec">PhoenixAIFeSpec</a>, <a href="#phoenixdata.ai/v1.WarehouseComponentSpec">WarehouseComponentSpec</a>)
+(<em>Appears on:</em><a href="#phoenixdata.ai/v1.PhoenixAICnSpec">PhoenixAICnSpec</a>, <a href="#phoenixdata.ai/v1.PhoenixAIFeSpec">PhoenixAIFeSpec</a>, <a href="#phoenixdata.ai/v1.WarehouseComponentSpec">WarehouseComponentSpec</a>)
 </p>
 <div>
 <p>PhoenixAIComponentSpec defines the shared specification for all PhoenixAI components except FE Proxy</p>
@@ -1436,7 +1317,7 @@ to use a different default value.</p>
 <h3 id="phoenixdata.ai/v1.PhoenixAIComponentStatus">PhoenixAIComponentStatus
 </h3>
 <p>
-(<em>Appears on:</em><a href="#phoenixdata.ai/v1.PhoenixAIBeStatus">PhoenixAIBeStatus</a>, <a href="#phoenixdata.ai/v1.PhoenixAICnStatus">PhoenixAICnStatus</a>, <a href="#phoenixdata.ai/v1.PhoenixAIFeProxyStatus">PhoenixAIFeProxyStatus</a>, <a href="#phoenixdata.ai/v1.PhoenixAIFeStatus">PhoenixAIFeStatus</a>)
+(<em>Appears on:</em><a href="#phoenixdata.ai/v1.PhoenixAICnStatus">PhoenixAICnStatus</a>, <a href="#phoenixdata.ai/v1.PhoenixAIFeProxyStatus">PhoenixAIFeProxyStatus</a>, <a href="#phoenixdata.ai/v1.PhoenixAIFeStatus">PhoenixAIFeStatus</a>)
 </p>
 <div>
 <p>PhoenixAIComponentStatus represents the status of a PhoenixAI component.</p>
@@ -2503,7 +2384,7 @@ Defaults to &ldquo;&rdquo; (volume&rsquo;s root).</p>
 <p>SpecInterface defines the common interface that must be implemented by all PhoenixAI component specs
 (FE, BE, CN, FE Proxy). It provides methods to configure pod and container settings like security context,
 lifecycle hooks, networking, and storage.
-All components including PhoenixAIFeSpec, PhoenixAIBeSpec, PhoenixAICnSpec, PhoenixAIFeProxySpec have implemented
+All components including PhoenixAIFeSpec, PhoenixAICnSpec, PhoenixAIFeProxySpec have implemented
 the SpecInterface. If a method has the same implementation, we will implement in PhoenixAILoadSpec which implements
 the loadInterface interface.</p>
 </div>
@@ -2701,5 +2582,5 @@ AutoScalingPolicy
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>bce98f78</code>.
+on git commit <code>394e6d15</code>.
 </em></p>

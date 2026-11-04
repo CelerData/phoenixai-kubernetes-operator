@@ -1,0 +1,59 @@
+{{- /*
+A NetworkPolicy that admits traffic to the operator pod from the sources it needs and nothing
+else: the kubelet's probes on the health port, and — when the gRPC query API is served — that
+API's port from the console's pods only. Opt-in (phoenixAIOperator.networkPolicy.enabled): a
+NetworkPolicy is enforced by the cluster's network plugin, and on one that does not enforce it
+the object is accepted and inert, which is why the chart cannot turn it on for everyone.
+Ingress only — the operator's own connections (the Kubernetes API, the FE's MySQL port, DNS)
+are never restricted here.
+*/}}
+{{- $np := .Values.phoenixAIOperator.networkPolicy | default dict }}
+{{- if and .Values.phoenixAIOperator.enabled $np.enabled }}
+{{- $clientLabels := $np.apiClientPodLabels | default (dict "app" "kube-anywhere-console") }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ template "operator.name" . }}-operator
+  namespace: {{ template "operator.namespace" . }}
+  labels:
+    app: {{ template "operator.name" . }}-operator
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ template "operator.name" . }}-operator
+  policyTypes:
+  - Ingress
+  ingress:
+  # The kubelet's liveness and readiness probes (deployment.yaml binds them to 8081). No `from`:
+  # the kubelet calls from the node's own address, which no pod or namespace selector can name,
+  # so the port is open to every source. Kept on purpose rather than relying on the node-to-pod
+  # exemption, which network plugins implement unevenly — a plugin that drops the probes would
+  # restart the operator in a loop — while the port serves only /healthz and /readyz.
+  - ports:
+    - port: 8081
+      protocol: TCP
+  {{- if .Values.phoenixAIOperator.enableApiServer }}
+  # The gRPC query API: the console's pods, in this namespace or in each namespace listed.
+  - ports:
+    - port: {{ .Values.phoenixAIOperator.apiServerPort }}
+      protocol: TCP
+    from:
+    {{- if $np.apiClientNamespaces }}
+    {{- range $ns := $np.apiClientNamespaces }}
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ $ns | quote }}
+      podSelector:
+        matchLabels:
+          {{- toYaml $clientLabels | nindent 10 }}
+    {{- end }}
+    {{- else }}
+    - podSelector:
+        matchLabels:
+          {{- toYaml $clientLabels | nindent 10 }}
+    {{- end }}
+  {{- end }}
+  {{- with $np.extraIngress }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+{{- end }}

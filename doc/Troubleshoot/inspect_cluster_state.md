@@ -15,7 +15,7 @@ default.
 
 A fixed catalogue of read-only statements ships with the product. Sixteen at present:
 
-**Nodes and sessions**
+### Nodes and sessions
 
 | Command | Answers |
 |---|---|
@@ -25,7 +25,7 @@ A fixed catalogue of read-only statements ships with the product. Sixteen at pre
 | `show-processlist` | Active client sessions |
 | `show-running-queries` | Queries running right now |
 
-**Jobs and profiles**
+### Jobs and profiles
 
 | Command | Answers |
 |---|---|
@@ -34,7 +34,7 @@ A fixed catalogue of read-only statements ships with the product. Sixteen at pre
 | `show-profilelist` | Recent query profiles |
 | `show-proc-statistic` | Per-database tablet and replica health |
 
-**Configuration and variables**
+### Configuration and variables
 
 | Command | Answers |
 |---|---|
@@ -44,7 +44,7 @@ A fixed catalogue of read-only statements ships with the product. Sixteen at pre
 | `show-time-zone` | The cluster's `time_zone` and `system_time_zone` |
 | `show-resource-groups` | Resource groups |
 
-**Catalogs**
+### Catalogs
 
 | Command | Answers |
 |---|---|

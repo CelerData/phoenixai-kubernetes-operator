@@ -9,7 +9,7 @@ environment. From this document, you will learn,
 ## 1. Prerequisites
 
 * Kubernetes: v1.23.0+
-* PhoenixAI operator and helm chart: v2.0.0 (the ServiceMonitor route below needs v1.8.4 or later)
+* PhoenixAI operator and helm chart: v2.1.0 (the ServiceMonitor route below needs v1.8.4 or later)
 * `kube-prometheus-stack`, installed **before** the cluster — see
   [deploy-prometheus-grafana.md](./deploy-prometheus-grafana.md)
 

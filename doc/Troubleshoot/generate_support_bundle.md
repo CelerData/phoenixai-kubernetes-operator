@@ -34,6 +34,31 @@ of each; start there rather than from this page.
 A scenario pre-selects a subset. It does not restrict what you can add, and everything it selects
 can be changed.
 
+## Reuse a selection with a bundle profile
+
+A bundle profile is a selection saved to a file: the artifacts, the pods, the time window and the
+search values. It carries no cluster name and no collection logic, so it is a way to hand someone
+an exact selection instead of describing one. The usual sender is support. Bundle profiles are
+available from v2.1.
+
+**Bundle profile** sits at the top right of the Create support bundle page.
+
+- **Save to file** writes the current selection, with an optional note shown to whoever opens it.
+  A half-finished selection will not save: a category ticked in one part and left empty in another
+  is named so you can finish or clear it, because collection would otherwise drop it without
+  saying so.
+- **Load from file** always opens a review step before anything changes. The review reports what
+  the file asks for that this cluster does not have — a pod that is gone, a value not offered here
+  — and names what needs a decision; a missing pod can be replaced with one of the same kind, or
+  ignored. Applying replaces the whole selection, and collection still waits for **Create bundle**.
+
+A profile holds a selection and nothing else, so loading one cannot collect anything the page could
+not already collect.
+
+A file is refused outright, before any review, when it is not a bundle profile at all or was saved
+by a console too different from yours to read it. The message says which it is; where the answer is
+the version, ask whoever sent it to save it again on yours.
+
 ## What gets collected
 
 A bundle can include, among other things:
@@ -72,7 +97,13 @@ Bundles are removed after 7 days.
 
 ## What is masked, and what is not
 
-Credentials in manifests and configuration files are masked irreversibly.
+Credential values in manifests, in configuration files and in the coordinator configuration
+listing (`commands/show-frontend-config.txt`) are masked irreversibly.
+
+Every other command output under `commands/` is collected exactly as the cluster printed it. What
+a statement prints is the cluster's decision: `DESC STORAGE VOLUME`, `SHOW CREATE CATALOG` and
+`SHOW ROUTINE LOAD` mask their own secrets, and a custom command you saved yourself is never
+rewritten.
 
 > **Audit logs contain user SQL verbatim and are deliberately not masked.** Review a bundle before
 > sending it outside your organisation.

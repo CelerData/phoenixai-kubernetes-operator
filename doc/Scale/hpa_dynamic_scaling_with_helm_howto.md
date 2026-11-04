@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # HPA Dynamic Scaling for CN Nodes with Helm Charts
 
 This document describes how to implement Horizontal Pod Autoscaler (HPA) based dynamic scaling for CN (Compute Node) nodes in PhoenixAI clusters using Helm Charts. This feature was introduced in v1.11.0 and addresses critical autoscaling issues including resource cleanup, version compatibility, and graceful scaling operations.
@@ -8,6 +12,21 @@ This document describes how to implement Horizontal Pod Autoscaler (HPA) based d
 - [Helm](https://helm.sh/) v3.0.0 or higher
 - [metrics-server](https://github.com/kubernetes-sigs/metrics-server) installed in your cluster
 
+The CPU and memory metrics that HPA reads come from metrics-server, which is not part of Kubernetes
+itself. Some platforms ship it (for example GKE and AKS); others, such as clusters built with
+kubeadm or kind, do not. Check that it is serving:
+
+```bash
+kubectl get apiservice v1beta1.metrics.k8s.io   # AVAILABLE should be True
+kubectl top pod -n <namespace>                  # should print CPU and memory per pod
+```
+
+Without metrics-server, the HPA shows `<unknown>` under `TARGETS`, `kubectl describe hpa` reports
+`FailedGetResourceMetric`, and the CN nodes are never scaled.
+
+To scale CN nodes on the query queue instead of CPU and memory, see
+[Queue-based autoscaling for CN nodes](./queue_based_autoscaling_howto.md).
+
 ## Overview
 
 The HPA feature enables automatic scaling of CN nodes based on resource metrics such as CPU and memory utilization. CN nodes are designed for elastic scaling as they handle query processing without affecting data distribution.
@@ -17,7 +36,7 @@ The HPA feature enables automatic scaling of CN nodes based on resource metrics 
 Since v1.11.0, the following critical issues have been resolved:
 
 - **Resource Cleanup**: Proper HPA resource management when autoscaling policies are removed
-- **Version Compatibility**: Support for multiple HPA API versions across different Kubernetes versions
+- **Version Compatibility**: The operator always uses the autoscaling/v2 HPA API, available on every supported Kubernetes version
 - **Graceful Scaling**: Coordinated scaling operations with proper node registration/deregistration
 - **Conflict Resolution**: Eliminated conflicts between operator and HPA replica management
 
@@ -97,7 +116,6 @@ phoenixai:
 
     # HPA Configuration
     autoScalingPolicy:
-      version: v2  # HPA API version (v2, v2beta2, v2beta1)
       minReplicas: 1    # Minimum number of CN pods
       maxReplicas: 2   # Maximum number of CN pods
       hpaPolicy:
@@ -131,8 +149,8 @@ phoenixai:
 operator:
   phoenixAIOperator:
     image:
-      repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/operator
-      tag: v1.11.0-rc5
+      repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-operator
+      tag: v2.1.0
     imagePullPolicy: IfNotPresent
 ```
 
@@ -221,8 +239,8 @@ phoenixai:
 operator:
   phoenixAIOperator:
     image:
-      repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/operator
-      tag: v1.11.0-rc5
+      repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-operator
+      tag: v2.1.0
     imagePullPolicy: IfNotPresent
 ```
 
@@ -277,7 +295,6 @@ spec:
 
   # HPA Autoscaling Policy
   autoScalingPolicy:
-    version: v2
     minReplicas: 1
     maxReplicas: 2
     hpaPolicy:

@@ -1,0 +1,32 @@
+{{- $root := . }}
+{{- $seen := dict }}
+{{- range $entry := .Values.cnGroups }}
+{{- $ctx := dict "root" $root "entry" $entry }}
+{{- include "phoenixaiwarehouse.cngroup.validate" $ctx }}
+{{- if hasKey $seen $entry.name }}
+{{- fail (printf "cnGroups: duplicate entry name %q" $entry.name) }}
+{{- end }}
+{{- $_ := set $seen $entry.name true }}
+{{- /* The CN spec helper reads .Values.spec.*, so hand it the chart values with spec replaced by this
+     entry. omit returns a new map and set swaps the key wholesale, so nothing of the warehouse's own
+     spec leaks into the group (merge would recurse into both maps and inherit it). */}}
+{{- $values := set (omit $root.Values "spec") "spec" $entry }}
+{{- /* The same test cnconfigmap.yaml renders the entry's ConfigMap on, so an empty or null config
+     falls back to the warehouse's ConfigMap here too. */}}
+{{- $ownConfig := not (empty (include "phoenixaiwarehouse.cngroup.hasOwnConfig" $entry)) }}
+---
+apiVersion: phoenixdata.ai/v1
+kind: PhoenixAICnGroup
+metadata:
+  name: {{ include "phoenixaiwarehouse.cngroup.name" $ctx }}
+  namespace: {{ template "phoenixaiwarehouse.namespace" $root }}
+  labels:
+    warehouse: {{ template "phoenixaiwarehouse.name" $root }}
+    cngroup: {{ $entry.name }}
+    {{- include "phoenixaiwarehouse.labels" $root | nindent 4 }}
+spec:
+  phoenixAICluster: {{ $root.Values.spec.phoenixAIClusterName }}
+  phoenixAIWarehouse: {{ template "phoenixaiwarehouse.name" $root }}
+  phoenixAICnSpec:
+{{- include "phoenixaiwarehouse.cnspec" (dict "Values" $values "cnspec" (dict "configMapName" (ternary (include "phoenixaiwarehouse.cngroup.configmap.name" $ctx) (include "phoenixaiwarehouse.configmap.name" $root) $ownConfig) "configHash" (include "phoenixaiwarehouse.cngroup.config.hash" $ctx) "envVarsKey" "cnEnvVars" "config" (default $root.Values.spec.config $entry.config))) }}
+{{- end }}

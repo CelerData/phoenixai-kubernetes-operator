@@ -40,8 +40,18 @@ with your release at the same time as the key file.
 ## Which image versions to use
 
 Examples in these pages write versions as `<operator-image-tag>`, `<database-image-tag>` and
-`<console-image-tag>`. Substitute the ones for your release. The three are not interchangeable, and
-there is no floating tag that always means "the current one".
+`<console-image-tag>`. Substitute the ones for your release.
+
+**The PhoenixAI Database images and the Anywhere Control Plane images are versioned separately, so
+expect two tags that do not look alike.** Images in the same row move together:
+
+| | Images | Tag |
+| --- | --- | --- |
+| **PhoenixAI Database** | `fe-ubuntu` (coordinators), `cn-ubuntu` (compute nodes), and their `-minimal` variants | ends in `-ee`, for example `4.1.6-ee` |
+| **Anywhere Control Plane** | `anywhere-console` (Anywhere Console), `anywhere-operator` (Anywhere Operator) | begins with `v`, for example `v2.1.0` |
+
+A database version used as the operator or console tag does not exist, and the reverse is also true.
+There is no floating tag that always means "the current one".
 
 **If you have an account team**, use the versions they named — those are the builds your release was
 qualified against.
@@ -54,7 +64,7 @@ gcloud artifacts docker tags list \
   us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu
 ```
 
-Repeat for `cn-ubuntu`, `operator` and `anywhere`. Authenticate first with the key file from
+Repeat for `cn-ubuntu`, `anywhere-operator` and `anywhere-console`. Authenticate first with the key file from
 [Step 1](./install_with_helm.md#step-1--get-the-images-and-teach-kubernetes-to-pull-them).
 
 <!-- WARNING: check before publish -- verify this command against the real Artifact Registry repo,

@@ -165,7 +165,7 @@ phoenixAICluster:
   #   2. The values in their own spec will replace all the values in this field, not merge.
   componentValues:
     image:
-      tag: "4.1.5-ee"
+      tag: "4.1.7-ee"
     # hostAliases allows adding entries to /etc/hosts inside the containers.
     hostAliases: []
       # - ip: "127.0.0.1"
@@ -507,6 +507,15 @@ phoenixAIFeSpec:
     # transition to Node Not Ready state. Since the default value of min_graceful_exit_time_second is 15, we change it to a larger value.
     # Note: PhoenixAI version must be greater than or equal to 3.4.2 to support this configuration, otherwise it will not take effect.
     min_graceful_exit_time_second = 25
+    # This chart deploys shared-data (elastic) clusters only, and the operator refuses a cluster whose fe.conf
+    # does not say so. These lines let the FE start in shared-data mode before any object storage is
+    # configured: create a storage volume with SQL afterwards, or replace this block with one that names
+    # the bucket (aws_s3_* settings, enable_load_volume_from_conf = true) as the install guide does.
+    # The mode is fixed when the FE first starts and cannot be changed on an existing cluster.
+    run_mode = shared_data
+    cloud_native_storage_type = S3
+    cloud_native_meta_port = 6090
+    enable_load_volume_from_conf = false
   # A map object for setting the FE config. When configyaml is set to non-empty, the configs in configyaml will take
   # precedence and values in the config field will be discarded.
   # Note: When using configyaml, the number needs to be quoted to avoid being converted to scientific notation.
@@ -784,11 +793,8 @@ phoenixAICnSpec:
     #     matchLabels:
     #       app.kubernetes.io/component: cn
   autoScalingPolicy: {}
-    # If version is not set, the operator picks the HPA (Horizontal Pod Autoscaler) version
-    # automatically based on your Kubernetes version: autoscaling/v2 on Kubernetes >= 1.26,
-    # autoscaling/v2beta2 on older clusters. Only set it (v1, v2beta2, v2) to override that
-    # choice — note that the v2beta2 API was removed in Kubernetes 1.26.
-    # version: v2
+    # The operator creates an autoscaling/v2 HorizontalPodAutoscaler. The version field is
+    # accepted for compatibility and ignored.
     # maxReplicas: 10
     # minReplicas: 1
     # hpaPolicy:
@@ -1165,3 +1171,41 @@ phoenixAIFeProxySpec:
       #   mountPath: /tmp
   # the pod labels for user select or classify pods.
   podLabels: {}
+
+# phoenixAICnGroups declares extra CN Groups inside this cluster's default_warehouse. One entry
+# becomes one PhoenixAICnGroup custom resource, which the operator turns into one CN Group in the FE
+# plus its own StatefulSet, services and optional HPA. A query runs entirely inside one group, so
+# the usual reason to add groups is to keep each one inside a single availability zone.
+#
+# Requirements:
+#   * the CN image must be >= 4.1.6-ee (or >= 26.2.1); older images ignore the group and register
+#     into the builtin group instead
+#   * an entry is self-contained: nothing is inherited from phoenixAICnSpec above, and entries do
+#     not take part in phoenixAICluster.componentValues. Use a YAML anchor to share common fields.
+#   * an entry without its own `config` (missing or empty) points at the cluster's CN ConfigMap, so
+#     in that case the cluster must render one (phoenixAICluster.enabledCn with
+#     phoenixAICnSpec.config).
+#   * `replicas` is optional. Without it the group starts at one replica (the CRD default) and is
+#     then left to whoever scales it; a value written here is re-applied by helm upgrade (every
+#     upgrade with Helm 4, any upgrade that changes it with Helm 3), which resets whatever an HPA
+#     (autoScalingPolicy) or kubectl scale set in between, and removing a value that an earlier
+#     release carried resets the group to one replica on Helm 3. 0 parks the group.
+#
+# Adding or removing a group restarts none of the cluster's own CN pods. Once a group exists they
+# have to name the builtin CN group explicitly, and the operator adds that to their pod template the
+# next time it writes their StatefulSet anyway (a spec change, a new image, a replica change); it
+# never removes it again, not even after the last group is gone.
+#
+# The entry schema is the warehouse chart's `spec` block, not the larger phoenixAICnSpec above:
+# name, image (both required), then replicas, serviceAccount, annotations, runAsNonRoot, podLabels,
+# hostAliases, schedulerName, nodeSelector, affinity, tolerations, topologySpreadConstraints,
+# envVars, minReadySeconds, autoScalingPolicy, resources, service, imagePullSecrets, secrets,
+# configMaps, storageSpec, persistentVolumeClaimRetentionPolicy, config.
+phoenixAICnGroups: []
+  # - name: az-a
+  #   image:
+  #     repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu
+  #     tag: "4.1.6-ee"
+  #   replicas: 3
+  #   nodeSelector:
+  #     topology.kubernetes.io/zone: us-east-1a

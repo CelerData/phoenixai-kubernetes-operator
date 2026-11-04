@@ -1,3 +1,7 @@
+---
+sidebar_position: 9
+---
+
 # Use MinIO For Shared-Data Storage
 
 A shared-data PhoenixAI cluster keeps its data in object storage rather than on the compute nodes.
@@ -22,24 +26,43 @@ You need:
 - a MySQL client, to configure storage and to check the result.
 
 For an air-gapped installation, stage these images in your internal registry before you begin —
-MinIO adds two to the list:
+MinIO adds two to the list — and request the MinIO license file while you are still online
+([step 1](#1-deploy-minio) says where it comes from). Change the two `image:` lines in the MinIO
+manifests to your copies.
 
 | Image | Why |
 | --- | --- |
-| `minio/minio` | the object store |
-| `minio/mc` | creates the bucket |
+| `quay.io/minio/aistor/minio` | the object store |
+| `quay.io/minio/aistor/mc` | creates the bucket |
 | PhoenixAI FE / CN (`-ee`) | the cluster |
 | PhoenixAI operator | reconciles the cluster |
 | PhoenixAI Anywhere | the console |
 
 ## 1. Deploy MinIO
 
+:::caution AIStor serves no S3 requests until a license is installed
+MinIO's community edition was retired, so this page deploys **MinIO AIStor**, a commercial product.
+Without a license the server starts in *offline mode*: its readiness check fails, so the
+Deployment never becomes Ready, and every S3 request — including the bucket Job below — is
+denied with `No license is installed`.
+
+Get a license before you apply the manifest. The **Free** tier is enough for this page: it costs
+nothing and is limited to a single node, which is all this manifest runs. Request it from
+[min.io/pricing](https://www.min.io/pricing) (**Get Started** under *Free*); it comes from MinIO
+SUBNET as a `minio.license` file holding one long token. The manifest below keeps that token in a
+Secret, mounts it into the container and passes it to the server with `--license`. The license
+has to be there at start-up: a pod that is not Ready has no Service endpoint, so installing it
+afterwards with `mc license update` does not fit this manifest. MinIO's
+[license documentation](https://docs.min.io/aistor/operations/licenses/) covers the details.
+:::
+
 This manifest is deliberately minimal: one replica, one volume, root credentials in a Secret. It is
 enough for a demo or an evaluation, and is **not** a production MinIO topology — for that, see
 MinIO's own documentation on distributed deployments.
 
-Change the credentials before applying it, and set `storageClassName` to a class your cluster
-provides (`kubectl get storageclass`).
+Paste the contents of your `minio.license` file into the `minio-license` Secret, change the
+credentials, and set `storageClassName` to a class your cluster provides
+(`kubectl get storageclass`).
 
 ```yaml
 apiVersion: v1
@@ -55,6 +78,14 @@ metadata:
 stringData:
   MINIO_ROOT_USER: phoenixai
   MINIO_ROOT_PASSWORD: change-me-before-applying
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-license
+  namespace: minio
+stringData:
+  minio.license: paste-the-contents-of-your-minio.license-file-here
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -83,8 +114,9 @@ spec:
     spec:
       containers:
         - name: minio
-          image: minio/minio:RELEASE.2025-09-07T16-13-09Z
-          args: ["server", "/data", "--console-address", ":9001"]
+          image: quay.io/minio/aistor/minio:RELEASE.2026-09-19T17-05-25Z
+          args: ["server", "/data", "--console-address", ":9001",
+                 "--license", "/license/minio.license"]
           envFrom:
             - secretRef: { name: minio-root }
           ports:
@@ -92,6 +124,7 @@ spec:
             - { containerPort: 9001, name: console }
           volumeMounts:
             - { name: data, mountPath: /data }
+            - { name: license, mountPath: /license, readOnly: true }
           readinessProbe:
             httpGet: { path: /minio/health/ready, port: 9000 }
             initialDelaySeconds: 5
@@ -101,6 +134,8 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim: { claimName: minio-data }
+        - name: license
+          secret: { secretName: minio-license }
 ---
 apiVersion: v1
 kind: Service
@@ -142,7 +177,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: mc
-          image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+          image: quay.io/minio/aistor/mc:RELEASE.2026-02-03T00-12-26Z
           envFrom:
             - secretRef: { name: minio-root }
           command: ["/bin/sh", "-c"]

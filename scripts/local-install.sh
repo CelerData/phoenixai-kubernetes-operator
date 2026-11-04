@@ -15,7 +15,7 @@ K8S_VERSION="v1.23.4"
 HELM_URL="https://get.helm.sh"
 KIND_URL="https://kind.sigs.k8s.io/dl/v0.20.0"
 KUBECTL_URL="https://dl.k8s.io/release/v1.28.3/bin"
-HELM_CHART_URL="https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v2.0.0/kube-anywhere-2.0.0.tgz"
+HELM_CHART_URL="https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v2.1.0/kube-anywhere-2.1.0.tgz"
 # NOTE:
 # If your network cannot reach these official download sites, point each one at a
 # mirror of your own with --helm-url, --kind-url, --kubectl-url and

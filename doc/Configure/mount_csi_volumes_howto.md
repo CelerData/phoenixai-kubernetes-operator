@@ -1,3 +1,7 @@
+---
+sidebar_position: 5
+---
+
 # Mount CSI Ephemeral Volumes
 
 Some Kubernetes drivers publish a resource to a pod through a **CSI ephemeral inline volume**

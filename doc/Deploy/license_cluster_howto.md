@@ -1,6 +1,6 @@
 ---
 sidebar_label: License a cluster
-sidebar_position: 9
+sidebar_position: 11
 ---
 
 # License Your PhoenixAI Cluster

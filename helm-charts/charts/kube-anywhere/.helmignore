@@ -22,4 +22,4 @@
 *.tmproj
 .vscode/
 # Build metadata, not part of the chart
-charts/anywhere/.vendored-from
+charts/anywhere-console/.vendored-from

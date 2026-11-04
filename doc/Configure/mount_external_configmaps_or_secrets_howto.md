@@ -1,3 +1,7 @@
+---
+sidebar_position: 6
+---
+
 # Mount external configMaps or secrets
 
 PhoenixAI Kubernetes Operator supports mounting multiple external configmaps or secrets into PhoenixAI. This document

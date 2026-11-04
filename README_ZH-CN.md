@@ -88,7 +88,7 @@ kubectl apply -f deploy_a_phoenixai_cluster_running_in_shared_data_mode.yaml
 
 请参阅 [kube-anywhere](./helm-charts/charts/kube-anywhere/README.md) 了解如何通过 Helm Chart 安装 operator 和
 PhoenixAI 集群（还可以通过 `anywhere.enabled=true` 选装 PhoenixAI Anywhere 控制台）。 如果您希望在管理 PhoenixAI
-集群时有更多的灵活性，您可以使用 [operator](./helm-charts/charts/kube-anywhere/charts/operator) Helm Chart 部署
+集群时有更多的灵活性，您可以使用 [anywhere-operator](./helm-charts/charts/kube-anywhere/charts/anywhere-operator) Helm Chart 部署
 Operator，使用  [phoenixai](./helm-charts/charts/kube-anywhere/charts/phoenixai) Helm Chart 部署 PhoenixAI。
 
 ## 其它文档

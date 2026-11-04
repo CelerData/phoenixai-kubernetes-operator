@@ -46,17 +46,18 @@ It includes the following main steps:
 
 ### 1.1. Apply the PhoenixAI CRDs
 
-PhoenixAICluster and PhoenixAIWarehouse are the custom resource definitions (CRDs) that define a PhoenixAI cluster and
-an additional compute warehouse. They are used to create and manage those objects by using the PhoenixAI Operator.
+PhoenixAICluster, PhoenixAIWarehouse and PhoenixAICnGroup are the custom resource definitions (CRDs) that define a
+PhoenixAI cluster, an additional compute warehouse and a CN group. They are used to create and manage those objects by using the PhoenixAI Operator.
 Please refer to [api.md](../api.md) for their detailed description.
 
-Apply **both** CRDs before you deploy the operator. The operator decides whether to run the warehouse controller once,
-at startup, so a warehouse CRD applied later is ignored until the operator is restarted — applying both now avoids
-that. Installing the warehouse CRD costs nothing if you never create a warehouse.
+Apply **all three** CRDs before you deploy the operator. The operator decides whether to run the warehouse and CN group
+controllers once, at startup, so a CRD applied later is ignored until the operator is restarted — applying all three
+now avoids that. Installing a CRD costs nothing if you never create that kind of object.
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/celerdata/phoenixai-kubernetes-operator/main/deploy/phoenixdata.ai_phoenixaiclusters.yaml
 kubectl apply -f https://raw.githubusercontent.com/celerdata/phoenixai-kubernetes-operator/main/deploy/phoenixdata.ai_phoenixaiwarehouses.yaml
+kubectl apply -f https://raw.githubusercontent.com/celerdata/phoenixai-kubernetes-operator/main/deploy/phoenixdata.ai_phoenixaicngroups.yaml
 ```
 
 ### 1.2. Deploy PhoenixAI Operator
@@ -152,12 +153,12 @@ the `Running` state and all containers inside the pods are `READY`, the PhoenixA
 
 ```bash
 $ kubectl -n phoenixai get pods
-NAME                                  READY   STATUS    RESTARTS   AGE
-phoenixai-controller-65bb8679-jkbtg   1/1     Running   0          22h
-phoenixaicluster-sample-cn-0          1/1     Running   0          23h
-phoenixaicluster-sample-fe-0          1/1     Running   0          21h
-phoenixaicluster-sample-fe-1          1/1     Running   0          21h
-phoenixaicluster-sample-fe-2          1/1     Running   0          22h
+NAME                                    READY   STATUS    RESTARTS   AGE
+kube-anywhere-operator-65bb8679-jkbtg   1/1     Running   0          22h
+phoenixaicluster-sample-cn-0            1/1     Running   0          23h
+phoenixaicluster-sample-fe-0            1/1     Running   0          21h
+phoenixaicluster-sample-fe-1            1/1     Running   0          21h
+phoenixaicluster-sample-fe-2            1/1     Running   0          22h
 ```
 
 > **Note**
@@ -349,13 +350,13 @@ the chart from your values.
 The console runs independently of how the operator was installed, so an operator and cluster
 deployed from the manifests above can still get the console. Two ways to add it:
 
-1. **Install the standalone `anywhere` chart with Helm (recommended).** The standalone chart
+1. **Install the standalone `anywhere-console` chart with Helm (recommended).** The standalone chart
    exists exactly for installing the console next to an operator that is managed separately:
 
    ```bash
    helm repo add phoenixai https://celerdata.github.io/phoenixai-kubernetes-operator
    helm repo update phoenixai
-   helm install anywhere phoenixai/anywhere --namespace phoenixai -f console-values.yaml
+   helm install anywhere phoenixai/anywhere-console --namespace phoenixai -f console-values.yaml
    ```
 
    The settings to put in `console-values.yaml` are the `anywhere.*` values from
@@ -407,7 +408,7 @@ deployed from the manifests above can still get the console. Two ways to add it:
    cluster is needed:
 
    ```bash
-   helm template anywhere phoenixai/anywhere --namespace phoenixai -f console-values.yaml > console.yaml
+   helm template anywhere phoenixai/anywhere-console --namespace phoenixai -f console-values.yaml > console.yaml
    kubectl apply -n phoenixai -f console.yaml
    ```
 

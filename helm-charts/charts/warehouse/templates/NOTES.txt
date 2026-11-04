@@ -1,1 +1,13 @@
 Thank you for installing {{ .Chart.Name }}-{{ .Chart.Version }} warehouse chart. Please wait for a few minutes for the warehouse to be ready.
+{{- if .Values.cnGroups }}
+
+This release also declares {{ len .Values.cnGroups }} CN group(s):
+{{- $root := . }}
+{{- range $entry := .Values.cnGroups }}
+  - {{ include "phoenixaiwarehouse.cngroup.name" (dict "root" $root "entry" $entry) }}, {{ if kindIs "invalid" $entry.replicas }}replicas not pinned (starts at 1, then owned by whoever scales it){{ else }}{{ $entry.replicas }} replica(s){{ end }}
+{{- end }}
+
+Adding a group restarts none of the warehouse's own CN pods: once a group exists they have to name
+the builtin CN group explicitly, and the operator adds that the next time it writes their
+StatefulSet anyway. The CN image must be >= 4.1.6-ee.
+{{- end }}

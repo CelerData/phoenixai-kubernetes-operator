@@ -12,7 +12,7 @@ assumes you have **never used Helm** and know only that Kubernetes is "the thing
 on". Every command can be copied as-is once you have filled in the values file in
 [Step 3](#step-3--set-the-root-password-and-write-your-values-file).
 
-**What you have at the end**
+At the end, you have:
 
 - a PhoenixAI cluster in elastic (shared-data) mode — 3 coordinators and 1 compute node — storing
   its data in your object-storage bucket;
@@ -50,10 +50,10 @@ because these names show up in every later step.
 | **Warehouse** *(optional, later)* | An extra, separately scalable group of compute nodes. Not part of this page — see [Deploy a Warehouse](./deploy_warehouse_howto.md). |
 
 **How those map to charts.** `kube-anywhere` is a single chart wrapping three subcharts —
-`operator`, `phoenixai`, and `anywhere`, the console, which is included when you set
+`anywhere-operator`, `phoenixai`, and `anywhere-console`, the console, which is included when you set
 `anywhere.enabled=true`. Installing `kube-anywhere` installs all of them, and uninstalling it
 removes what it installed. If you would rather manage the operator and the cluster on their own
-schedules, `operator` and `phoenixai` can be installed separately instead. Warehouses come from a
+schedules, `anywhere-operator` and `phoenixai` can be installed separately instead. Warehouses come from a
 chart of their own, `phoenixai/warehouse`. The chart has been split this way since v1.8.0.
 
 And the four words from Helm and Kubernetes that this page uses:
@@ -226,12 +226,12 @@ A repository that carries your release prints five charts — `kube-anywhere` an
 built from:
 
 ```text
-NAME                       CHART VERSION    APP VERSION  DESCRIPTION
-phoenixai/kube-anywhere    2.0.0            4.1.5-ee     kube-anywhere includes three subcharts, operato...
-phoenixai/operator         2.0.0            2.0.0        A Helm chart for PhoenixAI operator
-phoenixai/phoenixai        2.0.0            4.1.5-ee     A Helm chart for PhoenixAI cluster
-phoenixai/anywhere         2.0.0            v2.0.0       A Helm chart for PhoenixAI Anywhere — a read-on...
-phoenixai/warehouse        2.0.0            4.1.5-ee     Warehouse is currently a feature of the Phoenix...
+NAME                        CHART VERSION    APP VERSION  DESCRIPTION
+phoenixai/kube-anywhere     2.1.0            4.1.7-ee     kube-anywhere includes three subcharts, anywher...
+phoenixai/anywhere-operator 2.1.0            2.1.0        A Helm chart for PhoenixAI operator
+phoenixai/phoenixai         2.1.0            4.1.7-ee     A Helm chart for PhoenixAI cluster
+phoenixai/anywhere-console  2.1.0            v2.1.0       A Helm chart for PhoenixAI Anywhere — an operat...
+phoenixai/warehouse         2.1.0            4.1.7-ee     Warehouse is currently a feature of the Phoenix...
 ```
 
 The versions above are only an example. Use whichever your own command prints, and name them
@@ -249,9 +249,9 @@ What each of those five is:
 | Chart | Installs |
 | --- | --- |
 | `phoenixai/kube-anywhere` | The operator and a cluster, plus the console when `anywhere.enabled=true`. What this page uses |
-| `phoenixai/operator` | The operator on its own |
+| `phoenixai/anywhere-operator` | The operator on its own |
 | `phoenixai/phoenixai` | A cluster on its own |
-| `phoenixai/anywhere` | The console on its own, alongside an operator you install and manage separately. It is the same chart `kube-anywhere` pulls in, so through `kube-anywhere` its values carry the `anywhere.` prefix and here they do not |
+| `phoenixai/anywhere-console` | The console on its own, alongside an operator you install and manage separately. It is the same chart `kube-anywhere` pulls in, so through `kube-anywhere` its values carry the `anywhere.` prefix and here they do not |
 | `phoenixai/warehouse` | A warehouse for an existing cluster |
 
 Every value each of them accepts is documented in a `README.md` that travels inside the chart, so
@@ -259,12 +259,7 @@ you can read it without leaving the terminal: `helm show readme phoenixai/kube-a
 and `helm show values phoenixai/kube-anywhere` prints the annotated defaults. Both work for any of
 the five names above.
 
-:::caution Do not substitute a chart that merely looks similar
-The repository also carries older charts from the previous product generation, with names like
-`celerdata` and `kube-celerdata`. They are a different, earlier product — not this one under another
-name, and not a fallback. If `kube-anywhere` is absent, ask your account team for the package file;
-do not install `kube-celerdata` instead.
-:::
+If `kube-anywhere` is absent, ask your account team for the package file.
 
 ## Step 3 — Set the root password, and write your values file
 
@@ -631,11 +626,11 @@ show `kube-anywhere` in the `phoenixai` namespace, reported as elastic. If the l
 [the console shows no clusters](#the-console-shows-no-clusters).
 
 :::caution Change this password before anyone else can reach the console
-If the command above printed a long random string, that password was generated for your
-installation alone and is already private to it.
-
-If it printed something short and guessable — `admin`, for instance — your chart version installed a
-**well-known default**, and anyone who can reach the console can sign in as an administrator.
+The chart ships a **well-known default** account, `admin` with the password `admin`, so the command
+above prints `admin` unless you set `anywhere.admin.users` or `anywhere.admin.existingSecret`. Until
+you change it, anyone who can reach the console can sign in as an administrator. (The chart
+generates a random password only if you clear `anywhere.admin.users` to `{}` and leave
+`existingSecret` empty.)
 Replace it now, before you put an Ingress or a load balancer in front of the console. An
 administrator session is what gates the console's most sensitive actions, so treat this as the last
 required step of the install rather than as hardening you will get to later.
@@ -662,6 +657,7 @@ the well-known default:
 kubectl -n phoenixai patch secret kube-anywhere-console-admin \
   --type merge -p "{\"stringData\":{\"admin\":\"$(openssl rand -base64 24)\"}}"
 ```
+
 :::
 
 Accounts live in that one Secret — one entry per user name. Add, remove or rotate them by editing
@@ -825,9 +821,55 @@ kubectl -n phoenixai exec -it kube-anywhere-fe-0 -- \
 
 If that is not `shared_data`, the `run_mode` block in `phoenixAIFeSpec.config` was missing or edited
 away when the cluster was **first created**. The mode cannot be changed on an existing cluster: fix
-the values file, then uninstall and reinstall. Note that the coordinators' disks are deliberately
+the values file, then uninstall and reinstall.
+
+The operator refuses to build such a cluster in the first place, so you will usually meet this
+before the console does: `kubectl -n phoenixai get pac` shows the cluster as `failed`, and its
+`status.reason` says that `fe.conf` does not set `run_mode = shared_data`. No coordinator or
+compute-node pod is created until the FE config is fixed. Note that the coordinators' disks are deliberately
 kept on uninstall, so delete those claims too before reinstalling — see
 [Uninstall and clean up](#uninstall-and-clean-up).
+
+### `CREATE DATABASE` fails with "The default storage volume does not exist"
+
+```
+ERROR 5506 (55000): The default storage volume does not exist. A default storage volume can be
+created by following these steps: 1. Create a storage volume. 2. Set the storage volume as default
+```
+
+The cluster is elastic but has no object storage yet. This is what the chart's **default** values
+produce: the coordinator starts in shared-data mode without a bucket (`enable_load_volume_from_conf
+= false`), so the cluster comes up `running` and the console lists it, but the first `CREATE
+DATABASE` or `CREATE TABLE` is refused. The install notes printed by `helm install` warn about it.
+Add storage in one of two ways:
+
+- **Create the volume with SQL**, on the running cluster. Connect as `root` (Step 5) and run, with
+  your bucket, region, endpoint and credentials:
+
+  ```sql
+  CREATE STORAGE VOLUME s3_volume
+  TYPE = S3
+  LOCATIONS = ("s3://<bucket>/data")
+  PROPERTIES (
+      "aws.s3.region" = "<region>",
+      "aws.s3.endpoint" = "s3.<region>.amazonaws.com",
+      "aws.s3.access_key" = "<access-key>",
+      "aws.s3.secret_key" = "<secret-key>",
+      "aws.s3.use_aws_sdk_default_behavior" = "false",
+      "aws.s3.use_instance_profile" = "false"
+  );
+  SET s3_volume AS DEFAULT STORAGE VOLUME;
+  ```
+
+  `SHOW STORAGE VOLUMES` then lists it and `CREATE DATABASE` works. An endpoint that needs
+  path-style access (MinIO, AIStor) takes one more property; see
+  [Use MinIO for Shared Data](../Configure/use_minio_for_shared_data_howto.md).
+
+- **Put the bucket in the values file**, as [Step 3](#step-3--set-the-root-password-and-write-your-values-file)
+  shows (`aws_s3_*` under `run_mode = shared_data`, with `enable_load_volume_from_conf = true`), so
+  the coordinator creates `builtin_storage_volume` itself when it first starts. For a cluster that
+  holds no data yet, the simplest is to fix the file, uninstall and reinstall; remember the
+  coordinators' disks are kept on uninstall (see [Uninstall and clean up](#uninstall-and-clean-up)).
 
 ### `CREATE TABLE` fails with "no valid cache space"
 
@@ -949,7 +991,7 @@ are finished with the installation for good.
 
 - `helm show readme phoenixai/kube-anywhere` and `helm show values phoenixai/kube-anywhere` — every
   value the chart accepts, printed from the chart itself.
-- [Console tour](../GetStarted/anywhere_console_ui_guide.md) — what each console page is for.
+- [Console tour](../Console/overview.md) — what each console page is for.
 - [Deploy Multiple Clusters](./deploy_multiple_clusters_howto.md) — more than one cluster in one
   Kubernetes cluster.
 - [Expand Persistent Volume](../Operate/expand_persistent_volume_howto.md) — growing disks after the

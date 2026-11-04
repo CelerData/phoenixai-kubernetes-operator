@@ -11,3 +11,22 @@ data:
   {{- include "phoenixaicluster.cn.config" . | nindent 2 }}
 
 {{- end }}
+
+{{- $root := . }}
+{{- range $entry := .Values.phoenixAICnGroups }}
+{{- if include "phoenixaicluster.cngroup.hasOwnConfig" $entry }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "phoenixaicluster.cngroup.configmap.name" (dict "root" $root "entry" $entry) }}
+  namespace: {{ template "phoenixaicluster.namespace" $root }}
+  labels:
+    cluster: {{ template "phoenixaicluster.name" $root }}
+    cngroup: {{ $entry.name }}
+    app: "cn"
+data:
+  cn.conf: |
+{{ $entry.config | indent 4 }}
+{{- end }}
+{{- end }}

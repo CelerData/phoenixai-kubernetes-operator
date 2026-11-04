@@ -12,16 +12,17 @@ nothing.
 
 ## Configure the dependency
 
-In the `kube-anywhere` chart's values:
+In the `kube-anywhere` chart's values, under the `anywhere` key (the console subchart):
 
 ```yaml
-dependencies:
-  prometheus:
-    enabled: true
-    # Full base URL. The scheme is required, and a path prefix is kept, so this
-    # also works behind a reverse proxy or against a Prometheus-compatible
-    # backend such as Mimir or Thanos.
-    endpoint: http://prometheus-kube-prometheus-prometheus.monitoring:9090
+anywhere:
+  dependencies:
+    prometheus:
+      enabled: true
+      # Full base URL. The scheme is required, and a path prefix is kept, so this
+      # also works behind a reverse proxy or against a Prometheus-compatible
+      # backend such as Mimir or Thanos.
+      endpoint: http://prometheus-kube-prometheus-prometheus.monitoring:9090
 ```
 
 That is the whole of the required configuration. The optional settings are worth knowing about
@@ -47,7 +48,7 @@ fastest way to find out which piece is wrong, and much more useful than an empty
 It needs an admin session, so sign in first and keep the cookie:
 
 ```bash
-kubectl -n phoenixai port-forward svc/kube-anywhere 8090:8090
+kubectl -n phoenixai port-forward svc/kube-anywhere-console 8090:8090
 
 curl -s -c cookies.txt -X POST localhost:8090/api/v1/auth/admin/login \
   -H 'Content-Type: application/json' \

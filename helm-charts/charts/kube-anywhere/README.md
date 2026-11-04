@@ -6,12 +6,14 @@
 
 The kube-anywhere chart carries three subcharts:
 
-- **operator** — the PhoenixAI operator;
+- **anywhere-operator** — the PhoenixAI operator;
 - **phoenixai** — a PhoenixAI cluster (the PhoenixAICluster custom resource);
-- **anywhere** — the PhoenixAI Anywhere console, an operations & usage console for the deployed
-  clusters. It is **opt-in** (`anywhere.enabled=true`) because it requires S3-compatible object
-  storage (`anywhere.dependencies.s3`); see its own
-  [README](./charts/anywhere/README.md) for the values.
+- **anywhere-console** — the PhoenixAI Anywhere console, an operations & usage console for the deployed
+  clusters. It is **opt-in** (`anywhere.enabled=true`) because it requires object storage with no
+  usable default: exactly one of `anywhere.dependencies.s3` (S3-compatible),
+  `anywhere.dependencies.azblob` (Azure Blob Storage), `anywhere.dependencies.adls2` (Azure Data
+  Lake Storage Gen2) or `anywhere.dependencies.gs` (Google Cloud Storage); see its own
+  [README](./charts/anywhere-console/README.md) for the values.
 
 ## Before you begin
 
@@ -38,16 +40,16 @@ The kube-anywhere chart carries three subcharts:
       ```Bash
       $ helm search repo phoenixai
       NAME                          CHART VERSION    APP VERSION  DESCRIPTION
-      phoenixai/anywhere            2.0.0            v2.0.0       A Helm chart for PhoenixAI Anywhere — a read-only operations & usage console
-      phoenixai/kube-anywhere       2.0.0            4.1.5-ee     kube-anywhere includes three subcharts, operator, phoenixai and anywhere
-      phoenixai/operator            2.0.0            2.0.0        A Helm chart for PhoenixAI operator
-      phoenixai/phoenixai           2.0.0            4.1.5-ee     A Helm chart for PhoenixAI cluster
-      phoenixai/warehouse           2.0.0            4.1.5-ee     Warehouse is a feature of the PhoenixAI Enterprise Edition
+      phoenixai/anywhere-console    2.1.0            v2.1.0       A Helm chart for PhoenixAI Anywhere — a read-only operations & usage console
+      phoenixai/kube-anywhere       2.1.0            4.1.7-ee     kube-anywhere includes three subcharts, anywhere-operator, phoenixai and anywhere-console
+      phoenixai/anywhere-operator   2.1.0            2.1.0        A Helm chart for PhoenixAI operator
+      phoenixai/phoenixai           2.1.0            4.1.7-ee     A Helm chart for PhoenixAI cluster
+      phoenixai/warehouse           2.1.0            4.1.7-ee     Warehouse is a feature of the PhoenixAI Enterprise Edition
       ```
 
       `kube-anywhere` is the install path this guide follows: it carries the console as a
       subchart, enabled with `anywhere.enabled=true`. The separately listed
-      `phoenixai/anywhere` is the same console packaged on its own, for installing it next
+      `phoenixai/anywhere-console` is the same console packaged on its own, for installing it next
       to an operator that is managed separately — do not install both.
 
 2. Use the default **[values.yaml](https://github.com/CelerData/phoenixai-kubernetes-operator/blob/main/helm-charts/charts/kube-anywhere/values.yaml)** of the Helm Chart to deploy the PhoenixAI Operator and PhoenixAI cluster, or create a YAML file to customize your deployment configurations.
@@ -65,6 +67,12 @@ The kube-anywhere chart carries three subcharts:
       REVISION: 1
       TEST SUITE: None
       ```
+
+      The default values start the cluster in shared-data (elastic) mode **without object
+      storage**: it comes up `running`, but `CREATE DATABASE` is refused with "The default storage
+      volume does not exist" until you add a bucket, either with `CREATE STORAGE VOLUME` over SQL
+      or by naming it in `phoenixAIFeSpec.config` (see the
+      [install guide](https://github.com/CelerData/phoenixai-kubernetes-operator/blob/main/doc/Deploy/install_with_helm.md)).
 
    2. Deployment with custom configurations
       - Create a YAML file, for example, **my-values.yaml**, and customize the configurations for the PhoenixAI Operator and PhoenixAI cluster in the YAML file. For the supported parameters and descriptions, see the comments in the default **[values.yaml](https://github.com/CelerData/phoenixai-kubernetes-operator/blob/main/helm-charts/charts/kube-anywhere/values.yaml)** of the Helm Chart.

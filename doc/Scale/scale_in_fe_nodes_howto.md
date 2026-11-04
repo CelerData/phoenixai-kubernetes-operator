@@ -1,4 +1,5 @@
 ---
+sidebar_position: 5
 sidebar_label: Scale in FE nodes
 ---
 

@@ -7,3 +7,23 @@ ERROR: Installation of the ServiceMonitor CR for the Prometheus operator failed.
 Thank you for installing {{ .Chart.Name }}-{{ .Chart.Version }} phoenixai chart. Please wait for a few minutes for the cluster to be ready.
 
 Please see the values.yaml for more operation information: https://github.com/CelerData/phoenixai-kubernetes-operator/blob/main/helm-charts/charts/kube-anywhere/charts/phoenixai/values.yaml
+{{- if not (include "phoenixaicluster.fe.configNamesBucket" .Values.phoenixAIFeSpec) }}
+
+NOTE: the FE config names no object storage (no aws_s3_path), so the cluster starts with no storage
+volume. It comes up running, but CREATE DATABASE and CREATE TABLE are refused with "The default
+storage volume does not exist" until you add one: either create it with SQL
+(CREATE STORAGE VOLUME ... ; SET ... AS DEFAULT STORAGE VOLUME) or put the bucket in
+phoenixAIFeSpec.config as the install guide's Step 3 shows. See doc/Deploy/install_with_helm.md.
+{{- end }}
+{{- if .Values.phoenixAICnGroups }}
+
+This release also declares {{ len .Values.phoenixAICnGroups }} CN group(s) in the cluster's default_warehouse:
+{{- $root := . }}
+{{- range $entry := .Values.phoenixAICnGroups }}
+  - {{ include "phoenixaicluster.cngroup.name" (dict "root" $root "entry" $entry) }}, {{ if kindIs "invalid" $entry.replicas }}replicas not pinned (starts at 1, then owned by whoever scales it){{ else }}{{ $entry.replicas }} replica(s){{ end }}
+{{- end }}
+
+Adding a group restarts none of the cluster's own CN pods: once a group exists they have to name the
+builtin CN group explicitly, and the operator adds that the next time it writes their StatefulSet
+anyway. The CN image must be >= 4.1.6-ee.
+{{- end }}

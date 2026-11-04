@@ -8,6 +8,9 @@ sidebar_position: 7
 From PhoenixAI Operator v1.9.0, PhoenixAIWarehouse CRD is introduced to manage the warehouse. This document describes
 how to deploy a warehouse.
 
+A warehouse can be split further into CN Groups, each an independent copy of the same compute pool,
+typically one per availability zone. See [Deploy CN Groups](./deploy_cn_group_howto.md).
+
 ## 1. Prerequisites
 
 1. PhoenixAI Operator >= v1.9.0. The latest version of the operator is recommended.
@@ -58,8 +61,10 @@ You can choose one of the following methods to deploy a warehouse:
 1. Deploy Warehouse by YAML Manifest
 2. Deploy Warehouse by Helm Chart
 
-> The CN nodes you deploy with a PhoenixAI cluster are added to the `default_warehouse` by default. You can
-> also define a Warehouse CR named `default-warehouse` to add more CN nodes to that warehouse.
+> The CN nodes you deploy with a PhoenixAI cluster are added to the `default_warehouse` by default. To add CN nodes
+> to that warehouse, scale the cluster's CNs or [deploy a CN group](./deploy_cn_group_howto.md) without
+> `phoenixAIWarehouse`. A Warehouse CR whose name resolves to `default_warehouse`, such as `default-warehouse`, is
+> rejected: that warehouse is reserved for the cluster's own CNs.
 
 ### 2.1 Deploy Warehouse by YAML Manifest
 
@@ -195,6 +200,13 @@ you can update any fields in the file, e.g. the image version, replicas, and res
 
 > We don't suggest you to modify the deployment of warehouse by `kubectl edit`.
 
+When you change the **image version**, the warehouse and its cluster have to move in order: the
+cluster's FE may never run a newer version than any compute node, the warehouse's included. Upgrade
+the warehouse before the cluster, and downgrade it after. In the other order the operator holds the
+change with `InvalidImageOrder` until the second one is applied. CN groups in `cnGroups` do not follow
+the warehouse's image: change each entry's `image.tag` in the same step. See
+[Warehouses in their own Helm releases](../Operate/upgrade_and_downgrade_cluster_howto.md#warehouses-in-their-own-helm-releases).
+
 #### 3.2.1 Update the YAML manifest
 
 For example, upgrade the image version:
@@ -273,3 +285,91 @@ If you deployed the warehouse by Helm chart, you can delete it by running the fo
 ```console
 helm -n phoenixai uninstall wh1
 ```
+
+Deleting a warehouse CR normally also removes the warehouse from the cluster: before it lets the
+warehouse's CN StatefulSet go, the operator runs `DROP WAREHOUSE` in the FE. Everything set on the
+warehouse inside the database (its properties and the privileges granted on it) is dropped with it.
+
+If the FE is unreachable or rejects the statement, the warehouse stays in the cluster. From v2.1, the
+operator keeps retrying for up to 10 minutes, then lets the StatefulSet go anyway and records a
+Warning event on it. v2.0.x tries once and lets the StatefulSet go right away, reporting the failure
+only in the operator log. Either way, after deleting a warehouse CR, run `SHOW WAREHOUSES` to confirm
+it is gone, and drop it with `DROP WAREHOUSE` if it is still listed.
+
+The one exception is a warehouse that still has CN groups. The operator keeps such a warehouse in the
+FE on purpose, because dropping it would take the groups' FE state with it, and drops it once the
+groups are deleted (see [Deploy CN Groups](./deploy_cn_group_howto.md)). Do not drop it by hand while
+any `PhoenixAICnGroup` still points at it.
+
+### 4.1 Delete the CR but keep the warehouse in the cluster
+
+Sometimes the CR is deleted only to be applied again under the same name, for example when moving the
+warehouse between operators or rolling such a move back. To keep the warehouse, its properties and its
+grants in the cluster across that, annotate the CR first.
+
+This needs PhoenixAI operator **v2.0.2 or later**. Older operators ignore the annotation without any
+error and still drop the warehouse when the CR is deleted, which is why you check below that it has
+taken effect.
+
+```console
+kubectl -n phoenixai annotate phoenixaiwarehouse wh1 starrocks.com/skip-fe-cleanup=true
+```
+
+Or put the annotation in the manifest:
+
+```yaml
+apiVersion: phoenixdata.ai/v1
+kind: PhoenixAIWarehouse
+metadata:
+  name: wh1
+  namespace: phoenixai
+  annotations:
+    starrocks.com/skip-fe-cleanup: "true"
+```
+
+For a warehouse deployed by Helm chart, use the `kubectl annotate` command above; `helm upgrade` leaves
+the annotation in place.
+
+The annotation takes effect once the operator has copied it onto the warehouse's CN StatefulSet and
+removed its protection finalizer there. Check it before you delete the CR:
+
+```console
+kubectl -n phoenixai get sts wh1-warehouse-cn \
+  -o jsonpath='{.metadata.finalizers}{"\n"}{.metadata.annotations.starrocks\.com/skip-fe-cleanup}{"\n"}'
+```
+
+The first line must not list `phoenixdata.ai.phoenixaiwarehouse/protection`, and the second line must
+print `true`. Adding the annotation changes only the StatefulSet's metadata, so no CN pod restarts.
+
+From then on, deleting the CR is an ordinary Kubernetes delete. The operator sends nothing to the FE,
+and the CN StatefulSet is removed even if the operator is not running at that moment. In the cluster,
+the warehouse stays as it was and its compute nodes show `Alive = false` in `SHOW COMPUTE NODES` until a
+same-named warehouse brings them back. If the new CR has fewer replicas than the old one, the extra
+compute nodes stay offline; drop them with `ALTER SYSTEM DROP COMPUTE NODE`.
+
+If the warehouse has CN groups, the operator also records the opt-out on each group's StatefulSet the
+next time it reconciles the group, which takes up to about two minutes. Check every group before you
+delete the warehouse CR; for a group `wh1-az-a`:
+
+```console
+kubectl -n phoenixai get sts wh1-az-a-cngroup-cn \
+  -o jsonpath='{.metadata.annotations.phoenixdata\.ai/warehouse-skip-fe-cleanup}{"\n"}'
+```
+
+It must print `true`. The warehouse then stays in the cluster even after its last group is deleted.
+The opt-out covers the warehouse, not its groups: deleting a group CR still drops that group in the
+cluster, and a same-named group CR applied later creates it again.
+
+To delete the warehouse for good later, remove the annotation first:
+
+```console
+kubectl -n phoenixai annotate phoenixaiwarehouse wh1 starrocks.com/skip-fe-cleanup-
+```
+
+Then wait until the operator has put the protection finalizer back, and only then delete the CR. Run the
+same check as above: the first line must list `phoenixdata.ai.phoenixaiwarehouse/protection`, and the
+second line must be empty. If you delete the CR before that, the StatefulSet still carries the opt-out,
+so the operator skips `DROP WAREHOUSE` and the warehouse stays in the cluster. The same holds for CN
+groups: the check above must print nothing for each of them before the last one is deleted.
+
+If you delete an annotated CR and no longer need the warehouse, drop it yourself with `DROP WAREHOUSE`.

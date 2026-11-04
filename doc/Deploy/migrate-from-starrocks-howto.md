@@ -2,49 +2,123 @@
 sidebar_label: Migrate from the StarRocks operator
 sidebar_position: 5
 ---
-
 # Migrating from the open-source StarRocks operator to PhoenixAI
 
-This guide explains how to move a cluster that is currently managed by the open-source
-[`starrocks-kubernetes-operator`](https://github.com/StarRocks/starrocks-kubernetes-operator)
-to the enterprise **PhoenixAI** operator, **without losing data or cluster identity**.
+## What this does
 
-> **CelerData-era clusters are supported by the same procedure and the same converter.** If your
-> cluster still uses the previous enterprise branding (`celerdata.com/v1` CRs —
-> `CelerDataCluster` / `CelerDataWarehouse` — or `kube-celerdata` Helm values), every
-> `migrate-from-starrocks` command below applies unchanged: the converter auto-detects the source
-> dialect per document and maps `celerData*` keys, the `celerdata.com` API group, and the CelerData
-> operator image to their PhoenixAI equivalents. Data-plane (FE/CN) image references are never
-> touched, regardless of dialect.
->
-> **Shared-data clusters only.** The PhoenixAI operator only supports shared-data clusters
-> (FE + CN). A shared-nothing cluster — one that runs BE nodes — **cannot be migrated**: the
-> converter refuses any input that carries a BE spec (`starRocksBeSpec` / `starrocksBeSpec`), and
-> in values mode it also refuses input that does not state `enabledBe: false` explicitly, because
-> the kube-starrocks chart defaults `enabledBe` to `true`. If your source values file never
-> mentions `enabledBe` but your cluster genuinely runs without BE, add `enabledBe: false` to the
-> input values and rerun the converter (the key is dropped from the output — the kube-anywhere
-> chart has no BE surface at all).
+This is the upgrade path from the open-source
+[`starrocks-kubernetes-operator`](https://github.com/StarRocks/starrocks-kubernetes-operator) to
+PhoenixAI Anywhere. PhoenixAI releases start at v2.0.0 under a different API group, so there is no
+in-place upgrade: this procedure is how you get there.
 
-There are two migration paths, depending on how the cluster is managed. They share the same
-data-plane mechanics, pre-flight checks, and verification — only the cutover differs:
+It swaps the operator that manages your cluster. **Your data stays where it is** (the volumes are
+retained and reused), the cluster keeps its name and its pods keep their addresses, and the FE and
+CN images keep running exactly what they ran before. Moving those to the enterprise images is a
+separate step you can take afterwards.
 
-- **Path A — raw manifests / `kubectl`**: you `kubectl apply` a `StarRocksCluster` CR directly.
-- **Path B — Helm Chart**: you manage the cluster through a Helm release.
+The cost is **a short downtime**, because the old workloads have to be deleted and recreated rather
+than adopted in place. [How it works](#how-it-works) explains why.
 
-## Contents
+## Does this apply to you
 
-- [Why this needs a procedure](#why-this-needs-a-procedure)
-- [Get the converter](#get-the-converter)
-- [Pre-flight (both paths)](#pre-flight-both-paths)
-- [Path A — kubectl / CR](#path-a--kubectl--cr)
-- [Path B — Helm (kube-starrocks → kube-anywhere)](#path-b--helm-kube-starrocks--kube-anywhere)
-- [Verify (both paths)](#verify-both-paths)
-- [Warehouses](#warehouses)
-- [Rollback](#rollback)
-- [Checklist](#checklist)
+Three things decide it, and the first is disqualifying.
 
-## Why this needs a procedure
+- **Shared-data clusters only.** PhoenixAI supports FE + CN clusters. A cluster running BE nodes is
+  shared-nothing and cannot be migrated: the converter refuses any input carrying a BE spec
+  (`starRocksBeSpec` / `starrocksBeSpec`). In values mode it also refuses input that does not state
+  `enabledBe: false` explicitly, because the kube-starrocks chart defaults it to `true`. If your
+  values never mention `enabledBe` but the cluster genuinely runs without BE, add `enabledBe: false`
+  to the input and rerun the converter.
+- **Volumes must be set to be retained.** The migration deletes the old workloads, so their volumes
+  have to survive that. `Retain` is the default; [Before you start](#before-you-start) checks it.
+- **The community operator must be v1.11.0 through v1.11.8.** If you run warehouses, v1.11.8 saves
+  manual steps. See the version prerequisite below.
+
+**CelerData-era clusters are covered by the same procedure and the same converter.** If your cluster
+still uses the previous enterprise branding (`celerdata.com/v1` CRs, `CelerDataCluster` /
+`CelerDataWarehouse`, or `kube-celerdata` Helm values), every command below applies unchanged: the
+converter auto-detects the source dialect per document and maps `celerData*` keys, the
+`celerdata.com` API group, and the CelerData operator image to their PhoenixAI equivalents.
+Data-plane images are never touched, whichever dialect you start from. The annotation that keeps
+warehouses needs the CelerData-era operator at **v1.11.8**, the enterprise release that matches
+community v1.11.8; older CelerData-era operators do not understand it, so with one of those keep the
+warehouses by stopping the old operator instead; see [Warehouses](#warehouses).
+
+### Version prerequisite: community operator v1.11.0 through v1.11.8
+
+PhoenixAI releases start at **v2.0.0** under a new API group (`phoenixdata.ai`), so there is no
+in-place upgrade from either the community operator or a CelerData-era enterprise operator; this
+migration is the upgrade path. You can migrate straight to any PhoenixAI release; there is no need
+to go through v2.0.0 first.
+
+The converter supports clusters managed by any community operator release from **v1.11.0** through
+**v1.11.8**. Every field those releases define exists in the PhoenixAI CRDs and charts under the same
+name, so nothing is dropped, and none of them names its StatefulSets, Services or volumes
+differently, so the volumes are reused whichever one you run. A field your release does not have
+yet (for example `waitForFullRollout`, added in v1.11.5) keeps the behavior your cluster has today.
+**For the cluster itself, you do not need to upgrade the community operator first.** If you run a
+release older than v1.11.0, upgrade it to a release in that range before migrating; see
+[Upgrade the Operator](../Deploy/upgrade_operator_howto.md). Community releases newer than v1.11.8
+have not been checked against PhoenixAI yet; do not migrate from one before they are.
+
+**If you run warehouses and want to keep them, migrate to PhoenixAI v2.0.2 or later.** Deleting a
+warehouse CR makes the operator that owns it run `DROP WAREHOUSE`, which loses the warehouse's
+properties and the privileges granted on it. v2.0.2 is the first PhoenixAI release that can be told
+not to, which is what keeps the warehouses if you roll back. On the old side you have two options:
+
+- Upgrade the old operator to **v1.11.8** first: community v1.11.8 for a `StarRocksWarehouse`, the
+  CelerData-era enterprise v1.11.8 for a `CelerDataWarehouse`. These are the first releases that can
+  be told not to drop a warehouse. Then no manual step is needed.
+- Stay on an older release. The warehouses are kept as long as the old operator is not running when
+  you delete each old warehouse CR: on the Helm path it is already gone by then, and on the kubectl
+  path you stop it. You then clear a finalizer by hand.
+
+With v1.11.8, prepare the warehouses **before the old operator goes away**: on the Helm path, that is
+before the first `helm uninstall`. See [Warehouses](#warehouses).
+
+Whatever your version, check the `storageVolumes` of your cluster **before the cutover**. PhoenixAI
+expects stricter values than the community CRD accepts, and do not count on the API server to stop
+you: the CRDs of the 2.0.x releases (v2.0.0 through v2.0.3) still accept the values below, and
+v2.1.0 and later reject them only when the converted CR is applied. Either way the cutover fails
+after the old workloads are gone.
+
+- Each `storageSize` must be a size in binary units such as `10Gi` or `512Mi`: not `10G`, and a
+  positive size must not begin with `0` (write `512Mi`, not `0.5Gi`). Rewrite such a value as the
+  same size in the converted output; that is safe.
+- Each `name` must be a plain DNS label: lowercase letters, digits and `-`, no dots. A volume name
+  is part of its PVC names, so it **cannot** be changed without losing the volume. If a name does
+  not fit, do not migrate that cluster; contact support.
+
+## The flow
+
+1. **Check it qualifies.** Shared-data only, volumes set to be retained, community operator
+   v1.11.0 through v1.11.8 (v1.11.8 saves manual steps for warehouses), `storageVolumes` values
+   PhoenixAI accepts.
+2. **Convert.** A converter rewrites your CR or Helm values into the PhoenixAI equivalent, keeping
+   the cluster name, namespace and volume names identical. That is what makes the rest work.
+3. **Put the PhoenixAI operator in place.** Back up the old operator and the old CR or values
+   first: those are your rollback artifacts. If you keep warehouses with the annotation (old
+   operator at v1.11.8), annotate them before this step, while the old operator still runs (see [Warehouses](#warehouses)); on the
+   Helm path this step removes the old operator.
+4. **Delete the old cluster object.** Downtime starts here. The volumes survive.
+5. **Apply the converted CR, or install the new chart.** The new operator recreates the workloads
+   under the same names, binds them to the same volumes, and the pods come back with the same
+   addresses. The FE metadata recognises them and the cluster heals.
+6. **Verify.** Then migrate any warehouses, and switch to the enterprise images if you want to.
+
+**Where step 3 falls depends on your path.** On the kubectl path you install the PhoenixAI operator
+alongside the old one first, so steps 3 and 4 are separate and only step 4 costs downtime. With a
+single Helm release they are one action: `helm uninstall` removes the old operator and cluster
+together, and installing `kube-anywhere` brings both back. With separate operator and cluster
+releases you swap the operator release once, before cutting over any cluster.
+
+There are two paths through this, depending on how the cluster is managed today. They share the
+pre-flight checks, the mechanics and the verification; only the cutover differs.
+
+- **[Path A](#path-a--kubectl--cr)** — you `kubectl apply` a `StarRocksCluster` CR directly.
+- **[Path B](#path-b--helm-kube-starrocks--kube-anywhere)** — you manage the cluster with a Helm release.
+
+## How it works
 
 The two operators are functionally close, but their CRDs are **not** compatible and there
 is **no backward compatibility**:
@@ -133,25 +207,29 @@ done
 kubectl -n "$NS" get pvc --show-labels
 ```
 
-### Version prerequisite: bring the OSS operator up to the schema baseline first
-
-PhoenixAI releases start at **v2.0.0** — a deliberately incompatible major (its CRD group is
-`phoenixdata.ai`, so there is no in-place upgrade from either the community operator or a
-CelerData-era enterprise operator; this migration IS the upgrade path). The CR / CRD schema of
-v2.0.0 is baselined on community **v1.11.5**, and the fields are only guaranteed to match at that
-baseline. So before migrating, **first upgrade the open-source operator to v1.11.5, let the
-cluster settle and confirm it is healthy, and only then** convert and cut over to PhoenixAI
-v2.0.0.
-
-For how to upgrade the community operator (Helm release or raw `operator.yaml`), see
-[Upgrade the Operator](../Deploy/upgrade_operator_howto.md).
-
 ## Get the converter
 
-The release publishes prebuilt `migrate-from-starrocks` binaries (under the
-`migrate-from-starrocks/` release assets, one per OS/arch) — download the one for your platform,
-`chmod +x` it, and put it somewhere on your `PATH`. Every command below assumes it is on the
-`PATH`.
+Pick the PhoenixAI release you are migrating to, and take everything from that one release: the
+converter, the operator manifest and CRDs (Path A), and the Helm charts (Path B). The commands below
+use it as `$VERSION`:
+
+```bash
+VERSION=<X.Y.Z>   # the PhoenixAI release you are migrating to, e.g. 2.1.0
+```
+
+Each release publishes prebuilt `migrate-from-starrocks` binaries (under its
+`migrate-from-starrocks/` release assets, one per OS/arch). Download the one for your platform **from
+release `v$VERSION`**, `chmod +x` it, put it somewhere on your `PATH`, and check that it belongs to that
+release:
+
+```bash
+migrate-from-starrocks --version   # prints: migrate-from-starrocks v$VERSION
+```
+
+The converter is tied to its release: in values mode it writes that release's operator image,
+`us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-operator:v$VERSION`, whatever operator
+tag your input named. A converter from another release would install another operator. Every
+command below assumes the converter is on the `PATH`.
 
 The converter does a structured, key-only rename and never touches the cluster. It is safe to run
 repeatedly. Its subcommands cover both paths:
@@ -163,7 +241,7 @@ migrate-from-starrocks values   [--input FILE] [--output FILE] [--cluster-name N
 ```
 
 `--cluster-name NAME` (used by `values` for Path B) must be the **existing** cluster's name — the
-same value as `$NAME` in [Pre-flight](#pre-flight-both-paths). It is the `metadata.name` of the live
+same value as `$NAME` in [Before you start](#before-you-start). It is the `metadata.name` of the live
 `StarRocksCluster`; find it with:
 
 ```bash
@@ -177,6 +255,18 @@ The converter **preserves the FE/CN data-plane images unchanged** — this migra
 operator (see "What this migration actually changes" above). It rewrites just the **operator** image
 to the PhoenixAI registry (`us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/*`), since a StarRocks
 operator cannot manage PhoenixAI CRs; make sure the namespace has `imagePullSecrets` able to pull that operator image.
+
+**If your operator image comes from your own registry or mirror**, the converter cannot know the
+path the PhoenixAI operator has there, so it leaves that image exactly as it found it — tag included
+— and says so twice: a warning on stderr, and a `NOT CONVERTED` comment above the `image` key in the
+output. **That field is then yours to fix**: point it at the operator image of the release you are
+migrating to, `anywhere-operator:v$VERSION`, mirroring
+`us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-operator` into your registry first if
+you need to. The converter also writes no `imagePullSecrets` in this case — the
+`phoenixai-registry` secret it would otherwise add is for the upstream registry, and it cannot know
+what yours needs — so set that alongside the image if your registry requires one. Installing with
+the image left as-is runs a StarRocks operator against PhoenixAI CRs, which reconciles nothing — the
+operator pod comes up and the cluster never does.
 
 The converter also **pins the pods' timezone**. The kube-starrocks / kube-celerdata charts default
 `timeZone` to `Asia/Shanghai`, while kube-anywhere defaults it to `UTC`. So when your values.yaml
@@ -211,7 +301,7 @@ only the chart defaults moved.
 
 ---
 
-## Pre-flight (both paths)
+## Before you start
 
 ```bash
 NS=namespace_where_starrocks_runs              # the namespace the cluster lives in
@@ -270,7 +360,7 @@ namespace already exists):
 OPERATOR_NS="$NS"   # the namespace your StarRocks operator runs in (often the cluster's namespace)
 # Back up the running StarRocks operator deployment FIRST — this is your rollback artifact (see Rollback).
 kubectl -n "$OPERATOR_NS" get deploy -l app.kubernetes.io/name=kube-starrocks -o yaml > operator-backup.yaml
-curl -fsSLO https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v2.0.0/operator.yaml
+curl -fsSLO https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v${VERSION}/operator.yaml
 migrate-from-starrocks operator --input operator.yaml --namespace "$OPERATOR_NS" \
   --output phoenixai-operator.yaml
 ```
@@ -290,9 +380,10 @@ Apply it and wait for the operator to be Running before continuing:
 # This is a first-time install of the phoenixdata.ai CRDs (the cluster only had starrocks.com ones), so
 # `create` fits; on a later operator upgrade you would use `kubectl replace` instead.
 kubectl create \
-  -f https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v2.0.0/phoenixdata.ai_phoenixaiclusters.yaml \
-  -f https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v2.0.0/phoenixdata.ai_phoenixaiwarehouses.yaml
-kubectl get crd phoenixaiclusters.phoenixdata.ai phoenixaiwarehouses.phoenixdata.ai
+  -f https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v${VERSION}/phoenixdata.ai_phoenixaiclusters.yaml \
+  -f https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v${VERSION}/phoenixdata.ai_phoenixaiwarehouses.yaml \
+  -f https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v${VERSION}/phoenixdata.ai_phoenixaicngroups.yaml
+kubectl get crd phoenixaiclusters.phoenixdata.ai phoenixaiwarehouses.phoenixdata.ai phoenixaicngroups.phoenixdata.ai
 
 # apply the operator
 kubectl apply -f phoenixai-operator.yaml
@@ -355,7 +446,7 @@ when the values actually contain the operator block.
 > `phoenixAICluster.name`. Always pass `--cluster-name "$NAME"` when converting cluster values.
 
 Before you start, list the releases you will migrate. Each path below begins by backing up that
-release's values with `helm get values … > …-values-backup.yaml` — that file is **both the converter
+release's values with `helm get values -o yaml … > …-values-backup.yaml` — that file is **both the converter
 input and your rollback artifact** (see [Rollback](#rollback)), so keep it.
 
 ```bash
@@ -375,7 +466,7 @@ helm repo update
 #### Convert the values
 
 ```bash
-helm get values <oss-release> -n "$NS" > kube-starrocks-values-backup.yaml   # back up + converter input
+helm get values <oss-release> -n "$NS" -o yaml > kube-starrocks-values-backup.yaml   # back up + converter input
 migrate-from-starrocks values \
   --input kube-starrocks-values-backup.yaml \
   --cluster-name "$NAME" \
@@ -392,6 +483,11 @@ Then **review `kube-anywhere-values.yaml`**:
   [Get the converter](#get-the-converter)) — each pin carries a comment.
 
 #### Stop the old release (downtime starts here)
+
+> **Warehouses first.** If you keep warehouses with the annotation (old operator at v1.11.8),
+> annotate each `StarRocksWarehouse` and check that it took effect **before** this step, as described in
+> [Warehouses](#warehouses). This step removes the old operator, and once it is gone nothing acts on
+> the annotation any more.
 
 `helm uninstall` removes the whole OSS release — its operator **and** the StarRocksCluster CR.
 Deleting the CR garbage-collects its StatefulSets and Services; the cluster CR carries no
@@ -410,7 +506,7 @@ kubectl -n "$NS" get pvc            # confirm the PVCs survived
 #### Install kube-anywhere (reuses the existing PVCs)
 
 ```bash
-helm install <cd-release> phoenixai/kube-anywhere -n "$NS" -f kube-anywhere-values.yaml
+helm install <cd-release> phoenixai/kube-anywhere --version "$VERSION" -n "$NS" -f kube-anywhere-values.yaml
 ```
 
 This release's operator creates `$NAME-fe`/`$NAME-cn` with the same names and
@@ -425,18 +521,23 @@ and only the cluster swap incurs downtime.
 
 #### Swap the operator release (once)
 
+> **Warehouses first.** If you keep warehouses with the annotation (old operator at v1.11.8),
+> annotate each `StarRocksWarehouse`, in every namespace this operator manages, and check that it took effect
+> **before** this step, as described in [Warehouses](#warehouses). This step removes the old
+> operator, and once it is gone nothing acts on the annotation any more.
+
 Convert the operator-only values and replace the operator release. The data plane keeps running while
 the operator is briefly absent (an unmanaged FE/CN does not stop serving); only reconciliation
 pauses.
 
 ```bash
-helm get values <oss-operator-release> -n <operator-ns> > operator-values-backup.yaml  # back up + converter input
+helm get values <oss-operator-release> -n <operator-ns> -o yaml > operator-values-backup.yaml  # back up + converter input
 migrate-from-starrocks values \
   --input operator-values-backup.yaml \
   --output phoenixai-operator-values.yaml
 
 helm uninstall <oss-operator-release> -n <operator-ns>
-helm install  <cd-operator-release> phoenixai/operator -n <operator-ns> -f phoenixai-operator-values.yaml
+helm install  <cd-operator-release> phoenixai/anywhere-operator --version "$VERSION" -n <operator-ns> -f phoenixai-operator-values.yaml
 ```
 
 Make sure the PhoenixAI operator **watches the namespaces your clusters live in** — cluster-wide, or
@@ -451,7 +552,7 @@ old cluster release, and install the `phoenixai` cluster subchart. Repeat per na
 ```bash
 # `storageSpec.name` unchanged, `phoenixAICluster.name` pinned, data-plane images kept
 NAME=$(kubectl -n "$NS" get starrockscluster -o jsonpath='{.items[0].metadata.name}')
-helm get values <oss-cluster-release> -n "$NS" > cluster-values-backup.yaml   # back up + converter input
+helm get values <oss-cluster-release> -n "$NS" -o yaml > cluster-values-backup.yaml   # back up + converter input
 migrate-from-starrocks values \
   --input cluster-values-backup.yaml \
   --cluster-name "$NAME" \
@@ -466,12 +567,12 @@ kubectl -n "$NS" delete statefulset "$NAME-fe" "$NAME-cn" --ignore-not-found
 kubectl -n "$NS" wait --for=delete pod --all --timeout=180s 2>/dev/null || true
 kubectl -n "$NS" get pvc            # confirm the PVCs survived
 
-helm install <cd-cluster-release> phoenixai/phoenixai -n "$NS" -f phoenixai-cluster-values.yaml
+helm install <cd-cluster-release> phoenixai/phoenixai --version "$VERSION" -n "$NS" -f phoenixai-cluster-values.yaml
 ```
 
 ---
 
-## Verify (both paths)
+## Verify
 
 ```bash
 kubectl -n "$NS" get phoenixaicluster "$NAME"
@@ -509,30 +610,83 @@ lower-risk than the cluster migration; just keep the **warehouse name** and the 
 at** unchanged so its CNs rejoin. The PhoenixAI operator from the main migration already reconciles it
 — no extra operator needed.
 
-**The warehouse CN StatefulSet carries a protection finalizer — clear it by hand.** Unlike the
-cluster (whose CR carries no finalizer, so its deletion never hangs), a warehouse's CN StatefulSet
-is created with a finalizer (`starrocks.com.starrockswarehouse/protection`; CelerData-era clusters:
-`celerdata.com.celerdatawarehouse/protection`) that **only the OLD operator removes** while
-processing the warehouse CR's deletion. At this point in the migration the old operator is already
-gone (uninstalled together with the main cluster's release), so deleting the old warehouse CR
-leaves its CN StatefulSet stuck in `Terminating` forever — and the same-named replacement can
-never be created. After deleting the old warehouse CR (either path below), clear the finalizer
-yourself:
+**Deleting a warehouse CR drops the warehouse, unless you opt out.** Both operators clean up after a
+deleted warehouse CR: before they release the warehouse's CN StatefulSet, they run `DROP WAREHOUSE` in
+the FE. The migration deletes each `StarRocksWarehouse` and applies a same-named `PhoenixAIWarehouse`,
+and a rollback does the reverse. Whenever the drop runs, the CNs of the new CR create the warehouse
+again, but with default properties and without the privileges granted on it, and queries on that
+warehouse fail in between.
+
+Whether the drop runs depends on whether the operator that owns the deleted CR is still running:
+
+| When | Owner of the deleted CR | Without the annotation below |
+|---|---|---|
+| Migrating on Path A | the community operator, still running | it drops the warehouse, unless you stop it first (see below) |
+| Migrating on Path B | the community operator, already removed with its release | no drop, but the CN StatefulSet stays in `Terminating` until you clear its finalizer by hand |
+| Rolling back | the PhoenixAI operator, running | it drops the warehouse |
+
+**To keep the warehouse, its properties and its grants**, annotate the warehouse CR with
+`starrocks.com/skip-fe-cleanup: "true"` on both sides. An operator that understands the annotation
+holds no protection finalizer on the warehouse's CN StatefulSet and never drops the warehouse, so
+deleting the CR is an ordinary Kubernetes delete and nothing is left in `Terminating`. That takes:
+
+- the old operator at **v1.11.8 or later** for the old warehouse CR: community v1.11.8 for a
+  `StarRocksWarehouse`, the CelerData-era enterprise v1.11.8 for a `CelerDataWarehouse`, if you want
+  to avoid the manual steps under "Without the annotation" below. Upgrade to v1.11.8 before you
+  migrate (see [Upgrade the Operator](../Deploy/upgrade_operator_howto.md)); older operators of either
+  kind do not understand it.
+- PhoenixAI operator **v2.0.2 or later** (2.1 and later included) for the `PhoenixAIWarehouse`. v2.0.0
+  and v2.0.1 do not understand it and drop the warehouse on rollback.
+
+An operator that does not understand the annotation ignores it without any error, so always check
+that it has taken effect instead of assuming it did.
+
+**Annotate the old warehouses while the old operator still runs.** It has to see the annotation
+to release its own finalizer. On Path B that means before you uninstall the old operator's
+release: before the cutover in B-combined, before the operator swap in B-split. For each warehouse:
 
 ```bash
-kubectl -n "$NS" get sts -o name | grep -E "warehouse|$WH"   # find the warehouse CN StatefulSet
-kubectl -n "$NS" patch sts <warehouse-cn-sts> --type=merge -p '{"metadata":{"finalizers":null}}'
+WH=<warehouse-name>   # on the Helm path, the warehouse is named after its Helm release
+kubectl -n "$NS" annotate starrockswarehouse "$WH" starrocks.com/skip-fe-cleanup=true
+# CelerData-era cluster: same key, on the celerdatawarehouse instead
+# kubectl -n "$NS" annotate celerdatawarehouse "$WH" starrocks.com/skip-fe-cleanup=true
+kubectl -n "$NS" get sts "$WH-warehouse-cn" \
+  -o jsonpath='{.metadata.finalizers}{"\n"}{.metadata.annotations.starrocks\.com/skip-fe-cleanup}{"\n"}'
 ```
 
-(The PVCs are unaffected — they have their own retain semantics and are reused by the recreated
-warehouse. Alternatively, delete the old warehouse CR **while the old operator is still running**,
-before the main cluster cutover; then the operator clears the finalizer itself.)
+It has taken effect when the first line does not list `starrocks.com.starrockswarehouse/protection`
+(CelerData-era: `celerdata.com.celerdatawarehouse/protection`) and the second line prints `true`.
+Only the StatefulSet's metadata changes, so no CN pod restarts.
 
-**kubectl / CR** — the `cr` converter rewrites the kind and `spec.starRocksCluster` →
-`spec.phoenixAICluster`:
+**Without the annotation** (a community or CelerData-era operator older than v1.11.8, or a
+warehouse you did not annotate), the old warehouse is kept only if the old operator is **not
+running** when you delete its CR. On Path B it is already gone. On Path A, stop it first, after the
+cluster cutover; if it still manages clusters you have not migrated yet, their reconciliation pauses
+until you scale it back up, while their pods keep serving:
 
 ```bash
-WH=<warehouse-name>
+# The community operator's Deployment: kube-starrocks-operator unless you renamed it.
+kubectl -n "$OPERATOR_NS" scale deploy kube-starrocks-operator --replicas=0
+```
+
+The CN StatefulSet then keeps its finalizer after you delete the old warehouse CR
+(`starrocks.com.starrockswarehouse/protection`; CelerData-era clusters:
+`celerdata.com.celerdatawarehouse/protection`), because only the old operator removes it. The
+same-named replacement cannot be created until you clear it yourself:
+
+```bash
+kubectl -n "$NS" patch sts "$WH-warehouse-cn" --type=merge -p '{"metadata":{"finalizers":null}}'
+```
+
+The PVCs are unaffected: they have their own retain semantics and are reused by the recreated
+warehouse.
+
+**kubectl / CR** — the `cr` converter rewrites the kind and `spec.starRocksCluster` →
+`spec.phoenixAICluster`. It keeps your annotations, so a `StarRocksWarehouse` annotated above yields
+an annotated `PhoenixAIWarehouse`; if you did not annotate the old one, add the annotation to
+`phoenixai-wh.yaml` before applying it, so that a rollback keeps the warehouse:
+
+```bash
 kubectl -n "$NS" get starrockswarehouse "$WH" -o yaml > wh-backup.yaml   # back up + converter input
 migrate-from-starrocks cr --input wh-backup.yaml > phoenixai-wh.yaml   # verify spec.phoenixAICluster == "$NAME"
 kubectl -n "$NS" delete starrockswarehouse "$WH"                         # GC removes its CN StatefulSet; PVCs survive
@@ -547,20 +701,53 @@ reuse the original release name**, or the warehouse comes back renamed and does 
 Convert, then swap the release in place under the same name:
 
 ```bash
-WH_RELEASE=<oss-warehouse-release>          # reuse this exact name for the PhoenixAI release
-helm get values "$WH_RELEASE" -n "$NS" > wh-values-backup.yaml
+WH=<oss-warehouse-release>          # the warehouse name; reuse this exact name for the PhoenixAI release
+helm get values "$WH" -n "$NS" -o yaml > wh-values-backup.yaml
 migrate-from-starrocks values --input wh-values-backup.yaml --output phoenixai-wh-values.yaml
-helm uninstall "$WH_RELEASE" -n "$NS"
-helm install "$WH_RELEASE" phoenixai/warehouse -n "$NS" -f phoenixai-wh-values.yaml
+helm uninstall "$WH" -n "$NS"
+helm install "$WH" phoenixai/warehouse --version "$VERSION" -n "$NS" -f phoenixai-wh-values.yaml
+```
+
+The chart does not set annotations on the `PhoenixAIWarehouse`, so add the annotation after the
+install (`helm upgrade` leaves it in place):
+
+```bash
+kubectl -n "$NS" annotate phoenixaiwarehouse "$WH" starrocks.com/skip-fe-cleanup=true
 ```
 
 If a recreate races the asynchronous GC of the old CN StatefulSet (a same-name clash), wait for the
 old warehouse pods to terminate before applying/installing.
 
+**Check the new warehouse before you rely on a rollback.** Run the same check against the PhoenixAI
+StatefulSet: the first line must not list `phoenixdata.ai.phoenixaiwarehouse/protection`, and the
+second line must print `true`. See "Delete the CR but keep the warehouse in the cluster" in
+[deploy_warehouse_howto.md](deploy_warehouse_howto.md) for what the annotation does afterwards.
+
+**Remove the annotation once you no longer plan to roll back**, so that deleting the warehouse later
+drops it from the FE again. Before you delete such a warehouse, wait until the operator has put
+`phoenixdata.ai.phoenixaiwarehouse/protection` back on its StatefulSet; deleted earlier, the warehouse
+stays in the FE.
+
 ## Rollback
 
 If verification fails, you can return to the open-source operator (PVCs are reused the same way).
-Roll back with the **same path** you migrated with.
+Roll back with the **same path** you migrated with. Roll back each warehouse the same way, in reverse:
+delete the `PhoenixAIWarehouse` and re-apply the backed-up `StarRocksWarehouse` (or reinstall its OSS
+release). With the annotation in effect on the `PhoenixAIWarehouse`, the warehouse keeps its properties
+and grants; without it, the PhoenixAI operator drops the warehouse (see [Warehouses](#warehouses)).
+
+On the kubectl path, the backed-up `StarRocksWarehouse` was saved after you annotated it, so the
+re-applied one still opts out. Once you no longer plan to migrate again, remove the annotation, so
+that deleting the warehouse later drops it from the FE again:
+
+```bash
+kubectl -n "$NS" annotate starrockswarehouse "$WH" starrocks.com/skip-fe-cleanup-
+```
+
+Then wait until `starrocks.com.starrockswarehouse/protection` is back on the `$WH-warehouse-cn`
+StatefulSet, with the same check as in [Warehouses](#warehouses), before you ever delete that warehouse;
+deleted earlier, it stays in the FE. A reinstalled Helm release carries no annotation, so there is
+nothing to remove.
 
 ### Rollback — Path A (kubectl / CR)
 
@@ -604,6 +791,11 @@ helm install <oss-release> starrocks-community/kube-starrocks -n "$NS" -f kube-s
   `componentValues.runAsNonRoot`, FE `storageSpec.name: ""`, `enablePVCExpansion`) unless you set
   those keys yourself
 - [ ] `SHOW FRONTENDS` / `SHOW COMPUTE NODES` all `Alive = true` after cutover
+- [ ] (Warehouses, to keep them) old operator at v1.11.8 (community or CelerData-era), every
+  `StarRocksWarehouse` / `CelerDataWarehouse` annotated with `starrocks.com/skip-fe-cleanup: "true"`
+  and checked **before** the old operator goes away
+  (or, without the annotation, the old operator stopped before any old warehouse CR is deleted);
+  PhoenixAI v2.0.2 or later, every `PhoenixAIWarehouse` annotated and checked
 - [ ] (Optional) reused PVCs relabeled to `app.phoenixai.ownerreference/name`, or your PVC tooling
   updated to account for the mixed owner-reference labels (see "reused PVCs keep the old
   owner-reference label")

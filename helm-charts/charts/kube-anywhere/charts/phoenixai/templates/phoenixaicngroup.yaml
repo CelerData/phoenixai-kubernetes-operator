@@ -1,0 +1,36 @@
+{{- $root := . }}
+{{- $seen := dict }}
+{{- range $entry := .Values.phoenixAICnGroups }}
+{{- $ctx := dict "root" $root "entry" $entry }}
+{{- include "phoenixaicluster.cngroup.validate" $ctx }}
+{{- if hasKey $seen $entry.name }}
+{{- fail (printf "phoenixAICnGroups: duplicate entry name %q" $entry.name) }}
+{{- end }}
+{{- $_ := set $seen $entry.name true }}
+{{- $extraEnvVars := list }}
+{{- if and $root.Values.initPassword.enabled (not (($entry.envVars | default list) | toJson | contains "MYSQL_PWD")) }}
+{{- $extraEnvVars = list (dict "name" "MYSQL_PWD" "valueFrom" (dict "secretKeyRef" (dict "name" (include "phoenixaicluster.initpassword.secret.name" $root) "key" "password"))) }}
+{{- end }}
+{{- /* The CN spec helper reads .Values.spec.* (the warehouse chart's key, kept so the two copies
+     stay identical), so hand it the chart values with a spec key holding this entry. omit returns
+     a new map, so $root.Values is untouched. */}}
+{{- $values := set (omit $root.Values "spec") "spec" $entry }}
+{{- /* The same test cnconfigmap.yaml renders the entry's ConfigMap on, so an empty or null config
+     falls back to the cluster CN ConfigMap here too. */}}
+{{- $ownConfig := not (empty (include "phoenixaicluster.cngroup.hasOwnConfig" $entry)) }}
+---
+apiVersion: phoenixdata.ai/v1
+kind: PhoenixAICnGroup
+metadata:
+  name: {{ include "phoenixaicluster.cngroup.name" $ctx }}
+  namespace: {{ template "phoenixaicluster.namespace" $root }}
+  labels:
+    cluster: {{ template "phoenixaicluster.name" $root }}
+    cngroup: {{ $entry.name }}
+    {{- include "phoenixaicluster.labels" $root | nindent 4 }}
+spec:
+  # No phoenixAIWarehouse: these groups belong to the cluster's default_warehouse.
+  phoenixAICluster: {{ template "phoenixaicluster.name" $root }}
+  phoenixAICnSpec:
+{{- include "phoenixaicluster.cngroup.cnspec" (dict "Values" $values "cnspec" (dict "configMapName" (ternary (include "phoenixaicluster.cngroup.configmap.name" $ctx) (include "phoenixaicluster.cn.configmap.name" $root) $ownConfig) "configHash" (include "phoenixaicluster.cngroup.config.hash" $ctx) "extraEnvVars" $extraEnvVars "envVarsKey" "cnEnvVars" "config" (default $root.Values.phoenixAICnSpec.config $entry.config))) }}
+{{- end }}

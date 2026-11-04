@@ -1,0 +1,61 @@
+PhoenixAI Anywhere has been installed as release {{ .Release.Name }}.
+{{- if eq (.Values.image.repository | default "") (include "anywhere.legacyImageRepository" .) }}
+
+NOTE: image.repository is set to {{ include "anywhere.legacyImageRepository" . }},
+the console image's name up to 2.0.x, which receives no new versions.
+{{- if include "anywhere.legacyImageRemapped" . }}
+Because image.tag is empty, this release pulls
+{{ include "anywhere.imageRepository" . }}:{{ include "anywhere.imageTag" . }} instead.
+If you upgraded with --reuse-values, that 2.0.x default was reused from the previous release,
+not from your values. Upgrade once with your values file instead of --reuse-values, or add
+--set image.repository=us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-console
+(prefix the key with anywhere. under the kube-anywhere chart).
+If your own values pin the old repository, drop that line.
+{{- else }}
+image.tag is set ({{ .Values.image.tag }}), so this release pulls that tag from the old
+repository as written. Because the old repository receives no new versions, move the pin to
+the new repository before you bump the tag: change image.repository and image.tag together,
+in the same edit, to
+us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-console and a version published
+there (prefix both keys with anywhere. under the kube-anywhere chart). Changing the repository
+alone keeps this tag, which the new repository may not have. Or keep the old repository with a
+tag it already has.
+{{- end }}
+{{- end }}
+
+Reach the console (REST API; the embedded web frontend is served at /):
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ template "anywhere.name" . }} {{ .Values.httpPort }}:{{ .Values.httpPort }}
+  curl -s localhost:{{ .Values.httpPort }}/api/v1/health
+
+The ops data path talks to the operator gRPC API at:
+{{- range .Values.operatorApiAddrs }}
+  - {{ . }}
+{{- end }}
+make sure each operator chart is installed with phoenixAIOperator.enableApiServer=true.
+
+Anywhere Console accounts live in the Secret "{{ template "anywhere.adminSecretName" . }}"
+(key = username, value = password).
+{{- if and (not .Values.admin.existingSecret) (not .Values.admin.users) }}
+A single "admin" account was generated with a random password. Retrieve it with:
+
+  kubectl -n {{ .Release.Namespace }} get secret {{ template "anywhere.adminSecretName" . }} -o jsonpath='{.data.admin}' | base64 -d; echo
+
+NOTE: this default relies on `helm lookup` and must not be used with GitOps/ArgoCD or
+`helm template` pipelines (each sync would re-randomize the password) — set
+admin.users or admin.existingSecret there instead.
+{{- else if eq (index .Values.admin.users "admin" | default "") "admin" }}
+
+WARNING: this install carries the chart's default account admin / admin. That password is
+public — replace it before anyone else can reach the console:
+
+  kubectl -n {{ .Release.Namespace }} edit secret {{ template "anywhere.adminSecretName" . }}
+{{- end }}
+Add, remove or rotate accounts with `kubectl -n {{ .Release.Namespace }} edit secret {{ template "anywhere.adminSecretName" . }}`;
+changes take effect within about a minute, no restart needed.
+
+The Cluster Console is a second sign-in page, at /cluster-console/login, for the people who query
+a cluster rather than operate the fleet: select a cluster there, then use that cluster's own
+PhoenixAI Database username and password. No Anywhere Console account is involved, and the two
+consoles keep separate session cookies, so one browser can hold both sessions at once.
+{{- include "anywhere.boolWarnings" . }}

@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # Initializing the Root User Password in PhoenixAI
 
 Upon deploying a fresh PhoenixAI cluster, the `root` user's password remains unset, potentially posing a security risk.

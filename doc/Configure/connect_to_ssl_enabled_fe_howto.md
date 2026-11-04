@@ -1,3 +1,7 @@
+---
+sidebar_position: 3
+---
+
 # Connect the Operator to an SSL-Enabled FE
 
 The operator talks to FE over the MySQL protocol to run maintenance statements such as
@@ -84,7 +88,7 @@ Set `phoenixAIOperator.feSslMode` when installing or upgrading the operator (or 
 umbrella chart, where the same key lives under `operator.phoenixAIOperator.feSslMode`):
 
 ```bash
-helm upgrade phoenixai-operator phoenixai/operator \
+helm upgrade phoenixai-operator phoenixai/anywhere-operator \
   --reuse-values \
   --set phoenixAIOperator.feSslMode=REQUIRED
 ```

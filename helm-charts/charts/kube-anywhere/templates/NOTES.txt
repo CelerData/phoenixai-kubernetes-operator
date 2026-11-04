@@ -8,6 +8,14 @@ Thank you for installing {{ .Chart.Name }}-{{ .Chart.Version }} kube-anywhere ch
 It will install the operator and a phoenixai cluster{{ if .Values.anywhere.enabled }}, plus the PhoenixAI Anywhere console{{ end }}, please wait for a few minutes for the cluster to be ready.
 
 Please see the values.yaml for more operation information: https://github.com/CelerData/phoenixai-kubernetes-operator/blob/main/helm-charts/charts/kube-anywhere/values.yaml
+{{- if not (include "phoenixaicluster.fe.configNamesBucket" .Values.phoenixai.phoenixAIFeSpec) }}
+
+NOTE: the FE config names no object storage (no aws_s3_path), so the cluster starts with no storage
+volume. It comes up running, but CREATE DATABASE and CREATE TABLE are refused with "The default
+storage volume does not exist" until you add one: either create it with SQL
+(CREATE STORAGE VOLUME ... ; SET ... AS DEFAULT STORAGE VOLUME) or put the bucket in
+phoenixAIFeSpec.config as the install guide's Step 3 shows. See doc/Deploy/install_with_helm.md.
+{{- end }}
 {{- if .Values.anywhere.enabled }}
 {{- $console := default "kube-anywhere-console" .Values.anywhere.nameOverride }}
 {{- $adminSecret := default (printf "%s-admin" $console) .Values.anywhere.admin.existingSecret }}
@@ -42,6 +50,6 @@ username and password.
 {{- else }}
 
 The PhoenixAI Anywhere console (operations & usage UI) is not enabled. Enable it with
-anywhere.enabled=true plus the required anywhere.dependencies.s3 settings — see
-charts/anywhere/values.yaml for the full reference.
+anywhere.enabled=true plus exactly one object-storage block — anywhere.dependencies.s3, .azblob,
+.adls2 or .gs — see charts/anywhere-console/values.yaml for the full reference.
 {{- end }}

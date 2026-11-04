@@ -16,8 +16,12 @@ metadata:
   name: a-phoenixai-with-persistent-storage   # change the name if needed.
 spec:
   phoenixAIFeSpec:
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1.5-ee
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1.7-ee
     replicas: 3
+    # reference the ConfigMap at the bottom of this file, which holds fe.conf.
+    configMapInfo:
+      configMapName: a-phoenixai-with-persistent-storage-fe-cm
+      resolveKey: fe.conf
     limits:
       cpu: 8
       memory: 16Gi
@@ -34,7 +38,7 @@ spec:
       storageSize: 1Gi    # the size of storage volume for log
       mountPath: /opt/starrocks/fe/log    # the path of log
   phoenixAICnSpec:
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1.5-ee
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1.7-ee
     replicas: 1
     limits:
       cpu: 16
@@ -51,3 +55,29 @@ spec:
       # storageClassName: ""  # if storageClassName is not set, the default storage class will be used
       storageSize: 1Gi  # the size of storage volume for log
       mountPath: /opt/starrocks/cn/log  # the path of log
+
+---
+
+# FE config. The operator deploys shared-data (elastic) clusters only and refuses a cluster whose
+# fe.conf does not set run_mode = shared_data; the mode is fixed when the FE first starts. These
+# lines let the FE start before any object storage is configured: create a storage volume with SQL
+# afterwards, or add the aws_s3_* settings here (see deploy_a_phoenixai_cluster_running_in_shared_data_mode.yaml).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: a-phoenixai-with-persistent-storage-fe-cm
+data:
+  fe.conf: |
+    LOG_DIR = ${STARROCKS_HOME}/log
+    DATE = "$(date +%Y%m%d-%H%M%S)"
+    JAVA_OPTS="-Dlog4j2.formatMsgNoLookups=true -Xmx8192m -XX:+UseG1GC -Xlog:gc*:${LOG_DIR}/fe.gc.log.$DATE:time"
+    http_port = 8030
+    rpc_port = 9020
+    query_port = 9030
+    edit_log_port = 9010
+    mysql_service_nio_enabled = true
+    sys_log_level = INFO
+    run_mode = shared_data
+    cloud_native_storage_type = S3
+    cloud_native_meta_port = 6090
+    enable_load_volume_from_conf = false

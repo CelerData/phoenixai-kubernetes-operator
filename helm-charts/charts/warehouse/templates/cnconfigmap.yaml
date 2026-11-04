@@ -11,3 +11,22 @@ data:
   {{- include "phoenixaiwarehouse.config" . | nindent 2 }}
 
 {{- end }}
+
+{{- $root := . }}
+{{- range $entry := .Values.cnGroups }}
+{{- if include "phoenixaiwarehouse.cngroup.hasOwnConfig" $entry }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "phoenixaiwarehouse.cngroup.configmap.name" (dict "root" $root "entry" $entry) }}
+  namespace: {{ template "phoenixaiwarehouse.namespace" $root }}
+  labels:
+    warehouse: {{ template "phoenixaiwarehouse.name" $root }}
+    cngroup: {{ $entry.name }}
+    app: "warehouse"
+data:
+  cn.conf: |
+{{ $entry.config | indent 4 }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,124 @@
+{{- if and .Values.phoenixAIOperator.enabled .Values.global.rbac.create }}
+{{- if or .Values.phoenixAIOperator.enablePVCExpansion .Values.phoenixAIOperator.enablePVCExpansionRBAC }}
+# RBAC for the PVC volume expansion feature. Rendered when the feature is enabled
+# (enablePVCExpansion) OR when only its RBAC is pre-provisioned (enablePVCExpansionRBAC). The latter
+# lets deploy/operator.yaml ship these permissions with the feature still OFF, so an operator can be
+# flipped on later (just add --enable-pvc-expansion) without re-applying cluster-scoped RBAC.
+# CAVEAT: since the gRPC-query-API release moved PVC READ into the main operator RBAC, this file is
+# no longer self-contained — pre-provisioning it standalone only works when the main operator RBAC
+# is from that release or newer; against an older main RBAC the operator would get PVC write without
+# read and fail Forbidden on every expansion reconcile.
+#
+# persistentvolumeclaims is namespaced; storageclasses is cluster-scoped (always needs a ClusterRole).
+# PVC get/list/watch is granted unconditionally in the main operator RBAC (clusterrole.yaml, or
+# role.yaml in watchNamespace mode — clusterrole.yaml renders nothing there), so this file only
+# needs to add the write verbs the expansion feature requires.
+{{- if .Values.phoenixAIOperator.watchNamespace }}
+# Scoped mode (watchNamespace): PVC access via a Role in the watched namespace, where the PVCs are;
+# StorageClass read via a ClusterRole.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "operator.name" . }}-operator-pvc-expansion
+  namespace: {{ .Values.phoenixAIOperator.watchNamespace | quote }}
+  labels:
+    app: {{ template "operator.name" . }}-operator
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - create
+  - update
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "operator.name" . }}-operator-pvc-expansion
+  namespace: {{ .Values.phoenixAIOperator.watchNamespace | quote }}
+  labels:
+    app: {{ template "operator.name" . }}-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "operator.name" . }}-operator-pvc-expansion
+subjects:
+- kind: ServiceAccount
+  name: {{ template "operator.serviceAccountName" . }}
+  namespace: {{ template "operator.namespace" . }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "operator.name" . }}-operator-pvc-expansion
+  labels:
+    app: {{ template "operator.name" . }}-operator
+rules:
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - storageclasses
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "operator.name" . }}-operator-pvc-expansion
+  labels:
+    app: {{ template "operator.name" . }}-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "operator.name" . }}-operator-pvc-expansion
+subjects:
+- kind: ServiceAccount
+  name: {{ template "operator.serviceAccountName" . }}
+  namespace: {{ template "operator.namespace" . }}
+{{- else }}
+# Cluster-wide mode: both resources granted via a single ClusterRole.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "operator.name" . }}-operator-pvc-expansion
+  labels:
+    app: {{ template "operator.name" . }}-operator
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - create
+  - update
+  - patch
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - storageclasses
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "operator.name" . }}-operator-pvc-expansion
+  labels:
+    app: {{ template "operator.name" . }}-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "operator.name" . }}-operator-pvc-expansion
+subjects:
+- kind: ServiceAccount
+  name: {{ template "operator.serviceAccountName" . }}
+  namespace: {{ template "operator.namespace" . }}
+{{- end }}
+{{- end }}
+{{- end }}

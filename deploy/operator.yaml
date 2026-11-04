@@ -4,14 +4,14 @@ kind: Namespace
 metadata:
   name: phoenixai
 ---
-# Source: operator/templates/service_account.yaml
+# Source: anywhere-operator/templates/service_account.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: phoenixai
   namespace: phoenixai
 ---
-# Source: operator/templates/clusterrole.yaml
+# Source: anywhere-operator/templates/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -85,6 +85,7 @@ rules:
   resources:
   - phoenixaiclusters
   - phoenixaiwarehouses
+  - phoenixaicngroups
   verbs:
   - '*'
 # when deploying to OpenShift, the following permission is also necessary
@@ -93,6 +94,7 @@ rules:
   resources:
   - phoenixaiclusters/finalizers
   - phoenixaiwarehouses/finalizers
+  - phoenixaicngroups/finalizers
   verbs:
   - update
 - apiGroups:
@@ -100,12 +102,13 @@ rules:
   resources:
   - phoenixaiclusters/status
   - phoenixaiwarehouses/status
+  - phoenixaicngroups/status
   verbs:
   - get
   - patch
   - update
 ---
-# Source: operator/templates/rbac-pvc-expansion.yaml
+# Source: anywhere-operator/templates/rbac-pvc-expansion.yaml
 # RBAC for the PVC volume expansion feature. Rendered when the feature is enabled
 # (enablePVCExpansion) OR when only its RBAC is pre-provisioned (enablePVCExpansionRBAC). The latter
 # lets deploy/operator.yaml ship these permissions with the feature still OFF, so an operator can be
@@ -144,7 +147,7 @@ rules:
   - list
   - watch
 ---
-# Source: operator/templates/clusterrolebinding.yaml
+# Source: anywhere-operator/templates/clusterrolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -158,7 +161,7 @@ subjects:
   name: phoenixai
   namespace: phoenixai
 ---
-# Source: operator/templates/rbac-pvc-expansion.yaml
+# Source: anywhere-operator/templates/rbac-pvc-expansion.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -174,7 +177,7 @@ subjects:
   name: phoenixai
   namespace: phoenixai
 ---
-# Source: operator/templates/leader-election-role.yaml
+# Source: anywhere-operator/templates/leader-election-role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -213,7 +216,7 @@ rules:
   - create
   - patch
 ---
-# Source: operator/templates/leader-election-role-binding.yaml
+# Source: anywhere-operator/templates/leader-election-role-binding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -228,7 +231,7 @@ subjects:
   name: phoenixai
   namespace: phoenixai
 ---
-# Source: operator/templates/api-service.yaml
+# Source: anywhere-operator/templates/api-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -246,7 +249,7 @@ spec:
     protocol: TCP
     name: grpc-api
 ---
-# Source: operator/templates/deployment.yaml
+# Source: anywhere-operator/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -265,7 +268,7 @@ spec:
         kubectl.kubernetes.io/default-container: manager
       labels:
         app: kube-anywhere-operator
-        version: 2.0.0
+        version: 2.1.0
     spec:
       automountServiceAccountToken: true
       containers:
@@ -284,7 +287,7 @@ spec:
         env:
         - name: TZ
           value: UTC
-        image: "us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/operator:v2.0.0"
+        image: "us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-operator:v2.1.0"
         imagePullPolicy: Always
         name: manager
         ports:

@@ -49,7 +49,7 @@ spec:
     # image sliced by "repository:tag"
     repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu
     # Note: the image tag must be greater than or equal to 3.2.0
-    tag: 4.1.5-ee
+    tag: 4.1.7-ee
   # serviceAccount for pod access cloud service.
   serviceAccount: ""
   # add annotations for pods. for example, if you want to config monitor for datadog, you can config the annotations.
@@ -143,17 +143,23 @@ spec:
     #   operator: "Equal|Exists"
     #   value: "value"
     #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+  # topologySpreadConstraints spreads the CN pods across failure domains.
+  # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  topologySpreadConstraints: []
+    # - maxSkew: 1
+    #   topologyKey: topology.kubernetes.io/zone
+    #   whenUnsatisfiable: ScheduleAnyway
+    #   labelSelector:
+    #     matchLabels:
+    #       app.kubernetes.io/component: cn
   # minReadySeconds specifies the minimum number of seconds for which a newly created pod should be ready
   # without any of its container crashing, for it to be considered available.
   # Defaults to 0 (pod will be considered available as soon as it is ready).
   # see https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds for more details.
   minReadySeconds: 0
   autoScalingPolicy: {}
-    # If version is not set, the operator picks the HPA (Horizontal Pod Autoscaler) version
-    # automatically based on your Kubernetes version: autoscaling/v2 on Kubernetes >= 1.26,
-    # autoscaling/v2beta2 on older clusters. Only set it (v1, v2beta2, v2) to override that
-    # choice — note that the v2beta2 API was removed in Kubernetes 1.26.
-    # version: v2
+    # The operator creates an autoscaling/v2 HorizontalPodAutoscaler. The version field is
+    # accepted for compatibility and ignored.
     # maxReplicas: 10
     # minReplicas: 1
     # hpaPolicy:
@@ -241,3 +247,54 @@ configMaps: []
   #     key: |
   #       this is the content of the configmap
   #       when mounted, the key will be the name of the file
+
+# cnGroups declares extra CN Groups inside this warehouse. One entry becomes one PhoenixAICnGroup
+# custom resource, which the operator turns into one CN Group in the FE plus its own StatefulSet,
+# services and optional HPA. A query runs entirely inside one group, so the usual reason to add
+# groups is to keep each one inside a single availability zone.
+#
+# Requirements:
+#   * the CN image must be >= 4.1.6-ee (or >= 26.2.1); older images ignore the group and register
+#     into the builtin group instead
+#   * an entry is self-contained: nothing is inherited from `spec` above. Use a YAML anchor to share
+#     the common fields between entries.
+#
+# Adding or removing a group restarts none of this warehouse's own CN pods. Once a group exists they
+# have to name the builtin CN group explicitly, and the operator adds that to their pod template the
+# next time it writes their StatefulSet anyway (a spec change, a new image, a replica change); it
+# never removes it again, not even after the last group is gone.
+cnGroups: []
+  # x-cn-common: &cn-common
+  #   image:
+  #     repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu
+  #     tag: "4.1.6-ee"
+  #   resources:
+  #     requests:
+  #       cpu: 8
+  #       memory: 32Gi
+  # cnGroups:
+  #   - name: az-a                 # required, ^[a-z][a-z0-9-]*$; the CR is named <release>-<name>
+  #     replicas: 3                # optional; leave it out when an HPA (autoScalingPolicy) or
+  #                                # kubectl scale owns the count, see below
+  #     nodeSelector:
+  #       topology.kubernetes.io/zone: us-east-1a
+  #     <<: *cn-common
+  #   - name: az-b
+  #     replicas: 3
+  #     nodeSelector:
+  #       topology.kubernetes.io/zone: us-east-1b
+  #     config: |                  # optional; when set (non-empty) the group gets its own cn.conf
+  #                                # ConfigMap, otherwise it shares the warehouse's
+  #       sys_log_level = WARN
+  #     <<: *cn-common
+  #
+  # Every other key of `spec` above may also be used in an entry: serviceAccount, annotations,
+  # runAsNonRoot, podLabels, hostAliases, schedulerName, affinity, tolerations,
+  # topologySpreadConstraints, envVars, minReadySeconds, autoScalingPolicy, resources, service,
+  # imagePullSecrets, secrets, configMaps, storageSpec, persistentVolumeClaimRetentionPolicy.
+  #
+  # replicas: an entry without it starts at one replica (the CRD default) and is then left to
+  # whoever scales the group. A value written here is re-applied by helm upgrade (every upgrade
+  # with Helm 4, any upgrade that changes it with Helm 3), which resets whatever an HPA or kubectl
+  # scale set in between; removing a value that an earlier release carried resets the group to one
+  # replica on Helm 3. 0 parks the group.

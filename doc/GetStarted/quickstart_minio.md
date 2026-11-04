@@ -54,12 +54,6 @@ operator, a PhoenixAI cluster, and (with `anywhere.enabled=true`) the Anywhere c
 distributed as a release archive, so if you do not see it in the repository, install it from the
 `.tgz` for your release — ask your account team for `kube-anywhere-<version>.tgz`.
 
-:::caution Do not substitute a chart that merely looks similar
-The repository also carries older charts from the previous product generation, named `celerdata` and
-`kube-celerdata`. They are a different, earlier product — not this one under another name, and not a
-fallback.
-:::
-
 ## Get the images
 
 The operator, coordinator (FE), compute-node (CN) and console images are enterprise builds in a
@@ -85,10 +79,12 @@ already run — see
 [Deploy step by step, Step 1](../Deploy/install_with_helm.md#step-1--get-the-images-and-teach-kubernetes-to-pull-them).
 
 For an air-gapped installation, stage **five** images in your internal registry: the FE, CN,
-operator and console images, plus `minio/minio` and `minio/mc`. Mirroring is also what removes the
-install's dependence on reaching Artifact Registry at all — create the pull secret for **your**
-registry instead, with whatever user name and password it takes, and point `image.repository` at it
-for the operator, the FE, the CN, the console and any warehouse.
+operator and console images, plus `quay.io/minio/aistor/minio` and `quay.io/minio/aistor/mc`, and
+request the MinIO license file while you are still online — [Deploy MinIO](#deploy-minio) says
+where it comes from. Mirroring is also what removes the install's dependence on reaching Artifact
+Registry at all — create the pull secret for **your** registry instead, with whatever user name
+and password it takes, point `image.repository` at it for the operator, the FE, the CN, the
+console and any warehouse, and change the two `image:` lines in the MinIO manifests to your copies.
 
 :::tip Loading image archives into kind
 `kind load docker-image` fails on the multi-platform archives the `-ee` images ship as, because it
@@ -113,11 +109,28 @@ Then set `imagePullPolicy: IfNotPresent` in the chart values so the kubelet uses
 
 ## Deploy MinIO
 
+:::caution AIStor serves no S3 requests until a license is installed
+MinIO's community edition was retired, so this page deploys **MinIO AIStor**, a commercial product.
+Without a license the server starts in *offline mode*: its readiness check fails, so the
+Deployment never becomes Ready, and every S3 request — including the bucket Job below — is
+denied with `No license is installed`.
+
+Get a license before you apply the manifest. The **Free** tier is enough for this page: it costs
+nothing and is limited to a single node, which is all this manifest runs. Request it from
+[min.io/pricing](https://www.min.io/pricing) (**Get Started** under *Free*); it comes from MinIO
+SUBNET as a `minio.license` file holding one long token. The manifest below keeps that token in a
+Secret, mounts it into the container and passes it to the server with `--license`. The license
+has to be there at start-up: a pod that is not Ready has no Service endpoint, so installing it
+afterwards with `mc license update` does not fit this manifest. MinIO's
+[license documentation](https://docs.min.io/aistor/operations/licenses/) covers the details.
+:::
+
 This is deliberately minimal — one replica, one volume, root credentials in a Secret. It is enough
 for an evaluation and is **not** a production MinIO topology; for that, see MinIO's own
 documentation on distributed deployments.
 
-Change the credentials before applying, and set `storageClassName` to a class your cluster provides.
+Paste the contents of your `minio.license` file into the `minio-license` Secret, change the
+credentials, and set `storageClassName` to a class your cluster provides.
 
 ```yaml
 # minio.yaml
@@ -134,6 +147,14 @@ metadata:
 stringData:
   MINIO_ROOT_USER: phoenixai
   MINIO_ROOT_PASSWORD: change-me-before-applying
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-license
+  namespace: minio
+stringData:
+  minio.license: paste-the-contents-of-your-minio.license-file-here
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -162,8 +183,9 @@ spec:
     spec:
       containers:
         - name: minio
-          image: minio/minio:RELEASE.2025-09-07T16-13-09Z
-          args: ["server", "/data", "--console-address", ":9001"]
+          image: quay.io/minio/aistor/minio:RELEASE.2026-09-19T17-05-25Z
+          args: ["server", "/data", "--console-address", ":9001",
+                 "--license", "/license/minio.license"]
           envFrom:
             - secretRef: { name: minio-root }
           ports:
@@ -171,6 +193,7 @@ spec:
             - { containerPort: 9001, name: console }
           volumeMounts:
             - { name: data, mountPath: /data }
+            - { name: license, mountPath: /license, readOnly: true }
           readinessProbe:
             httpGet: { path: /minio/health/ready, port: 9000 }
             initialDelaySeconds: 5
@@ -180,6 +203,8 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim: { claimName: minio-data }
+        - name: license
+          secret: { secretName: minio-license }
 ---
 apiVersion: v1
 kind: Service
@@ -220,7 +245,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: mc
-          image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+          image: quay.io/minio/aistor/mc:RELEASE.2026-02-03T00-12-26Z
           envFrom:
             - secretRef: { name: minio-root }
           command: ["/bin/sh", "-c"]
@@ -413,7 +438,7 @@ anywhere:
   imagePullSecrets:
     - name: phoenixai-registry
   image:
-    repository: <your-registry>/anywhere
+    repository: <your-registry>/anywhere-console
     tag: <console-image-tag>
 
   # The operator's gRPC API Service, in this namespace.
@@ -774,10 +799,11 @@ a load balancer in front of the console:
 kubectl -n phoenixai patch secret kube-anywhere-console-admin \
   --type merge -p "{\"stringData\":{\"admin\":\"$(openssl rand -base64 24)\"}}"
 ```
+
 :::
 
-To reach the **Cluster Console** — the per-cluster view, with the data catalog, query insights and
-system monitoring — go to `http://localhost:8090/cluster-console/login` and sign in with a database
+To reach the **Cluster Console** — the per-cluster view, with the SQL editor, data catalog, query
+insights and system monitoring — go to `http://localhost:8090/cluster-console/login` and sign in with a database
 user from the cluster itself. That is a PhoenixAI database user, created in the cluster with SQL,
 not an Anywhere account.
 
@@ -794,7 +820,7 @@ Then confirm the cluster's objects are there:
 
 ```bash
 kubectl -n minio run mc --rm -i --restart=Never \
-  --image=minio/mc:RELEASE.2025-08-13T08-35-41Z \
+  --image=quay.io/minio/aistor/mc:RELEASE.2026-02-03T00-12-26Z \
   --env=U=<access-key> --env=P=<secret-key> --command -- /bin/sh -c \
   'mc alias set local http://minio.minio.svc.cluster.local:9000 "$U" "$P" >/dev/null &&
    mc du local/phoenixai/data/'
@@ -870,4 +896,3 @@ fixes it. Second, the images are community builds rather than enterprise `-ee`.
 
 **Monitoring pages are empty.** Prometheus is not installed, `anywhere.dependencies.prometheus` is not set,
 or the ServiceMonitors were not rendered (`metrics.serviceMonitor.enabled`).
-

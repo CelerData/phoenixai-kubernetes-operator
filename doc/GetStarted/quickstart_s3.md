@@ -48,12 +48,6 @@ operator, a PhoenixAI cluster, and (with `anywhere.enabled=true`) the Anywhere c
 distributed as a release archive, so if you do not see it in the repository, install it from the
 `.tgz` for your release — ask your account team for `kube-anywhere-<version>.tgz`.
 
-:::caution Do not substitute a chart that merely looks similar
-The repository also carries older charts from the previous product generation, named `celerdata` and
-`kube-celerdata`. They are a different, earlier product — not this one under another name, and not a
-fallback.
-:::
-
 ## Get the images
 
 The operator, coordinator (FE), compute-node (CN) and console images are enterprise builds in a
@@ -264,7 +258,7 @@ anywhere:
   imagePullSecrets:
     - name: phoenixai-registry
   image:
-    repository: <your-registry>/anywhere
+    repository: <your-registry>/anywhere-console
     tag: <console-image-tag>
 
   # The operator's gRPC API Service, in this namespace.
@@ -583,10 +577,11 @@ a load balancer in front of the console:
 kubectl -n phoenixai patch secret kube-anywhere-console-admin \
   --type merge -p "{\"stringData\":{\"admin\":\"$(openssl rand -base64 24)\"}}"
 ```
+
 :::
 
-To reach the **Cluster Console** — the per-cluster view, with the data catalog, query insights and
-system monitoring — go to `http://localhost:8090/cluster-console/login` and sign in with a database
+To reach the **Cluster Console** — the per-cluster view, with the SQL editor, data catalog, query
+insights and system monitoring — go to `http://localhost:8090/cluster-console/login` and sign in with a database
 user from the cluster itself. That is a PhoenixAI database user, created in the cluster with SQL,
 not an Anywhere account.
 
@@ -634,4 +629,3 @@ fixes it. Second, the images are community builds rather than enterprise `-ee`.
 **Monitoring pages are empty.** Prometheus is not installed, `anywhere.dependencies.prometheus` is not set,
 or the ServiceMonitors were not rendered (`metrics.serviceMonitor.enabled`). The console has a
 dependency check for this under the admin API.
-

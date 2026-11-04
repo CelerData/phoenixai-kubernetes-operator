@@ -82,8 +82,8 @@ The status update logic is as follows:
 Inorder to keep it simple and easy for users to follow this document, we use the `kube-anywhere` Helm Chart to deploy.
 Please note:
 
-1. Be sure to use at least v1.10.0 version of Operator and CRD.
-3. Sensitive information is replaced by xxx, please set it to a reasonable value.
+1. Be sure to use at least v2.0.0 version of Operator and CRD.
+2. Sensitive information is replaced by xxx, please set it to a reasonable value.
 
 ### 1. Create a normal working cluster
 
@@ -94,8 +94,8 @@ Prepare the `./phoenixai-values.yaml` file:
 operator:
   phoenixAIOperator:
     image:
-      repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/operator
-      tag: v1.10.0
+      repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-operator
+      tag: v2.1.0
     imagePullPolicy: IfNotPresent
     replicaCount: 1
     resources:
@@ -371,10 +371,10 @@ This time, we will deploy the cluster with the following command:
 
 ```bash
 # Note:
-# 1. make sure you are using the at least v1.10.0 version of Operator and CRD
+# 1. make sure you are using the at least v2.0.0 version of Operator and CRD
 # 2. the command to deploy the cluster is different from the first time. We specify two files, and the override.yaml
 #    is used for the recovery configuration.
-helm install -f ./phoenixai-values.yaml -f override.yaml kube-anywhere phoenixai/kube-anywhere --version 1.10.0
+helm install -f ./phoenixai-values.yaml -f override.yaml kube-anywhere phoenixai/kube-anywhere --version 2.1.0
 
 ```
 

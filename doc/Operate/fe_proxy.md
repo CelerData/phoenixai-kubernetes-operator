@@ -76,7 +76,7 @@ for more details about how to configure `phoenixAIFeProxySpec`.
 ## Deploy Fe Proxy Using PhoenixAICluster CR
 
 If you install PhoenixAI with PhoenixAICluster CR yaml, please see
-[deploy_a_phoenixai_cluster_with_fe_proxy.md](../../examples/phoenixai/deploy_a_phoenixai_cluster_with_fe_proxy.yaml)
+[deploy_a_phoenixai_cluster_with_fe_proxy.yaml](../../examples/phoenixai/deploy_a_phoenixai_cluster_with_fe_proxy.yaml)
 
 ## Load through the proxy
 

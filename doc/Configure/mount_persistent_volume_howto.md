@@ -1,3 +1,7 @@
+---
+sidebar_position: 7
+---
+
 # Mount Persistent Volume
 
 PhoenixAI Kubernetes Operator supports mounting persistent volumes to PhoenixAI FE and CN pods. If not specified, the

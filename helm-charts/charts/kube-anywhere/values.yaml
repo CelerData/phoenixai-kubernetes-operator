@@ -14,7 +14,8 @@ operator:
       # If set true, the clusterrole, clusterrolebinding, serviceaccount resources will be created for
       # the operator. If changed to false later, these resources will be deleted.
       # Note: By default the operator will watch all namespaces, so it needs clusterrole, clusterrolebinding to access resources.
-      #       If .Values.phoenixAIOperator.watchNamespace is set, the role and rolebinding will be created for the specified namespace.
+      #       If .Values.phoenixAIOperator.watchNamespace is set, the role and rolebinding will be created in the specified
+      #       namespace (the leader-election role stays in the operator's own namespace).
       create: true
       serviceAccount:
         name: "phoenixai"
@@ -47,8 +48,8 @@ operator:
     namespaceOverride: ""
     image:
       # image sliced by "repository:tag"
-      repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/operator
-      tag: v2.0.0
+      repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-operator
+      tag: v2.1.0
     imagePullPolicy: Always
     replicaCount: 1
     resources:
@@ -93,6 +94,8 @@ operator:
     # If specified, it will restrict operator to watch resources in the specified namespace. And
     #  1. You must deploy your PhoenixAI cluster to the specified namespace.
     #  2. You cannot assign multiple namespaces to watchNamespace field.
+    #  3. The namespace must exist before you install, because the operator's role is created in it. The
+    #     operator itself may run in a different namespace.
     # Note: In most cases, you should not set this value. If your kubernetes cluster manages too many nodes, and
     # the operator watching all namespaces uses too many memory resources, you can set this value.
     # Defaults to all namespaces.
@@ -137,6 +140,33 @@ operator:
     enableApiServer: true
     # Port the gRPC query API server binds to when enableApiServer is true.
     apiServerPort: 9090
+    # Restrict who may connect to the operator pod with a Kubernetes NetworkPolicy. Off by default:
+    # a NetworkPolicy is enforced only by a network plugin that implements it (Calico, Cilium, Azure
+    # Network Policy, ...); on a cluster whose plugin does not, the object is accepted and ignored,
+    # so confirm your plugin enforces it before relying on this. When enabled, the policy admits
+    # exactly two things: the health port (8081, open to every source so the kubelet's probes pass;
+    # it serves only /healthz and /readyz), and the gRPC query API port
+    # (apiServerPort, only while enableApiServer is true) from the pods matching apiClientPodLabels —
+    # in this namespace, or in each namespace listed in apiClientNamespaces (a console serving
+    # several operators runs in a namespace of its own; the empty list means this namespace only, a
+    # non-empty list replaces it — list this namespace too if a console also runs here — and a
+    # namespace is matched by its name, the kubernetes.io/metadata.name label). Everything
+    # else inbound is refused, the operator's metrics port (8080) included: a scraper needs a rule of
+    # its own in extraIngress. Ingress only — the operator's own outbound connections (the
+    # Kubernetes API, the FE's MySQL port, DNS) are not restricted. Enabling or disabling it creates
+    # or removes one object and restarts nothing.
+    networkPolicy:
+      enabled: false
+      # The label of the console's pods: its `app` label is the console chart's nameOverride.
+      apiClientPodLabels:
+        app: kube-anywhere-console
+      apiClientNamespaces: []
+      # Extra ingress rules, appended as written (networking.k8s.io/v1 NetworkPolicyIngressRule),
+      # e.g. the metrics port for a Prometheus in the monitoring namespace:
+      # - ports: [{port: 8080, protocol: TCP}]
+      #   from:
+      #   - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: monitoring}}
+      extraIngress: []
     # How the operator's MySQL connection to FE negotiates TLS. Mirrors the MySQL client's
     # --ssl-mode option:
     #   DISABLED  - always plaintext. An FE with ssl_force_secure_transport=true rejects the
@@ -153,15 +183,18 @@ operator:
     # Additional operator container environment variables
     # You specify this manually like you would a raw deployment manifest.
     # Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
-    # operator supports the following environment variables:
-    # KUBE_PHOENIXAI_UNSUPPORTED_ENVS: "XXX,YYY" # The environment variables that will not be passed to phoenixai container.
+    # operator supports the following environment variable, a comma-separated list of the environment
+    # variables that will not be passed to the phoenixai containers:
+    # - name: KUBE_STARROCKS_UNSUPPORTED_ENVS
+    #   value: "XXX,YYY"
     env: []
     # setting log related parameter
     log:
       - --zap-time-encoding=iso8601
       - --zap-encoder=console
-      # to enable debug log, uncomment the following option
-      # - --zap-log-level 4
+      # to enable debug log, uncomment the following option (keep the "=": each list item is passed to
+      # the operator as one argument)
+      # - --zap-log-level=4
     # Operator needs to specify the FQDN in nginx.conf when it set up fe-proxy service.
     # By default, Operator will use cluster.local as the dnsDomainSuffix.
     # If you set up a kubernetes cluster with a different dnsDomainSuffix, you need to set this value.
@@ -339,7 +372,7 @@ phoenixai:
     #   2. The values in their own spec will replace all the values in this field, not merge.
     componentValues:
       image:
-        tag: "4.1.5-ee"
+        tag: "4.1.7-ee"
       # hostAliases allows adding entries to /etc/hosts inside the containers.
       hostAliases: []
         # - ip: "127.0.0.1"
@@ -681,6 +714,15 @@ phoenixai:
       # transition to Node Not Ready state. Since the default value of min_graceful_exit_time_second is 15, we change it to a larger value.
       # Note: PhoenixAI version must be greater than or equal to 3.4.2 to support this configuration, otherwise it will not take effect.
       min_graceful_exit_time_second = 25
+      # This chart deploys shared-data (elastic) clusters only, and the operator refuses a cluster whose fe.conf
+      # does not say so. These lines let the FE start in shared-data mode before any object storage is
+      # configured: create a storage volume with SQL afterwards, or replace this block with one that names
+      # the bucket (aws_s3_* settings, enable_load_volume_from_conf = true) as the install guide does.
+      # The mode is fixed when the FE first starts and cannot be changed on an existing cluster.
+      run_mode = shared_data
+      cloud_native_storage_type = S3
+      cloud_native_meta_port = 6090
+      enable_load_volume_from_conf = false
     # A map object for setting the FE config. When configyaml is set to non-empty, the configs in configyaml will take
     # precedence and values in the config field will be discarded.
     # Note: When using configyaml, the number needs to be quoted to avoid being converted to scientific notation.
@@ -958,11 +1000,8 @@ phoenixai:
       #     matchLabels:
       #       app.kubernetes.io/component: cn
     autoScalingPolicy: {}
-      # If version is not set, the operator picks the HPA (Horizontal Pod Autoscaler) version
-      # automatically based on your Kubernetes version: autoscaling/v2 on Kubernetes >= 1.26,
-      # autoscaling/v2beta2 on older clusters. Only set it (v1, v2beta2, v2) to override that
-      # choice — note that the v2beta2 API was removed in Kubernetes 1.26.
-      # version: v2
+      # The operator creates an autoscaling/v2 HorizontalPodAutoscaler. The version field is
+      # accepted for compatibility and ignored.
       # maxReplicas: 10
       # minReplicas: 1
       # hpaPolicy:
@@ -1339,17 +1378,56 @@ phoenixai:
         #   mountPath: /tmp
     # the pod labels for user select or classify pods.
     podLabels: {}
+  
+  # phoenixAICnGroups declares extra CN Groups inside this cluster's default_warehouse. One entry
+  # becomes one PhoenixAICnGroup custom resource, which the operator turns into one CN Group in the FE
+  # plus its own StatefulSet, services and optional HPA. A query runs entirely inside one group, so
+  # the usual reason to add groups is to keep each one inside a single availability zone.
+  #
+  # Requirements:
+  #   * the CN image must be >= 4.1.6-ee (or >= 26.2.1); older images ignore the group and register
+  #     into the builtin group instead
+  #   * an entry is self-contained: nothing is inherited from phoenixAICnSpec above, and entries do
+  #     not take part in phoenixAICluster.componentValues. Use a YAML anchor to share common fields.
+  #   * an entry without its own `config` (missing or empty) points at the cluster's CN ConfigMap, so
+  #     in that case the cluster must render one (phoenixAICluster.enabledCn with
+  #     phoenixAICnSpec.config).
+  #   * `replicas` is optional. Without it the group starts at one replica (the CRD default) and is
+  #     then left to whoever scales it; a value written here is re-applied by helm upgrade (every
+  #     upgrade with Helm 4, any upgrade that changes it with Helm 3), which resets whatever an HPA
+  #     (autoScalingPolicy) or kubectl scale set in between, and removing a value that an earlier
+  #     release carried resets the group to one replica on Helm 3. 0 parks the group.
+  #
+  # Adding or removing a group restarts none of the cluster's own CN pods. Once a group exists they
+  # have to name the builtin CN group explicitly, and the operator adds that to their pod template the
+  # next time it writes their StatefulSet anyway (a spec change, a new image, a replica change); it
+  # never removes it again, not even after the last group is gone.
+  #
+  # The entry schema is the warehouse chart's `spec` block, not the larger phoenixAICnSpec above:
+  # name, image (both required), then replicas, serviceAccount, annotations, runAsNonRoot, podLabels,
+  # hostAliases, schedulerName, nodeSelector, affinity, tolerations, topologySpreadConstraints,
+  # envVars, minReadySeconds, autoScalingPolicy, resources, service, imagePullSecrets, secrets,
+  # configMaps, storageSpec, persistentVolumeClaimRetentionPolicy, config.
+  phoenixAICnGroups: []
+    # - name: az-a
+    #   image:
+    #     repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu
+    #     tag: "4.1.6-ee"
+    #   replicas: 3
+    #   nodeSelector:
+    #     topology.kubernetes.io/zone: us-east-1a
 
 anywhere:
-  # Default values for the anywhere subchart (the PhoenixAI Anywhere console).
+  # Default values for the anywhere-console chart (the PhoenixAI Anywhere console), addressed as
+  # `anywhere` through the parent kube-anywhere chart.
   #
   # The sections every production install configures come first: image, the operator pairing
   # (operatorApiAddrs), the external dependencies (object storage is REQUIRED, Prometheus powers the
   # monitoring pages) and query-history collection. Everything after them has workable defaults.
   
   # Whether the parent kube-anywhere chart installs the console (dependency
-  # condition). Off by default because the console requires object storage
-  # (dependencies.s3) that has no usable default. Inert when this chart is
+  # condition). Off by default because the console requires object storage (exactly one of
+  # dependencies.s3 / .azblob / .adls2 / .gs) that has no usable default. Inert when this chart is
   # templated or installed standalone.
   enabled: false
   
@@ -1360,7 +1438,7 @@ anywhere:
   #
   #   enabled: true
   #   image:
-  #     repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere
+  #     repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-console
   #     tag: ""            # empty = the chart appVersion; set it to pin a specific console version
   #     pullPolicy: IfNotPresent
   #   operatorApiAddrs:
@@ -1396,7 +1474,12 @@ anywhere:
   # Image
   # ---------------------------------------------------------------------------------------------
   image:
-    repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere
+    # Up to 2.0.x the image was published as .../enterprise/anywhere, which receives no new
+    # versions. That exact value — pinned in a values file, or kept by `helm upgrade --reuse-values`
+    # — is replaced with the repository below while `tag` is empty, so the chart's appVersion is
+    # pulled from where it is published. With an explicit `tag` it is used as written: every tag
+    # it ever had is still served there. Any other value, such as a mirror, is used as given.
+    repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-console
     # Empty defaults to the chart appVersion.
     tag: ""
     pullPolicy: IfNotPresent
@@ -1430,21 +1513,30 @@ anywhere:
   # database here on purpose — that is embedded (see persistence below). Configured blocks are
   # inlined into the config-file Secret (templates/secret-config.yaml, the reason the config is
   # a Secret and not a ConfigMap) for the backend to consume; changes roll the pod via the config
-  # checksum annotation. At startup anywhere validates dependencies.s3 with a write/read/delete
-  # probe before serving; an enabled dependencies.prometheus is validated via the dependency-check
-  # endpoint. Both report actionable errors.
+  # checksum annotation. At startup anywhere validates the configured object store with a
+  # write/read/list/delete probe before serving; an enabled dependencies.prometheus is validated via
+  # the dependency-check endpoint. Both report actionable errors.
   dependencies:
     # Object storage for large artifacts — query profiles (tens of KB to tens of MB) and support
-    # bundles (up to 100 GiB scale): too large for a relational database, and the data PVC does not
-    # scale to them. REQUIRED: the chart refuses to render until bucket/region/credentials are
-    # set below. AWS-S3-compatible endpoints are supported. All artifacts share one key tree, one
-    # top-level prefix per feature ("profile/", "support-bundle/"), optionally under the "path"
-    # prefix below, so the bucket can be shared with other uses (e.g. the PhoenixAI cluster's own
-    # data bucket; bucket+path together match StarRocks' aws_s3_path semantics). Anywhere deletes
+    # bundles (up to 100 GiB scale; one bundle can grow to about 312 GiB on s3, 390 GiB on
+    # azblob/adls2, and is not capped by gs): too large for a relational database, and the data PVC
+    # does not scale to them. REQUIRED, and EXACTLY ONE of the four blocks below — s3, azblob, adls2 or gs —
+    # may be configured: the chart refuses to render with none or with two. All four store the same
+    # key tree, one top-level prefix per feature ("profile/", "support-bundle/"), optionally under
+    # the block's "path" prefix, so the bucket or container can be shared with other uses (e.g. the
+    # PhoenixAI cluster's own data store; bucket/container + path together match the cluster's
+    # aws_s3_path / azure_blob_path / azure_adls2_path / gs:// location semantics). Anywhere deletes
     # expired objects itself (query-history retention default 7 days; support bundles by TTL);
-    # bucket lifecycle rules on the two prefixes (expiration = retention + 7 days) plus an
+    # lifecycle rules on the two prefixes (expiration = retention + 7 days) plus, on S3, an
     # abort-incomplete-multipart-upload rule are recommended as backstops for objects orphaned
     # while anywhere is down.
+    #
+    # AWS S3 or any S3-compatible endpoint. On AWS, region is the bucket's own region (required) and
+    # endpoint stays empty. accessKey/secretKey are an IAM user's static key; leave both empty to use
+    # the AWS SDK's default credential chain — IRSA (annotate serviceAccount.annotations with
+    # eks.amazonaws.com/role-arn), EKS Pod Identity or an EC2 instance profile. The chart README lists
+    # the IAM actions the identity needs, and why export URLs signed with temporary credentials expire
+    # with their session.
     s3:
       bucket: ""
       path: ""
@@ -1455,6 +1547,97 @@ anywhere:
       # Path-style addressing (https://endpoint/bucket/key). Required by MinIO and most self-hosted
       # S3-compatibles; leave false for AWS S3 and Alibaba OSS (virtual-hosted style).
       usePathStyle: false
+    # Azure Blob Storage: a storage account whose hierarchical namespace is DISABLED — the same
+    # account kind a PhoenixAI Database storage volume of TYPE = AZBLOB uses, and the same values
+    # as its azure.blob.* properties (fe.conf azure_blob_*). Authentication is exactly one of five
+    # combinations; anything set beyond the one chosen refuses startup:
+    #   - sharedKey: the account's access key;
+    #   - sasToken: an account or container SAS with read, write, delete, list and create
+    #     permissions on the Blob service;
+    #   - Microsoft Entra ID, with the oauth2* keys, named and combined as a TYPE = ADLS2 storage
+    #     volume's azure.adls2.oauth2_* properties (an AZBLOB volume has no OAuth2 form):
+    #       workload identity  oauth2TokenFile + oauth2TenantId + oauth2ClientId
+    #       managed identity   oauth2UseManagedIdentity: true + oauth2TenantId + oauth2ClientId
+    #       service principal  oauth2ClientId + oauth2ClientSecret + oauth2ClientEndpoint
+    #     The identity needs Storage Blob Data Contributor on the storage account (export's user
+    #     delegation key can only be granted at account scope; a container-scoped role needs
+    #     Storage Blob Delegator on the account beside it). See the
+    #     chart README, "Authenticating with Microsoft Entra ID".
+    # Every combination but sasToken can mint the presigned download URLs of support-bundle export;
+    # with sasToken, bundles are downloaded through the console instead.
+    azblob:
+      # The account's Blob endpoint, with scheme: https://<account>.blob.core.windows.net
+      endpoint: ""
+      # The container holding anywhere's key tree.
+      container: ""
+      path: ""
+      sharedKey: ""
+      sasToken: ""
+      # Workload identity: the projected service-account token the AKS webhook mounts into a pod
+      # labelled azure.workload.identity/use: "true" (see podLabels) —
+      # /var/run/secrets/azure/tokens/azure-identity-token.
+      oauth2TokenFile: ""
+      # Managed identity: a user-assigned identity on the node, reached through IMDS. On AKS prefer
+      # workload identity: the kubelet identity is shared by every pod on the node.
+      oauth2UseManagedIdentity: false
+      # The Entra tenant (directory) id and the identity's client id, both GUIDs. The tenant is
+      # required by workload and managed identity; a service principal takes it from its endpoint.
+      oauth2TenantId: ""
+      oauth2ClientId: ""
+      # Service principal: an app registration's client secret, and its token endpoint
+      # https://login.microsoftonline.com/<tenant-id>/oauth2/token.
+      oauth2ClientSecret: ""
+      oauth2ClientEndpoint: ""
+    # Azure Data Lake Storage Gen2: a storage account whose hierarchical namespace is ENABLED — the
+    # account kind a storage volume of TYPE = ADLS2 uses, with the values of its azure.adls2.*
+    # properties (fe.conf azure_adls2_*). Same credential rules as azblob. Anywhere reaches an ADLS
+    # Gen2 account through its Blob endpoint (https://<account>.blob.core.windows.net), derived
+    # from the DFS endpoint given here; a Private Endpoint set up for the account must therefore
+    # cover the blob sub-resource too, not only dfs.
+    adls2:
+      # The account's DFS endpoint, with scheme: https://<account>.dfs.core.windows.net
+      endpoint: ""
+      # The file system (container) holding anywhere's key tree.
+      container: ""
+      path: ""
+      sharedKey: ""
+      sasToken: ""
+      # The Microsoft Entra ID keys, as in azblob above.
+      oauth2TokenFile: ""
+      oauth2UseManagedIdentity: false
+      oauth2TenantId: ""
+      oauth2ClientId: ""
+      oauth2ClientSecret: ""
+      oauth2ClientEndpoint: ""
+    # Google Cloud Storage through its native API — the bucket a PhoenixAI Database storage volume
+    # of TYPE = GS uses, with the values of its gcp.gcs.* properties. The identity is exactly one of:
+    #   - useComputeEngineServiceAccount: true — the service account the Compute Engine metadata
+    #     server hands out; on GKE that is Workload Identity (annotate serviceAccount.annotations
+    #     with iam.gke.io/gcp-service-account), so no secret is written here at all;
+    #   - the three serviceAccount* fields of a service-account JSON key (client_email,
+    #     private_key_id, private_key), which only take effect together.
+    # Either may impersonate another service account (impersonationServiceAccount): the identity
+    # above needs roles/iam.serviceAccountTokenCreator on the target, and every request then runs
+    # as the target. Support-bundle export presigns download URLs with the private key when one is
+    # configured; the other two identities sign through the IAM Credentials API, which needs
+    # roles/iam.serviceAccountTokenCreator on the signing account itself — the startup probe
+    # refuses to start without it. The bucket needs roles/storage.objectAdmin (or objectCreator +
+    # objectViewer + the delete permission) for the identity that reaches it.
+    gs:
+      # The bucket (the <bucket> of a gs://<bucket>/... storage-volume location).
+      bucket: ""
+      # Key prefix inside the bucket; bucket + path mean what gs://<bucket>/<prefix> means.
+      path: ""
+      # Optional endpoint override (= gcp.gcs.endpoint), e.g. a Private Service Connect address;
+      # empty = the public https://storage.googleapis.com.
+      endpoint: ""
+      useComputeEngineServiceAccount: false
+      serviceAccountEmail: ""
+      serviceAccountPrivateKeyId: ""
+      # The PEM private key. A YAML block scalar (|) keeps its line breaks; the JSON key file's
+      # one-line string with literal "\n" sequences is accepted as well.
+      serviceAccountPrivateKey: ""
+      impersonationServiceAccount: ""
     # Time-series metrics for the System Monitoring pages. Anywhere only queries; it never runs its
     # own TSDB. Validate the wiring after install with the dependency check:
     # POST /api/v1/admin/dependencies/prometheus/check. The same checks also run per cluster as the
@@ -1523,12 +1706,22 @@ anywhere:
     # Sampling period. The FE keeps query details in memory for only ~30s, so raising this
     # towards 30s risks losing queries; lowering it adds polling load.
     collectInterval: 10s
-    # Days to keep collected query records and their profile objects.
+    # Days to keep collected query records and their profile objects. 0 means the default (7 days),
+    # not keep-forever: unbounded query history outgrows the data volume. Negative values refuse startup.
     retentionDays: 7
     # Persist bar in milliseconds: only queries at least this slow are kept (failed queries are
     # always kept). 0 keeps every query — suitable only for low-traffic clusters: at high QPS
     # full persistence grows the database and object store without bound.
     slowQueryMs: 5000
+    # A query's profile is often built after its record is collected — on large queries it takes
+    # seconds. Such a record is stored at once and its profile is fetched later from the FE that
+    # ran it, for up to 5 minutes after the query ended. This caps how many records per FE wait
+    # for their profile at a time (default 1000; must be greater than 0). Each FE keeps only its
+    # newest profile_info_reserved_num profiles (500 by default), so a record past that is no
+    # longer worth waiting for. If you raise profile_info_reserved_num on the FEs, raise this to
+    # about twice it. The profile of a query that enabled profiling only for its own session
+    # (SET enable_profile = true, or a SET_VAR hint) is not fetched later.
+    # profileBackfillLimit: 1000
   
   # ---------------------------------------------------------------------------------------------
   # Admin Console accounts
@@ -1559,6 +1752,28 @@ anywhere:
       admin: "admin"
     existingSecret: ""
   
+  # How a login is carried, for both consoles. Each console keeps its session in
+  # its own HttpOnly, SameSite=Strict cookie; these two settings are the parts an
+  # installation decides.
+  auth:
+    # Marks the session cookies Secure, so a browser will not send them over
+    # plain HTTP at all.
+    #
+    # Off by default because the in-cluster deployment speaks plain HTTP, where
+    # the flag would stop every login from working. Turn it on when TLS
+    # terminates in front of the console — an Ingress, a load balancer, a service
+    # mesh — which is the only shape where the flag has something to protect: the
+    # cookie then cannot leak through a plain-HTTP request to the same host (a
+    # typed http:// address before the redirect, a mixed-content subresource).
+    secureCookies: false
+    # Sliding lifetime of a login: every request pushes the expiry back, so this
+    # bounds idle time rather than total session length.
+    #
+    # Empty keeps the service default of 24h. A Go duration ("12h", "90m", "45s"),
+    # and it must be positive — the service refuses to start on 0, which would
+    # expire every login at the moment it was created.
+    sessionTTL: ""
+  
   # ---------------------------------------------------------------------------------------------
   # Application settings
   # ---------------------------------------------------------------------------------------------
@@ -1576,14 +1791,16 @@ anywhere:
   # At `info` you get one line per API request plus every failure that is a server-side or
   # upstream problem. `debug` additionally logs the web UI's static-asset requests and the
   # client-side errors (bad parameters, not-found, expired sessions) — useful when reproducing
-  # one specific request, noisy as a steady state.
+  # one specific request, noisy as a steady state. An unknown level (a typo) refuses startup.
   logLevel: info
   # Sets the TZ environment variable of the anywhere pod, which is the zone its log timestamps are
   # rendered in. Does not affect the PhoenixAI cluster's own time_zone.
   timeZone: UTC
-  # Support-bundle sizing and retention. Bundle archives stream straight into the object store
-  # configured under dependencies.s3, enabling the presigned-URL export endpoint. There is no
-  # staging directory and no local copy of the archive.
+  # Support-bundle sizing and retention. Bundle archives stream straight into the configured object
+  # store (the dependencies.s3 / .azblob / .adls2 / .gs block). The presigned-URL export endpoint
+  # is available where that store can sign one (S3, Azure with sharedKey, gs); with an Azure
+  # sasToken a bundle is downloaded through the console instead. There is no staging directory and
+  # no local copy of the archive.
   supportBundle:
     # Days to keep finished bundles — time is the only retention dimension (0 disables cleanup:
     # an explicit keep-forever). The cleanup runs in anywhere itself.
@@ -1676,6 +1893,17 @@ anywhere:
   # its relational storage (SQLite on the PVC, see persistence above) which allows one writer,
   # and the binary refuses to start on a non-0 ordinal. Running more than one replica is not
   # supported.
+  #
+  # Startup compresses the web assets in memory: memory peaks for a few seconds at about 210 MB
+  # with the 1-CPU limit below (about 250 MB with more CPUs), then settles near 50 MB. Keep the
+  # memory limit at 512Mi or more.
+  #
+  # With query history enabled, the collector works on up to 8 clusters at once, and one cluster's
+  # collection round can hold up to about 320 MiB when every query carries a large profile
+  # (enable_profile on globally) and the FE's queue is near its 256 MiB response bound. The
+  # theoretical worst case, 8 such clusters in the same round, is about 2.5 GiB — above the 2Gi
+  # below. A typical round holds KB to MB; raise the limit if you collect from many clusters that
+  # profile every query.
   resources:
     limits:
       cpu: 1
@@ -1685,12 +1913,29 @@ anywhere:
       memory: 2Gi
   # Container security context. The image is distroless static (nonroot); the binary writes only
   # to the data PVC mount (persistent storage), never to the container root filesystem.
+  # Together with the pod's fsGroup these five settings are what the Kubernetes Pod Security
+  # Standards call the "restricted" profile, so the console installs unchanged into a namespace
+  # that enforces it. Overriding this key merges rather than replaces, so dropping one of the
+  # five means naming it explicitly.
   securityContext:
     runAsNonRoot: true
     allowPrivilegeEscalation: false
     readOnlyRootFilesystem: true
+    # A static Go binary listening on an unprivileged port needs none of the capabilities a
+    # container runtime grants by default.
+    capabilities:
+      drop:
+        - ALL
+    # RuntimeDefault is the container runtime's own syscall filter. The alternative that would
+    # also satisfy "restricted" is a Localhost profile, which every node would have to carry.
+    seccompProfile:
+      type: RuntimeDefault
   # Extra annotations for the anywhere pod.
   podAnnotations: {}
+  # Extra labels for the anywhere pod — e.g. azure.workload.identity/use: "true", which the AKS
+  # workload-identity webhook needs to mount the token an oauth2TokenFile reads. The chart's own
+  # labels (app, version) cannot be overridden: app is the StatefulSet's selector.
+  podLabels: {}
   # Standard scheduling knobs for the anywhere pod.
   nodeSelector: {}
   affinity: {}

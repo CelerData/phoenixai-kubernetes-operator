@@ -1,4 +1,8 @@
-# Deploying with a read-only fielsystem
+---
+sidebar_position: 8
+---
+
+# Deploying with a read-only filesystem
 
 PhoenixAI has two components: Frontend (FE) and Compute Node (CN). When the `readOnlyRootFilesystem` is
 set to `true`, the components of PhoenixAI cannot start normally. This is because the components of PhoenixAI write data
@@ -44,7 +48,7 @@ This document describes how to set up PhoenixAI when the `readOnlyRootFilesystem
 We create and mount a volume, and in the entrypoint script, we will copy everything from the original directory to the
 mounted volume. This way, the components of PhoenixAI can write data to the mounted volume.
 
-> Note: you should use the operator version `v1.9.9` or later.
+> Note: you should use the operator version `v2.0.0` or later.
 
 ## Steps
 
@@ -172,14 +176,14 @@ metadata:
 
 If you are using the `kube-anywhere` Helm chart, add the following snippets to `values.yaml`.
 
-> Note: you should use the chart version `v1.9.9` or later.
+> Note: you should use the chart version `2.0.0` or later.
 
 ```yaml
 operator:
   phoenixAIOperator:
     image:
-      repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/operator
-      tag: v1.9.9
+      repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-operator
+      tag: v2.1.0
     imagePullPolicy: IfNotPresent
     resources:
       requests:

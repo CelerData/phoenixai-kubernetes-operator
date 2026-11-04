@@ -20,6 +20,8 @@ Resource Types:
 (<em>Appears on:</em><a href="#phoenixdata.ai/v1.AutoScalingPolicy">AutoScalingPolicy</a>, <a href="#phoenixdata.ai/v1.HorizontalScaler">HorizontalScaler</a>)
 </p>
 <div>
+<p>AutoScalerVersion names a HorizontalPodAutoscaler API version. Only AutoScalerV2 is created; the
+other values are accepted from existing resources and treated as AutoScalerV2.</p>
 </div>
 <table>
 <thead>
@@ -29,13 +31,17 @@ Resource Types:
 </tr>
 </thead>
 <tbody><tr><td><p>&#34;v1&#34;</p></td>
-<td><p>AutoScalerV1 the cn service use v1 autoscaler. Reference to <a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/">https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/</a></p>
+<td><p>AutoScalerV1 is accepted for compatibility and treated as AutoScalerV2.</p>
+<p>Deprecated: the operator no longer creates autoscaling/v1 autoscalers.</p>
 </td>
 </tr><tr><td><p>&#34;v2&#34;</p></td>
-<td><p>AutoScalerV2 the cn service use v2. Reference to  <a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/">https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/</a></p>
+<td><p>AutoScalerV2 is the version the operator creates. autoscaling/v2 is GA since Kubernetes 1.23,
+the oldest version the charts support. Reference to
+<a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/">https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/</a></p>
 </td>
 </tr><tr><td><p>&#34;v2beta2&#34;</p></td>
-<td><p>AutoScalerV2Beta2 the cn service use v2beta2. Reference to  <a href="https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/">https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/</a></p>
+<td><p>AutoScalerV2Beta2 is accepted for compatibility and treated as AutoScalerV2.</p>
+<p>Deprecated: autoscaling/v2beta2 was removed in Kubernetes 1.26.</p>
 </td>
 </tr></tbody>
 </table>
@@ -79,7 +85,9 @@ AutoScalerVersion
 </td>
 <td>
 <em>(Optional)</em>
-<p>version represents the autoscaler version for cn service. only support v1,v2beta2,v2</p>
+<p>version is deprecated and ignored. The operator always creates an autoscaling/v2
+HorizontalPodAutoscaler, which every supported Kubernetes version serves. The field is kept
+so that existing resources that set it (v1, v2beta2 or v2) stay valid.</p>
 </td>
 </tr>
 <tr>
@@ -390,34 +398,28 @@ If the observed generation is less than the generation, it will trigger disaster
 <td>
 <code>metrics</code><br/>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#metricspec-v2beta2-autoscaling">
-[]Kubernetes autoscaling/v2beta2.MetricSpec
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#metricspec-v2-autoscaling">
+[]Kubernetes autoscaling/v2.MetricSpec
 </a>
 </em>
 </td>
 <td>
 <em>(Optional)</em>
-<p>Metrics specifies how to scale based on a single metric
-the struct copy from k8s.io/api/autoscaling/v2beta2/types.go. the redundancy code will hide the restriction about
-HorizontalPodAutoscaler version and kubernetes releases matching issue.
-the splice will have unsafe.Pointer convert, so be careful to edit the struct fields.</p>
+<p>Metrics specifies how to scale based on a single metric</p>
 </td>
 </tr>
 <tr>
 <td>
 <code>behavior</code><br/>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#horizontalpodautoscalerbehavior-v2beta2-autoscaling">
-Kubernetes autoscaling/v2beta2.HorizontalPodAutoscalerBehavior
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#horizontalpodautoscalerbehavior-v2-autoscaling">
+Kubernetes autoscaling/v2.HorizontalPodAutoscalerBehavior
 </a>
 </em>
 </td>
 <td>
 <em>(Optional)</em>
-<p>HorizontalPodAutoscalerBehavior configures the scaling behavior of the target.
-the struct copy from k8s.io/api/autoscaling/v2beta2/types.go. the redundancy code will hide the restriction about
-HorizontalPodAutoscaler version and kubernetes releases matching issue.
-the</p>
+<p>HorizontalPodAutoscalerBehavior configures the scaling behavior of the target.</p>
 </td>
 </tr>
 </tbody>
@@ -889,10 +891,262 @@ DisasterRecoveryStatus
 </tr>
 </tbody>
 </table>
+<h3 id="phoenixdata.ai/v1.PhoenixAICnGroup">PhoenixAICnGroup
+</h3>
+<div>
+<p>PhoenixAICnGroup defines an extra CN group inside a PhoenixAI warehouse.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>metadata</code><br/>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#objectmeta-v1-meta">
+Kubernetes meta/v1.ObjectMeta
+</a>
+</em>
+</td>
+<td>
+Refer to the Kubernetes API documentation for the fields of the
+<code>metadata</code> field.
+</td>
+</tr>
+<tr>
+<td>
+<code>spec</code><br/>
+<em>
+<a href="#phoenixdata.ai/v1.PhoenixAICnGroupSpec">
+PhoenixAICnGroupSpec
+</a>
+</em>
+</td>
+<td>
+<p>Spec represents the specification of desired state of a PhoenixAI CN group.</p>
+<br/>
+<br/>
+<table>
+<tr>
+<td>
+<code>phoenixAICluster</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>PhoenixAICluster is the name of the PhoenixAICluster this CN group belongs to. Required and
+immutable: the value observed on the first successful reconcile is recorded in
+status.phoenixAICluster and a later change is rejected.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>phoenixAIWarehouse</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>PhoenixAIWarehouse is the name of the PhoenixAIWarehouse this CN group belongs to. Optional
+and immutable. When empty the group belongs to the cluster&rsquo;s default_warehouse.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>phoenixAICnSpec</code><br/>
+<em>
+<a href="#phoenixdata.ai/v1.PhoenixAICnSpec">
+PhoenixAICnSpec
+</a>
+</em>
+</td>
+<td>
+<p>PhoenixAICnSpec describes the CN workload of this group. It is self-contained on purpose:
+nothing is inherited from the parent PhoenixAICluster.spec.phoenixAICnSpec or
+PhoenixAIWarehouse.spec.template. Whatever the group needs must be spelled out here.</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+<code>status</code><br/>
+<em>
+<a href="#phoenixdata.ai/v1.PhoenixAICnGroupStatus">
+PhoenixAICnGroupStatus
+</a>
+</em>
+</td>
+<td>
+<p>Status represents the recent observed status of the PhoenixAI CN group.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phoenixdata.ai/v1.PhoenixAICnGroupSpec">PhoenixAICnGroupSpec
+</h3>
+<p>
+(<em>Appears on:</em><a href="#phoenixdata.ai/v1.PhoenixAICnGroup">PhoenixAICnGroup</a>)
+</p>
+<div>
+<p>PhoenixAICnGroupSpec defines the desired state of PhoenixAICnGroup.</p>
+<p>One PhoenixAICnGroup custom resource maps to exactly one CN Group in the kernel, and to one set
+of CN workloads (StatefulSet, services, PDB and optionally an HPA) in Kubernetes. The kernel
+group name is derived from metadata.name, the same way a warehouse name is derived from the
+PhoenixAIWarehouse CR name.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>phoenixAICluster</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>PhoenixAICluster is the name of the PhoenixAICluster this CN group belongs to. Required and
+immutable: the value observed on the first successful reconcile is recorded in
+status.phoenixAICluster and a later change is rejected.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>phoenixAIWarehouse</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>PhoenixAIWarehouse is the name of the PhoenixAIWarehouse this CN group belongs to. Optional
+and immutable. When empty the group belongs to the cluster&rsquo;s default_warehouse.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>phoenixAICnSpec</code><br/>
+<em>
+<a href="#phoenixdata.ai/v1.PhoenixAICnSpec">
+PhoenixAICnSpec
+</a>
+</em>
+</td>
+<td>
+<p>PhoenixAICnSpec describes the CN workload of this group. It is self-contained on purpose:
+nothing is inherited from the parent PhoenixAICluster.spec.phoenixAICnSpec or
+PhoenixAIWarehouse.spec.template. Whatever the group needs must be spelled out here.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phoenixdata.ai/v1.PhoenixAICnGroupStatus">PhoenixAICnGroupStatus
+</h3>
+<p>
+(<em>Appears on:</em><a href="#phoenixdata.ai/v1.PhoenixAICnGroup">PhoenixAICnGroup</a>)
+</p>
+<div>
+<p>PhoenixAICnGroupStatus defines the observed state of PhoenixAICnGroup.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>PhoenixAICnStatus</code><br/>
+<em>
+<a href="#phoenixdata.ai/v1.PhoenixAICnStatus">
+PhoenixAICnStatus
+</a>
+</em>
+</td>
+<td>
+<p>
+(Members of <code>PhoenixAICnStatus</code> are embedded into this type.)
+</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>parent</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Parent identifies the object whose builtin CN group the operator must keep addressable, in
+the form &ldquo;PhoenixAIWarehouse/<name>&rdquo; or &ldquo;PhoenixAICluster/<name>&rdquo;.</p>
+<p>It is written only after the group CR passes validation and the FE multi-cngroup feature
+gate. The parent&rsquo;s CN sub-controller uses it as the single criterion for injecting
+KUBE_STARROCKS_CNGROUP=_builtin_cngroup<em>0</em> into its own pods, so a group CR that is
+misspelled, points at the wrong cluster or runs against an FE without CN Group support never
+causes the parent workload to roll.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>phoenixAICluster</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>PhoenixAICluster records the cluster this group was admitted against; it makes
+spec.phoenixAICluster immutable in practice.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>phoenixAIWarehouse</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>PhoenixAIWarehouse records the warehouse this group was admitted against; it makes
+spec.phoenixAIWarehouse immutable in practice. Empty means default_warehouse.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>cnGroupName</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>CnGroupName is the effective group name in the FE, i.e. metadata.name with &lsquo;-&rsquo; replaced by &lsquo;_&rsquo;.</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="phoenixdata.ai/v1.PhoenixAICnSpec">PhoenixAICnSpec
 </h3>
 <p>
-(<em>Appears on:</em><a href="#phoenixdata.ai/v1.PhoenixAIClusterSpec">PhoenixAIClusterSpec</a>)
+(<em>Appears on:</em><a href="#phoenixdata.ai/v1.PhoenixAIClusterSpec">PhoenixAIClusterSpec</a>, <a href="#phoenixdata.ai/v1.PhoenixAICnGroupSpec">PhoenixAICnGroupSpec</a>)
 </p>
 <div>
 <p>PhoenixAICnSpec defines the desired state of cn.</p>
@@ -952,7 +1206,7 @@ AutoScalingPolicy
 <h3 id="phoenixdata.ai/v1.PhoenixAICnStatus">PhoenixAICnStatus
 </h3>
 <p>
-(<em>Appears on:</em><a href="#phoenixdata.ai/v1.PhoenixAIClusterStatus">PhoenixAIClusterStatus</a>, <a href="#phoenixdata.ai/v1.PhoenixAIWarehouseStatus">PhoenixAIWarehouseStatus</a>)
+(<em>Appears on:</em><a href="#phoenixdata.ai/v1.PhoenixAIClusterStatus">PhoenixAIClusterStatus</a>, <a href="#phoenixdata.ai/v1.PhoenixAICnGroupStatus">PhoenixAICnGroupStatus</a>, <a href="#phoenixdata.ai/v1.PhoenixAIWarehouseStatus">PhoenixAIWarehouseStatus</a>)
 </p>
 <div>
 <p>WarehouseComponentStatus represents the status of component.</p>
@@ -2412,7 +2666,8 @@ string
 </em>
 </td>
 <td>
-<p>name of a storage volume.</p>
+<p>name of a storage volume. It names the volume in the pod and is part of the PVC name, so it must
+be a DNS-1123 label: lowercase letters, digits and &lsquo;-&rsquo;, no dots, at most 63 characters.</p>
 </td>
 </tr>
 <tr>
@@ -2441,7 +2696,9 @@ string
 <td>
 <em>(Optional)</em>
 <p>StorageSize is a valid memory size type based on powers-of-2, so 1Mi is 1024Ki.
-Supported units:Mi, Gi, GiB, Ti, Ti, Pi, Ei, Ex: <code>512Mi</code>.
+Supported units: Ki, Mi, Gi, Ti, Pi, Ei, with an optional fraction and an optional leading <code>+</code>
+(a valid quantity sign). Ex: <code>512Mi</code>, <code>1.5Gi</code>, <code>.5Gi</code>. A size beginning with 0 means no volume:
+write it as <code>0</code> (or <code>0Gi</code>); a positive size must not begin with 0 &ndash; write <code>512Mi</code>, not <code>0.5Gi</code>.
 It will take effect only when storageClassName is real storage class, not emptyDir or hostPath.</p>
 </td>
 </tr>
@@ -2582,5 +2839,5 @@ AutoScalingPolicy
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>394e6d15</code>.
+on git commit <code>b2695ed9</code>.
 </em></p>

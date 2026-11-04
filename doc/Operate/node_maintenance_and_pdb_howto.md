@@ -94,3 +94,6 @@ The operator does not set this by default, because a hard topology constraint
 (`whenUnsatisfiable: DoNotSchedule`) can make pods `Pending` forever on clusters with fewer nodes than
 replicas (e.g. small trial or dev clusters) — a worse outcome than the problem it's meant to prevent. Using
 `ScheduleAnyway` gets you the spreading benefit without that risk.
+
+To spread across availability zones rather than nodes, see
+[Deploy Across Availability Zones](../Deploy/deploy_multi_az_howto.md).

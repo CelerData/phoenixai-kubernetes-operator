@@ -3,6 +3,6 @@
   "position": 7,
   "link": {
     "type": "generated-index",
-    "description": "Metrics and dashboards, and the monitoring integrations that feed them: Prometheus, Grafana, the Anywhere Console, and Datadog."
+    "description": "Metrics and dashboards, and the monitoring integrations that feed them: Prometheus, Grafana, the Anywhere Console, and Datadog. Also the query history behind the Cluster Console's Query insights page."
   }
 }

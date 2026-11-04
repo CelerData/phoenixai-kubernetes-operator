@@ -103,7 +103,7 @@ metadata:
   namespace: phoenixai
 spec:
   phoenixAIFeSpec:
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1.5-ee
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1.7-ee
     replicas: 3
     requests:
       cpu: 1
@@ -117,7 +117,7 @@ spec:
       configMapName: phoenixaicluster-sample-fe-cm   # the fe.conf with your shared-data settings
       resolveKey: fe.conf
   phoenixAICnSpec:
-    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1.5-ee
+    image: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1.7-ee
     replicas: 3
     requests:
       cpu: 1
@@ -195,8 +195,8 @@ mysql>
 To upgrade, just patch the PhoenixAI cluster. 
 
 ```console
-kubectl -n phoenixai patch phoenixaicluster phoenixaicluster-sample --type='merge' -p '{"spec":{"phoenixAIFeSpec":{"image":"us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1.5-ee"}}}'
-kubectl -n phoenixai patch phoenixaicluster phoenixaicluster-sample --type='merge' -p '{"spec":{"phoenixAICnSpec":{"image":"us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1.5-ee"}}}'
+kubectl -n phoenixai patch phoenixaicluster phoenixaicluster-sample --type='merge' -p '{"spec":{"phoenixAIFeSpec":{"image":"us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/fe-ubuntu:4.1.7-ee"}}}'
+kubectl -n phoenixai patch phoenixaicluster phoenixaicluster-sample --type='merge' -p '{"spec":{"phoenixAICnSpec":{"image":"us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/cn-ubuntu:4.1.7-ee"}}}'
 ```
 
 ### 6. Resize the PhoenixAI cluster
@@ -238,7 +238,7 @@ PhoenixAI cluster by Helm Chart. The kube-anywhere chart can also optionally ins
 console with `anywhere.enabled=true`.
 
 If you want more flexibility in managing your PhoenixAI clusters, you can deploy Operator
-using [operator](./helm-charts/charts/kube-anywhere/charts/operator) Helm Chart and PhoenixAI
+using [anywhere-operator](./helm-charts/charts/kube-anywhere/charts/anywhere-operator) Helm Chart and PhoenixAI
 using [phoenixai](./helm-charts/charts/kube-anywhere/charts/phoenixai) Helm Chart separately.
 
 ## Other Documents

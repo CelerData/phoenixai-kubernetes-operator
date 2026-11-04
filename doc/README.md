@@ -8,7 +8,6 @@ site.
 
 - [Quick start with Amazon S3](./GetStarted/quickstart_s3.md)
 - [Quick start with MinIO](./GetStarted/quickstart_minio.md)
-- [Console tour](./GetStarted/anywhere_console_ui_guide.md)
 
 ## Deploy
 
@@ -20,9 +19,19 @@ site.
 - [Migrate from the StarRocks operator](./Deploy/migrate-from-starrocks-howto.md)
 - [Console data volume](./Deploy/console_data_volume.md)
 - [Warehouses](./Deploy/deploy_warehouse_howto.md)
+- [CN Groups](./Deploy/deploy_cn_group_howto.md)
+- [Multiple availability zones](./Deploy/deploy_multi_az_howto.md)
 - [Multiple clusters](./Deploy/deploy_multiple_clusters_howto.md)
 - [License a cluster](./Deploy/license_cluster_howto.md)
 - [Upgrade the operator](./Deploy/upgrade_operator_howto.md)
+- [Deploy on Azure](./Deploy/deploy_on_azure_howto.md) — AKS, ADLS Gen2 and workload identity:
+  no account key anywhere, on a storage account that admits only private endpoints.
+
+## Console
+
+- [Overview](./Console/overview.md)
+- [Anywhere Console pages](./Console/anywhere_console.md)
+- [Cluster Console pages](./Console/cluster_console.md)
 
 ## Configure
 
@@ -34,10 +43,15 @@ site.
 - [Mount External ConfigMaps Or Secrets](./Configure/mount_external_configmaps_or_secrets_howto.md)
 - [Run With a Read-Only Root Filesystem](./Configure/setup-phoenixai-when-readOnlyRootFilesystem-is-true.md)
 - [Use MinIO for Shared Data](./Configure/use_minio_for_shared_data_howto.md)
+- [Restrict access to the operator API](./Configure/restrict_operator_api_access_howto.md) — a
+  NetworkPolicy that lets only the Anywhere console reach the operator's gRPC query API.
 
 ## Scale
 
 - [HPA Automatic Scaling For CN Nodes](./Scale/hpa_dynamic_scaling_with_helm_howto.md)
+- [Queue-Based Autoscaling For CN Nodes](./Scale/queue_based_autoscaling_howto.md)
+- [Scheduled Scaling For CN Nodes With KEDA](./Scale/scheduled_scaling_with_keda_howto.md) — run
+  more CN nodes during business hours and fewer at night, with an introduction to KEDA.
 - [Scale In FE Nodes](./Scale/scale_in_fe_nodes_howto.md)
 
 ## Operate
@@ -47,6 +61,7 @@ site.
 - [Expand Persistent Volume (FE/CN)](./Operate/expand_persistent_volume_howto.md)
 - [Kubernetes Node Maintenance and PodDisruptionBudget](./Operate/node_maintenance_and_pdb_howto.md)
 - [Cluster Snapshot & Restore](./Operate/cluster_snapshot_and_restore.md)
+- [Upgrade and Downgrade a Cluster](./Operate/upgrade_and_downgrade_cluster_howto.md)
 
 ## Monitor
 

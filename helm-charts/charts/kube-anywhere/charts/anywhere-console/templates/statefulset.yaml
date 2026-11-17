@@ -137,12 +137,19 @@ spec:
         - name: config
           mountPath: /etc/phoenixai-anywhere/config
           readOnly: true
-        # Admin Console accounts (key = username -> one file per username);
+        # Anywhere Console accounts (key = username -> one file per username);
         # stays a separate Secret directory: read on every login, so rotation
         # needs no restart.
         - name: admin-credentials
           mountPath: /etc/phoenixai-anywhere/admin-credentials
           readOnly: true
+        {{- if include "anywhere.viewersEnabled" . }}
+        # Viewer-role accounts: the same layout, a separate directory — which
+        # directory holds an account is what decides its role.
+        - name: viewer-credentials
+          mountPath: /etc/phoenixai-anywhere/viewer-credentials
+          readOnly: true
+        {{- end }}
       serviceAccountName: {{ template "anywhere.serviceAccountName" . }}
       # On SIGTERM the console stops accepting connections, gives in-flight requests
       # up to 20s to finish, then saves login sessions and closes its database. The
@@ -162,6 +169,11 @@ spec:
       - name: admin-credentials
         secret:
           secretName: {{ template "anywhere.adminSecretName" . }}
+      {{- if include "anywhere.viewersEnabled" . }}
+      - name: viewer-credentials
+        secret:
+          secretName: {{ template "anywhere.viewerSecretName" . }}
+      {{- end }}
       {{- if .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml .Values.nodeSelector | nindent 8 }}

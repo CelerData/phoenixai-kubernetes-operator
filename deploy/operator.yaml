@@ -268,7 +268,7 @@ spec:
         kubectl.kubernetes.io/default-container: manager
       labels:
         app: kube-anywhere-operator
-        version: 2.1.0
+        version: 2.2.0
     spec:
       automountServiceAccountToken: true
       containers:
@@ -287,7 +287,7 @@ spec:
         env:
         - name: TZ
           value: UTC
-        image: "us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-operator:v2.1.0"
+        image: "us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-operator:v2.2.0"
         imagePullPolicy: Always
         name: manager
         ports:

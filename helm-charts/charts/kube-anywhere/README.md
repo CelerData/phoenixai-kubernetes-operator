@@ -40,11 +40,11 @@ The kube-anywhere chart carries three subcharts:
       ```Bash
       $ helm search repo phoenixai
       NAME                          CHART VERSION    APP VERSION  DESCRIPTION
-      phoenixai/anywhere-console    2.1.0            v2.1.0       A Helm chart for PhoenixAI Anywhere — a read-only operations & usage console
-      phoenixai/kube-anywhere       2.1.0            4.1.7-ee     kube-anywhere includes three subcharts, anywhere-operator, phoenixai and anywhere-console
-      phoenixai/anywhere-operator   2.1.0            2.1.0        A Helm chart for PhoenixAI operator
-      phoenixai/phoenixai           2.1.0            4.1.7-ee     A Helm chart for PhoenixAI cluster
-      phoenixai/warehouse           2.1.0            4.1.7-ee     Warehouse is a feature of the PhoenixAI Enterprise Edition
+      phoenixai/anywhere-console    2.2.0            v2.2.0       A Helm chart for PhoenixAI Anywhere — a read-only operations & usage console
+      phoenixai/kube-anywhere       2.2.0            4.1.7-ee     kube-anywhere includes three subcharts, anywhere-operator, phoenixai and anywhere-console
+      phoenixai/anywhere-operator   2.2.0            2.2.0        A Helm chart for PhoenixAI operator
+      phoenixai/phoenixai           2.2.0            4.1.7-ee     A Helm chart for PhoenixAI cluster
+      phoenixai/warehouse           2.2.0            4.1.7-ee     Warehouse is a feature of the PhoenixAI Enterprise Edition
       ```
 
       `kube-anywhere` is the install path this guide follows: it carries the console as a
@@ -72,7 +72,7 @@ The kube-anywhere chart carries three subcharts:
       storage**: it comes up `running`, but `CREATE DATABASE` is refused with "The default storage
       volume does not exist" until you add a bucket, either with `CREATE STORAGE VOLUME` over SQL
       or by naming it in `phoenixAIFeSpec.config` (see the
-      [install guide](https://github.com/CelerData/phoenixai-kubernetes-operator/blob/main/doc/Deploy/install_with_helm.md)).
+      [install guide](https://github.com/CelerData/phoenixai-kubernetes-operator/blob/main/doc/deployment/install_with_helm.md)).
 
    2. Deployment with custom configurations
       - Create a YAML file, for example, **my-values.yaml**, and customize the configurations for the PhoenixAI Operator and PhoenixAI cluster in the YAML file. For the supported parameters and descriptions, see the comments in the default **[values.yaml](https://github.com/CelerData/phoenixai-kubernetes-operator/blob/main/helm-charts/charts/kube-anywhere/values.yaml)** of the Helm Chart.

@@ -107,8 +107,8 @@ context shaped like the chart's own, a dict with two keys:
                            it for the generated root password; unset here)
 
 The phoenixai subchart carries a copy of this body as phoenixaicluster.cngroup.cnspec so that a CN
-group declared next to a cluster renders identically; scripts/internal/check-helm.sh renders the
-same entry through both charts and diffs the result to catch drift.
+group declared next to a cluster renders identically; a render check runs the same entry through
+both charts and diffs the result to catch drift.
 */}}
 {{- define "phoenixaiwarehouse.cnspec" -}}
 {{- $args := .cnspec -}}

@@ -1,8 +1,0 @@
-{
-  "label": "Scale",
-  "position": 5,
-  "link": {
-    "type": "generated-index",
-    "description": "Add and remove capacity, by hand and automatically."
-  }
-}

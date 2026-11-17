@@ -42,7 +42,7 @@ phoenixAIOperator:
   image:
     # image sliced by "repository:tag"
     repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-operator
-    tag: v2.1.0
+    tag: v2.2.0
   imagePullPolicy: Always
   replicaCount: 1
   resources:

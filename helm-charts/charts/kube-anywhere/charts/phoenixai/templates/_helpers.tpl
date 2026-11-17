@@ -567,8 +567,8 @@ Usage: include "phoenixaicluster.datadog.log.annotation" (dict "root" . "compone
 phoenixaicluster.cngroup.cnspec is a copy of phoenixaiwarehouse.cnspec in the warehouse chart: the
 same CN spec body, so that a CN group declared next to a cluster renders exactly like one declared
 next to a warehouse. The two charts are separate top-level charts and cannot share a template, so
-scripts/internal/check-helm.sh renders the same entry through both and diffs the result. Change one
-copy and you must change the other.
+a render check runs the same entry through both and diffs the result. Change one copy and you must
+change the other.
 
 The argument is a context shaped like a chart's own, a dict with two keys (see the warehouse copy
 for the full description):

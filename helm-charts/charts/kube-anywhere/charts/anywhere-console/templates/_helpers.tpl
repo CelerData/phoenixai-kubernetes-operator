@@ -65,11 +65,32 @@ The image tag defaults to the chart appVersion.
 {{- end }}
 
 {{/*
-The Secret holding the Admin Console accounts (key = username, value =
+The Secret holding the Anywhere Console accounts (key = username, value =
 password): the user-provided one, or the chart-rendered "<name>-admin".
 */}}
 {{- define "anywhere.adminSecretName" -}}
 {{- default (printf "%s-admin" (include "anywhere.name" .)) .Values.admin.existingSecret -}}
+{{- end }}
+
+{{/*
+Whether the console has viewer-role accounts: "true" when viewer.users or
+viewer.existingSecret is set, "" otherwise. Nothing viewer-related is
+rendered without them, so an install that sets neither renders exactly what
+it did before viewer accounts existed. Read nil-safe: `--reuse-values` from a
+chart without the viewer block carries none.
+*/}}
+{{- define "anywhere.viewersEnabled" -}}
+{{- $viewer := .Values.viewer | default dict }}
+{{- if or $viewer.users $viewer.existingSecret }}true{{- end }}
+{{- end }}
+
+{{/*
+The Secret holding the viewer-role accounts (key = username, value =
+password): the user-provided one, or the chart-rendered "<name>-viewer".
+*/}}
+{{- define "anywhere.viewerSecretName" -}}
+{{- $viewer := .Values.viewer | default dict }}
+{{- default (printf "%s-viewer" (include "anywhere.name" .)) $viewer.existingSecret -}}
 {{- end }}
 
 {{/*
@@ -140,10 +161,23 @@ render test counts both sides.
 {{- $_ := set $sw "dependencies.prometheus.enabled" (index $prom "enabled") -}}
 {{- $_ := set $sw "dependencies.prometheus.tls.insecureSkipVerify" (index ($prom.tls | default dict) "insecureSkipVerify") -}}
 {{- $_ := set $sw "dependencies.s3.usePathStyle" (index ($deps.s3 | default dict) "usePathStyle") -}}
+{{- $_ := set $sw "mcp.enabled" (index (.Values.mcp | default dict) "enabled") -}}
 {{- $_ := set $sw "queryHistory.enabled" (index (.Values.queryHistory | default dict) "enabled") -}}
 {{- range $key, $v := $sw }}
 {{- if and (kindIs "string" $v) (not (has (lower $v) $known)) }}
 WARNING: {{ $key }} should be true or false; it is {{ $v | quote }}, which is read as true.
 {{- end }}
 {{- end }}
+{{- end }}
+
+{{/*
+The port of the published Service: service.port, or httpPort when it is empty. httpPort stays the
+port the container listens on, which the Service forwards to and the headless Service keeps.
+*/}}
+{{- define "anywhere.servicePort" -}}
+{{- $port := (.Values.service | default dict).port | default .Values.httpPort -}}
+{{- if not (regexMatch "^[0-9]+$" (toString $port)) -}}
+{{- fail (printf "service.port must be a port number, got %q" (toString $port)) -}}
+{{- end -}}
+{{- $port -}}
 {{- end }}

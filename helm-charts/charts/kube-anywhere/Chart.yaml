@@ -1,6 +1,6 @@
 apiVersion: v2
 name: kube-anywhere
-description: kube-anywhere includes three subcharts, anywhere-operator, phoenixai and anywhere-console
+description: "All-in-one: operator, cluster, optional console"
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -19,7 +19,7 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 2.1.0
+version: 2.2.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -41,10 +41,10 @@ dependencies:
   # The alias keeps the operator's values under the `operator.` prefix.
   - name: anywhere-operator
     alias: operator
-    version: 2.1.0
+    version: 2.2.0
     repository: "file://charts/anywhere-operator"
   - name: phoenixai
-    version: 2.1.0
+    version: 2.2.0
     repository: "file://charts/phoenixai"
   # The PhoenixAI Anywhere console is opt-in: it requires object storage
   # (anywhere.dependencies.s3), so rendering it unconditionally would make the
@@ -52,7 +52,7 @@ dependencies:
   # under the `anywhere.` prefix.
   - name: anywhere-console
     alias: anywhere
-    version: 2.1.0
+    version: 2.2.0
     repository: "file://charts/anywhere-console"
     condition: anywhere.enabled
 

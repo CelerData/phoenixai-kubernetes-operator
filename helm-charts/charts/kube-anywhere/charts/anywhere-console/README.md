@@ -28,6 +28,11 @@ and a PhoenixAI cluster), where it is addressed as `anywhere`. Two ways to insta
   alive with a ping every 15 seconds; nginx-ingress, the AWS load balancer controller and Traefik
   pass upgrades by default, and nginx's default `proxy-read-timeout` (60s) is fine. A proxy that
   drops idle WebSockets sooner shows up as an editor whose Run button never answers.
+  With MCP access on, the same proxy also carries AI clients' tool calls. A SQL tool call answers
+  only when its statement ends and sends nothing in between, so a statement that runs longer than
+  the proxy's idle timeout is cut off there and canceled on the cluster. If AI clients run
+  statements longer than that, raise the timeout, e.g. on nginx-ingress:
+  `nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"`.
 
 ## Install
 
@@ -141,7 +146,14 @@ key — fails the pod too. Azure with `sasToken` does not advertise export,
 skips the step and starts normally (see the Azure blocks below). All four backends store the same key layout — one top-level
 prefix per feature, optionally under the block's `path` (so a bucket or container can be shared
 with other uses, e.g. the PhoenixAI cluster's own data store; bucket/container + `path` match the
-cluster's `aws_s3_path` / `azure_blob_path` / `azure_adls2_path` / `gs://` location semantics). The configured block
+cluster's `aws_s3_path` / `azure_blob_path` / `azure_adls2_path` / `gs://` location semantics).
+Two PhoenixAI Anywhere installs on one bucket or container each need a `path` of their own, and
+neither `path` may lie inside the other — `path` is empty by default, and an empty `path` contains
+every other. An install treats every object under its `path` as its own: query-history cleanup
+deletes profiles and query texts by its own retention and, under disk pressure, every one its
+database does not reference; on restart it adopts the support bundles it finds, dropping one still
+being written as interrupted, and deletes them by its own TTL. Two installs on the same or on
+nested paths therefore delete each other's. The configured block
 is inlined into the `dependencies:` section of the rendered config-file Secret
 (`templates/secret-config.yaml` — the reason the config is a Secret and not a ConfigMap). The whole
 config is read once at startup; changing any of it via `helm upgrade` rolls the pod through the
@@ -202,8 +214,9 @@ Every key lies under `path`, so the object resource can be narrowed to
 - **Support-bundle export URLs are signed with the console's identity.** With a static key a URL
   lives for the lifetime the export asked for (up to 7 days). With temporary credentials (IRSA,
   EKS Pod Identity, an instance profile, an assumed role) S3 stops accepting the URL when the
-  session that signed it expires — typically within hours, whatever lifetime was asked for. When
-  a link must last longer, use a static key, or download the bundle through the console.
+  session that signed it expires — typically within hours, whatever lifetime was asked for — and
+  the export reports that earlier moment as the link's expiry. When a link must last longer, use
+  a static key, or download the bundle through the console.
 
 The two Azure blocks follow the PhoenixAI Database storage-volume vocabulary, so the values can be
 copied from the cluster's own configuration:
@@ -412,7 +425,14 @@ credential note above for Azure). Operational notes:
   objects orphaned while anywhere is down — expiration on the `profile/` prefix (query-history
   retention + 7 days) and on the `support-bundle/` prefix (bundle retentionDays + 7 days), plus an
   abort-incomplete-multipart-upload rule (a bundle upload killed mid-flight can leave paid-for
-  parts behind).
+  parts behind). Beyond that, leave the `support-bundle/` prefix to anywhere's own retention:
+  no rule that moves it to a storage class that must be restored before a read (S3 Glacier
+  Flexible Retrieval or Deep Archive, the Azure Archive tier), no expiration sooner than the
+  `retentionDays` + 7 days above (none at all with `retentionDays: 0`) — anywhere applies its
+  retention when the bundle list is read or a bundle finishes, not on a timer, so an expired
+  bundle can stay listed for a while — and no deleting bundle objects by hand. A bundle whose
+  archive was moved or deleted that way still lists as finished, but its download fails and
+  an export link to it is broken.
 
 ### Switching to another object store, and downgrading
 
@@ -511,10 +531,20 @@ Prefix each with `anywhere.` when installing through the parent `kube-anywhere` 
 | `image.repository` / `.tag` | `us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-console`, tag = chart appVersion | container image. The 2.0.x repository `.../enterprise/anywhere` with an empty tag is replaced with the current one (see [Upgrading from 2.0.x](#upgrading-from-20x)) |
 | `operatorApiAddrs` | `["kube-anywhere-operator-api:9090"]` | ALL operator gRPC API Service addresses this anywhere serves — one entry per operator; order arbitrates ownership conflicts |
 | `watchNamespaces` | `[]` (all namespaces, cluster-scoped RBAC) | the namespaces the PhoenixAI clusters live in when pairing namespaced-mode operators; one Role/RoleBinding each |
-| `admin.users` / `admin.existingSecret` | `{admin: admin}` / `""` | Admin Console accounts. The chart ships a default **admin / admin** account, which a reachable install must replace; clear `users` to have a random password generated instead. See the comments in `values.yaml` for the three sources and the GitOps caveat |
+| `admin.users` / `admin.existingSecret` | `{admin: admin}` / `""` | Anywhere Console accounts. The chart ships a default **admin / admin** account, which a reachable install must replace; clear `users` to have a random password generated instead. See the comments in `values.yaml` for the three sources and the GitOps caveat |
+| `viewer.users` / `viewer.existingSecret` | `{}` / `""` | Viewer accounts: log in to the Anywhere Console, read everything, build and delete support bundles, and run the commands and exec presets an admin has defined — but change nothing, run no arbitrary pod command, and cannot download or export a bundle. Same key = username shape as `admin.users`, in a Secret of its own. A username in both Secrets holds both roles: signing in with the admin Secret's password makes it an admin, with the viewer Secret's a viewer. Unset means no viewer accounts |
 | `auth.secureCookies` | `false` | marks both consoles' session cookies `Secure`. Off by default because the in-cluster deployment speaks plain HTTP, where the flag would stop every login from working; turn it on when TLS terminates in front of the console (an Ingress, a load balancer, a service mesh) |
 | `auth.sessionTTL` | `""` (the service default, 24h) | sliding lifetime of a login — every request pushes the expiry back, so it bounds idle time rather than total session length. A Go duration (`"12h"`, `"90m"`), and it must be positive |
-| `httpPort` | `8090` | HTTP listen/Service port |
+| `mcp.enabled` | `true` | MCP access: AI clients (Claude Code, Cursor, claude.ai) sign in through the console — a person approves each client in the browser — and then call it on that person's behalf, never with more than a viewer may do. Each person sees and revokes their clients on the console's MCP access page; an admin sees everyone's. `false` turns it off, and then nothing MCP-related renders |
+| `mcp.publicURL` | unset | the HTTPS address AI clients reach the console at, no path (`https://anywhere.example.com`). It must be `https://`: AI clients refuse to sign in over plain http to any host but localhost, so the console refuses to start on an `http://` address of any other host. Unset means clients connect only through `kubectl port-forward`. A client is bound to the address it signed in through |
+| `mcp.accessTokenTTL` / `mcp.refreshTokenTTL` | unset (`1h` / `720h`) | how long an access token lasts, and how long an unused sign-in stays valid (each use renews it). Go durations |
+| `httpPort` | `8090` | port the console listens on inside its container; the Service forwards to it, and listens on the same port unless `service.port` is set |
+| `service.type` | `ClusterIP` | how the console's Service is published: `ClusterIP` (inside the Kubernetes cluster only — `kubectl port-forward`, or an Ingress of your own), `NodePort` or `LoadBalancer`. Anything else fails the install |
+| `service.port` | `""` (= `httpPort`) | port the Service listens on, the one people open; it may differ from `httpPort`, e.g. `443` on a load balancer that terminates TLS |
+| `service.nodePort` | `""` (Kubernetes picks one) | a fixed node port, for `NodePort` and `LoadBalancer` |
+| `service.annotations` / `service.labels` | `{}` | annotations (where a cloud's load balancer controller reads its settings) and extra labels of the Service |
+| `service.loadBalancerSourceRanges` | `[]` | source IP ranges the load balancer accepts, for `LoadBalancer` |
+| `service.externalTrafficPolicy` | `""` (the Kubernetes default, `Cluster`) | `Cluster` or `Local`, for `NodePort` and `LoadBalancer`; `Local` keeps the client's source IP. A `service.*` key that does not apply to the chosen type fails the install instead of being ignored |
 | `logLevel` | `info` | debug/info/warn/error; an unknown level refuses startup |
 | `dependencies.s3.bucket` / `.region` / `.accessKey` / `.secretKey` / ... | `""` | S3-compatible object storage for large artifacts — one of the four object-store blocks is required, see [External dependencies](#external-dependencies-object-storage--prometheus) |
 | `dependencies.azblob.endpoint` / `.container` / `.path` / `.sharedKey` / `.sasToken` / `.oauth2TokenFile` / `.oauth2UseManagedIdentity` / `.oauth2TenantId` / `.oauth2ClientId` / `.oauth2ClientSecret` / `.oauth2ClientEndpoint` | `""` / `false` | Azure Blob Storage (hierarchical namespace disabled) as the object store; exactly one credential: `sharedKey`, `sasToken`, or a Microsoft Entra ID identity (see [Authenticating with Microsoft Entra ID](#authenticating-with-microsoft-entra-id)) |

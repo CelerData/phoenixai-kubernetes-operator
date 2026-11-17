@@ -4,8 +4,8 @@ entries:
   - apiVersion: v2
     appVersion: v2.0.0
     created: "2026-09-14T13:34:52.942717+08:00"
-    description: A Helm chart for PhoenixAI Anywhere — a read-only operations & usage
-      console for PhoenixAI deployments on Kubernetes
+    deprecated: true
+    description: 'Deprecated: renamed to anywhere-console'
     digest: 3048c94694fe42cd74bfeca0eb83bd7e5dc17615778a40f3fbc6ad9a6993ce5a
     home: https://github.com/CelerData/phoenixai-kubernetes-operator
     keywords:
@@ -26,6 +26,29 @@ entries:
     - https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v2.0.0/anywhere-2.0.0.tgz
     version: 2.0.0
   anywhere-console:
+  - apiVersion: v2
+    appVersion: v2.2.0
+    created: "2026-11-17T15:05:52.165544+08:00"
+    description: Operations, usage, and SQL console
+    digest: 2e1af8d41a0e24c858e71cffb289cc7bd5bda8191a3afba5375cd475da3d5095
+    home: https://github.com/CelerData/phoenixai-kubernetes-operator
+    keywords:
+    - anywhere
+    - console
+    - phoenixai
+    - database
+    - olap
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@phoenixdata.ai
+      name: Ray Yan
+    name: anywhere-console
+    sources:
+    - https://github.com/CelerData/phoenixai-kubernetes-operator
+    type: application
+    urls:
+    - https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v2.2.0/anywhere-console-2.2.0.tgz
+    version: 2.2.0
   - apiVersion: v2
     appVersion: v2.1.0
     created: "2026-11-04T19:25:44.695537+08:00"
@@ -52,6 +75,28 @@ entries:
     version: 2.1.0
   anywhere-operator:
   - apiVersion: v2
+    appVersion: 2.2.0
+    created: "2026-11-17T15:05:47.364115+08:00"
+    description: Operator and CRDs that deploy and manage clusters
+    digest: 721a98d12a9e51e90e67cbb7d773eeb8700a20dd5f1b31d226ad3271660229c4
+    home: https://github.com/CelerData/phoenixai-kubernetes-operator
+    keywords:
+    - operator
+    - phoenixai
+    - database
+    - olap
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@phoenixdata.ai
+      name: Ray Yan
+    name: anywhere-operator
+    sources:
+    - https://github.com/CelerData/phoenixai-kubernetes-operator
+    type: application
+    urls:
+    - https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v2.2.0/anywhere-operator-2.2.0.tgz
+    version: 2.2.0
+  - apiVersion: v2
     appVersion: 2.1.0
     created: "2026-11-04T19:25:40.425095+08:00"
     description: A Helm chart for PhoenixAI operator
@@ -74,6 +119,43 @@ entries:
     - https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v2.1.0/anywhere-operator-2.1.0.tgz
     version: 2.1.0
   kube-anywhere:
+  - apiVersion: v2
+    appVersion: 4.1.7-ee
+    created: "2026-11-17T15:05:45.117728+08:00"
+    dependencies:
+    - alias: operator
+      name: anywhere-operator
+      repository: file://charts/anywhere-operator
+      version: 2.2.0
+    - name: phoenixai
+      repository: file://charts/phoenixai
+      version: 2.2.0
+    - alias: anywhere
+      condition: anywhere.enabled
+      name: anywhere-console
+      repository: file://charts/anywhere-console
+      version: 2.2.0
+    description: 'All-in-one: operator, cluster, optional console'
+    digest: 203d04e7d13aacd19e40065d57e0ade94c4d99da57f35cb4ebb1b8bf0d909dd2
+    home: https://github.com/CelerData/phoenixai-kubernetes-operator
+    keywords:
+    - operator
+    - phoenixai
+    - anywhere
+    - console
+    - database
+    - olap
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@phoenixdata.ai
+      name: Ray Yan
+    name: kube-anywhere
+    sources:
+    - https://github.com/CelerData/phoenixai-kubernetes-operator
+    type: application
+    urls:
+    - https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v2.2.0/kube-anywhere-2.2.0.tgz
+    version: 2.2.0
   - apiVersion: v2
     appVersion: 4.1.7-ee
     created: "2026-11-04T19:25:38.221345+08:00"
@@ -151,7 +233,8 @@ entries:
   - apiVersion: v2
     appVersion: 2.0.0
     created: "2026-09-14T13:34:48.427689+08:00"
-    description: A Helm chart for PhoenixAI operator
+    deprecated: true
+    description: 'Deprecated: renamed to anywhere-operator'
     digest: ee1f26d2d8848f418591c3005cd3f2c0d932b294bc8e8ed3804238868a2525fc
     home: https://github.com/CelerData/phoenixai-kubernetes-operator
     keywords:
@@ -261,6 +344,28 @@ entries:
   phoenixai:
   - apiVersion: v2
     appVersion: 4.1.7-ee
+    created: "2026-11-17T15:05:49.787254+08:00"
+    description: Shared-data cluster (FE + CN); needs the operator
+    digest: 9613adda0db541afbb1452ac3891dad3065a4517a68443339c935c3dc9172788
+    home: https://github.com/CelerData/phoenixai-kubernetes-operator
+    keywords:
+    - operator
+    - phoenixai
+    - database
+    - olap
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@phoenixdata.ai
+      name: Ray Yan
+    name: phoenixai
+    sources:
+    - https://github.com/CelerData/phoenixai-kubernetes-operator
+    type: application
+    urls:
+    - https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v2.2.0/phoenixai-2.2.0.tgz
+    version: 2.2.0
+  - apiVersion: v2
+    appVersion: 4.1.7-ee
     created: "2026-11-04T19:25:42.524884+08:00"
     description: A Helm chart for PhoenixAI cluster
     digest: 6696fa0606b2c4c6a89bd74e16889a84459ee5f37397a285edc9ce03b2e82361
@@ -304,6 +409,29 @@ entries:
     - https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v2.0.0/phoenixai-2.0.0.tgz
     version: 2.0.0
   warehouse:
+  - apiVersion: v2
+    appVersion: 4.1.7-ee
+    created: "2026-11-17T15:05:54.658877+08:00"
+    description: Extra compute warehouse for an existing cluster
+    digest: 6ff85703fae4657c8fb2041a529e7da64e4f3bbc318bccfe163d588994dfd8da
+    home: https://github.com/CelerData/phoenixai-kubernetes-operator
+    keywords:
+    - operator
+    - phoenixai
+    - database
+    - olap
+    - multi-warehouse
+    kubeVersion: '>=1.23.0-0'
+    maintainers:
+    - email: ray.yan@phoenixdata.ai
+      name: Ray Yan
+    name: warehouse
+    sources:
+    - https://github.com/CelerData/phoenixai-kubernetes-operator
+    type: application
+    urls:
+    - https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v2.2.0/warehouse-2.2.0.tgz
+    version: 2.2.0
   - apiVersion: v2
     appVersion: 4.1.7-ee
     created: "2026-11-04T19:25:47.019941+08:00"
@@ -442,4 +570,4 @@ entries:
     urls:
     - https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v1.11.4/warehouse-1.11.4.tgz
     version: 1.11.4
-generated: "2026-11-04T19:25:47.019021+08:00"
+generated: "2026-11-17T15:05:54.657548+08:00"

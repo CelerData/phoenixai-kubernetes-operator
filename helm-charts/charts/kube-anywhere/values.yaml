@@ -49,7 +49,7 @@ operator:
     image:
       # image sliced by "repository:tag"
       repository: us-west1-docker.pkg.dev/phoenix-ai-images/enterprise/anywhere-operator
-      tag: v2.1.0
+      tag: v2.2.0
     imagePullPolicy: Always
     replicaCount: 1
     resources:
@@ -303,7 +303,7 @@ phoenixai:
       # Whether to expose metrics to Prometheus by ServiceMonitor.
       # Note: make sure the prometheus operator is installed in your cluster.
       # If prometheus is not installed by operator, you can add annotations on k8s service to expose metrics.
-      # See https://github.com/CelerData/phoenixai-kubernetes-operator/blob/main/doc/Monitor/integration-prometheus-grafana.md#51-turn-on-the-prometheus-metrics-scrape-by-adding-annotations for more details.
+      # See https://github.com/CelerData/phoenixai-kubernetes-operator/blob/main/doc/administration/management/monitoring/integration-prometheus-grafana.md#51-turn-on-the-prometheus-metrics-scrape-by-adding-annotations for more details.
       enabled: false
       # Prometheus ServiceMonitor labels
       labels: {}
@@ -1525,7 +1525,14 @@ anywhere:
     # key tree, one top-level prefix per feature ("profile/", "support-bundle/"), optionally under
     # the block's "path" prefix, so the bucket or container can be shared with other uses (e.g. the
     # PhoenixAI cluster's own data store; bucket/container + path together match the cluster's
-    # aws_s3_path / azure_blob_path / azure_adls2_path / gs:// location semantics). Anywhere deletes
+    # aws_s3_path / azure_blob_path / azure_adls2_path / gs:// location semantics). Two PhoenixAI
+    # Anywhere installs on one bucket or container each need a path of their own, and neither path
+    # may lie inside the other — "path" is empty by default, and an empty path contains every other.
+    # An install treats every object under its path as its own: query-history cleanup deletes
+    # profiles and query texts by its own retention and, under disk pressure, every one its database
+    # does not reference; on restart it adopts the support bundles it finds, dropping one still
+    # being written as interrupted, and deletes them by its own TTL. Two installs on the same or on
+    # nested paths therefore delete each other's. Anywhere deletes
     # expired objects itself (query-history retention default 7 days; support bundles by TTL);
     # lifecycle rules on the two prefixes (expiration = retention + 7 days) plus, on S3, an
     # abort-incomplete-multipart-upload rule are recommended as backstops for objects orphaned
@@ -1724,7 +1731,7 @@ anywhere:
     # profileBackfillLimit: 1000
   
   # ---------------------------------------------------------------------------------------------
-  # Admin Console accounts
+  # Anywhere Console accounts
   # ---------------------------------------------------------------------------------------------
   # The accounts live in one Kubernetes Secret (key = username, value = password) mounted into
   # the pod; the backend reads it on every login, so rotating or adding accounts via
@@ -1752,6 +1759,24 @@ anywhere:
       admin: "admin"
     existingSecret: ""
   
+  # Viewer accounts: a second set of Anywhere Console accounts that can look but not change. A
+  # viewer reads everything the console shows, builds and deletes support bundles, and runs the
+  # commands and exec presets an admin has already defined; it cannot create or edit those,
+  # upload a license, run an arbitrary command in a pod, or download/export a support bundle.
+  # Same shape as `admin` (key = username, value = password), in a Secret of its own, read on
+  # every login like the admin one. Moving a username from one Secret to the other changes its
+  # role on its next request. A username in both Secrets holds both roles: logging in with the
+  # password the admin Secret gives it makes it an admin, with the one the viewer Secret gives it
+  # a viewer — so a viewer password never opens the admin role. Two sources:
+  #   - existingSecret — name of a Secret you manage yourself;
+  #   - users          — accounts rendered from values, e.g.
+  #                        users:
+  #                          support: "<password>"
+  # Neither set (the default) means no viewer accounts, and nothing viewer-related is rendered.
+  viewer:
+    users: {}
+    existingSecret: ""
+  
   # How a login is carried, for both consoles. Each console keeps its session in
   # its own HttpOnly, SameSite=Strict cookie; these two settings are the parts an
   # installation decides.
@@ -1774,11 +1799,81 @@ anywhere:
     # expire every login at the moment it was created.
     sessionTTL: ""
   
+  # MCP access: lets AI clients (Claude Code, Cursor, claude.ai) call the console on a person's
+  # behalf. The console runs an OAuth 2.1 sign-in for them: the client opens a browser page, the
+  # person signs in to the console and approves the client, and the client receives a token. An AI
+  # client acting for an Anywhere Console account is always limited to what a viewer may do, even
+  # when an admin approved it. Each person sees and revokes their own clients on the console's MCP
+  # access page; an admin sees and revokes everyone's.
+  #
+  # On by default. Keys:
+  #   - enabled         — true (the default) turns MCP access on; false turns it off, and then
+  #                       nothing MCP-related renders: no OAuth endpoints, no MCP endpoints, no MCP
+  #                       access page in either console.
+  #   - publicURL       — the HTTPS address AI clients reach the console at, with no path, e.g.
+  #                       https://anywhere.example.com (TLS terminating at your Ingress or load
+  #                       balancer). It must be https: AI clients refuse to sign in over plain
+  #                       http to any host but localhost (Claude Code stops with "Refusing to
+  #                       send credentials to non-https token endpoint"), so the console refuses
+  #                       to start on an http:// address of any other host rather than let a
+  #                       sign-in fail at its last step. Empty means AI clients can connect only through
+  #                       `kubectl port-forward` (http://localhost:<port>). A client is bound to the
+  #                       address it signed in through, so switching between the two needs one
+  #                       more sign-in.
+  #   - accessTokenTTL  — how long an access token lasts (Go duration, default "1h").
+  #   - refreshTokenTTL — how long an unused sign-in stays valid (default "720h", 30 days); each use
+  #                       renews it.
+  mcp:
+    enabled: true
+    # publicURL: "https://anywhere.example.com"
+  
   # ---------------------------------------------------------------------------------------------
   # Application settings
   # ---------------------------------------------------------------------------------------------
-  # HTTP port the container listens on and the Service exposes (REST API + embedded web UI).
+  # HTTP port the console listens on inside its container (REST API + embedded web UI). The
+  # Service forwards to it, and listens on the same port unless service.port says otherwise. You
+  # rarely need to change it: to change the port people open, set service.port instead.
   httpPort: 8090
+    # e.g. httpPort: 9000
+  # How the console's Service is published. The default, ClusterIP, is reachable only inside the
+  # Kubernetes cluster: through `kubectl port-forward`, or through an Ingress you create in front
+  # of it. NodePort and LoadBalancer publish it outside the cluster, as plain HTTP unless the load
+  # balancer terminates TLS — so replace the default admin account first, and where TLS terminates
+  # in front of the console also set auth.secureCookies and (for AI clients) mcp.publicURL.
+  # A key that does not apply to the chosen type refuses to render instead of being ignored.
+  # e.g. an internal load balancer on port 80 that accepts one network only:
+  # service:
+  #   type: LoadBalancer
+  #   port: 80
+  #   annotations:
+  #     service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+  #   loadBalancerSourceRanges:
+  #     - 10.0.0.0/8
+  service:
+    # ClusterIP, NodePort or LoadBalancer.
+    type: ClusterIP
+    # Port the Service listens on: the one people open. Empty uses httpPort. It may differ from
+    # httpPort, e.g. 443 on a load balancer that terminates TLS.
+    port: ""
+      # e.g. port: 443
+    # A fixed node port when type is NodePort or LoadBalancer. Empty lets Kubernetes pick one.
+    nodePort: ""
+      # e.g. nodePort: 30090 # the valid range is 30000-32767 unless your cluster changed it
+    # Annotations of the Service, which is where a cloud's load balancer controller reads its
+    # settings.
+    annotations: {}
+      # e.g. an internal load balancer on AWS:
+      # service.beta.kubernetes.io/aws-load-balancer-scheme: internal
+    # Extra labels of the Service. `app` is the chart's own and cannot be set here.
+    labels: {}
+      # team: data-platform
+    # Source IP ranges the load balancer accepts. Only when type is LoadBalancer.
+    loadBalancerSourceRanges: []
+      # - 10.0.0.0/8
+    # How nodes distribute the traffic, Cluster or Local, when type is NodePort or LoadBalancer.
+    # Empty leaves the Kubernetes default (Cluster). Local keeps the client's source IP.
+    externalTrafficPolicy: ""
+      # e.g. externalTrafficPolicy: Local
   # Log level: debug/info/warn/error.
   #
   # Logs are written to the container's standard output as one JSON object per line
@@ -1803,7 +1898,13 @@ anywhere:
   # no local copy of the archive.
   supportBundle:
     # Days to keep finished bundles — time is the only retention dimension (0 disables cleanup:
-    # an explicit keep-forever). The cleanup runs in anywhere itself.
+    # an explicit keep-forever). The cleanup runs in anywhere itself, so leave the
+    # support-bundle/ prefix to it: a lifecycle rule that moves the prefix to a class that must be
+    # restored before a read (S3 Glacier Flexible Retrieval / Deep Archive, Azure Archive) or
+    # expires it sooner than retentionDays + 7 days, or deleting its objects by hand, leaves a
+    # bundle that still lists as finished but can no longer be downloaded, and breaks any export
+    # link to it. The 7 days matter: the cleanup runs when the bundle list is read or a bundle
+    # finishes, not on a timer, so an expired bundle can stay listed for a while.
     retentionDays: 7
     # Per-stream rate limit (MB/s, 10^6 bytes), measured at the receiving end, on
     # every exec/pods-log byte stream a bundle collects. Collection is strictly

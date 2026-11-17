@@ -14,7 +14,7 @@ NOTE: the FE config names no object storage (no aws_s3_path), so the cluster sta
 volume. It comes up running, but CREATE DATABASE and CREATE TABLE are refused with "The default
 storage volume does not exist" until you add one: either create it with SQL
 (CREATE STORAGE VOLUME ... ; SET ... AS DEFAULT STORAGE VOLUME) or put the bucket in
-phoenixAIFeSpec.config as the install guide's Step 3 shows. See doc/Deploy/install_with_helm.md.
+phoenixAIFeSpec.config as the install guide's Step 3 shows. See doc/deployment/install_with_helm.md.
 {{- end }}
 {{- if .Values.anywhere.enabled }}
 {{- $console := default "kube-anywhere-console" .Values.anywhere.nameOverride }}

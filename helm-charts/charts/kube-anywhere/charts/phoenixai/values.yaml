@@ -96,7 +96,7 @@ metrics:
     # Whether to expose metrics to Prometheus by ServiceMonitor.
     # Note: make sure the prometheus operator is installed in your cluster.
     # If prometheus is not installed by operator, you can add annotations on k8s service to expose metrics.
-    # See https://github.com/CelerData/phoenixai-kubernetes-operator/blob/main/doc/Monitor/integration-prometheus-grafana.md#51-turn-on-the-prometheus-metrics-scrape-by-adding-annotations for more details.
+    # See https://github.com/CelerData/phoenixai-kubernetes-operator/blob/main/doc/administration/management/monitoring/integration-prometheus-grafana.md#51-turn-on-the-prometheus-metrics-scrape-by-adding-annotations for more details.
     enabled: false
     # Prometheus ServiceMonitor labels
     labels: {}

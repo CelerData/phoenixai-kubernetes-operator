@@ -30,9 +30,9 @@
       ```Bash
       $ helm search repo phoenixai
       NAME                          CHART VERSION    APP VERSION  DESCRIPTION
-      phoenixai/kube-anywhere       2.1.0            4.1.7-ee     kube-anywhere includes three subcharts, anywhere-operator, phoenixai and anywhere-console
-      phoenixai/anywhere-operator   2.1.0            2.1.0        A Helm chart for PhoenixAI operator
-      phoenixai/phoenixai           2.1.0            4.1.7-ee     A Helm chart for PhoenixAI cluster
+      phoenixai/kube-anywhere       2.2.0            4.1.7-ee     kube-anywhere includes three subcharts, anywhere-operator, phoenixai and anywhere-console
+      phoenixai/anywhere-operator   2.2.0            2.2.0        A Helm chart for PhoenixAI operator
+      phoenixai/phoenixai           2.2.0            4.1.7-ee     A Helm chart for PhoenixAI cluster
       ```
 
 2. Install the operator Chart.

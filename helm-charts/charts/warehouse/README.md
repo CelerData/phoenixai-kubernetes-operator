@@ -24,10 +24,10 @@ topic describes how to use Helm to automatically deploy a PhoenixAI warehouse on
     $ helm repo update phoenixai
     $ helm search repo phoenixai
     NAME                          CHART VERSION    APP VERSION  DESCRIPTION
-    phoenixai/kube-anywhere       2.1.0            4.1.7-ee     kube-anywhere includes three subcharts, anywhere-operator, phoenixai and anywhere-console
-    phoenixai/anywhere-operator   2.1.0            2.1.0        A Helm chart for PhoenixAI operator
-    phoenixai/phoenixai           2.1.0            4.1.7-ee     A Helm chart for PhoenixAI cluster
-    phoenixai/warehouse           2.1.0            4.1.7-ee     Warehouse is a feature of the PhoenixAI Enterprise Edition
+    phoenixai/kube-anywhere       2.2.0            4.1.7-ee     kube-anywhere includes three subcharts, anywhere-operator, phoenixai and anywhere-console
+    phoenixai/anywhere-operator   2.2.0            2.2.0        A Helm chart for PhoenixAI operator
+    phoenixai/phoenixai           2.2.0            4.1.7-ee     A Helm chart for PhoenixAI cluster
+    phoenixai/warehouse           2.2.0            4.1.7-ee     Warehouse is a feature of the PhoenixAI Enterprise Edition
     ```
 
 2. Prepare the values.yaml file.
@@ -61,7 +61,7 @@ topic describes how to use Helm to automatically deploy a PhoenixAI warehouse on
    the operator registers its warehouse controller only if the CRD exists when it starts, which is
    before this chart runs. If the CRD is missing the install fails with
    `no matches for kind "PhoenixAIWarehouse"`; install it and restart the operator, as described in
-   [Deploy Warehouse](../../../doc/Deploy/deploy_warehouse_howto.md).
+   [Deploy Warehouse](../../../doc/cluster_management/warehouse/deploy_warehouse_howto.md).
 
    Please see [values.yaml](./values.yaml) for more details.
 

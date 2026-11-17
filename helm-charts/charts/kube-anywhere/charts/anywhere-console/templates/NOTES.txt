@@ -25,8 +25,24 @@ tag it already has.
 
 Reach the console (REST API; the embedded web frontend is served at /):
 
-  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ template "anywhere.name" . }} {{ .Values.httpPort }}:{{ .Values.httpPort }}
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ template "anywhere.name" . }} {{ .Values.httpPort }}:{{ include "anywhere.servicePort" . }}
   curl -s localhost:{{ .Values.httpPort }}/api/v1/health
+{{- $svcType := (.Values.service | default dict).type | default "ClusterIP" }}
+{{- if ne $svcType "ClusterIP" }}
+
+The Service is of type {{ $svcType }}, listening on port {{ include "anywhere.servicePort" . }}. Its address
+{{- if eq $svcType "LoadBalancer" }} (EXTERNAL-IP, once
+the load balancer is provisioned):
+{{- else }} is any node's, on
+the node port shown under PORT(S):
+{{- end }}
+
+  kubectl -n {{ .Release.Namespace }} get svc {{ template "anywhere.name" . }}
+
+It serves plain HTTP: anyone who can reach that address reaches the sign-in page. Replace the
+default admin account first, and where TLS terminates in front of the console set
+auth.secureCookies=true.
+{{- end }}
 
 The ops data path talks to the operator gRPC API at:
 {{- range .Values.operatorApiAddrs }}
@@ -53,9 +69,36 @@ public — replace it before anyone else can reach the console:
 {{- end }}
 Add, remove or rotate accounts with `kubectl -n {{ .Release.Namespace }} edit secret {{ template "anywhere.adminSecretName" . }}`;
 changes take effect within about a minute, no restart needed.
+{{- if include "anywhere.viewersEnabled" . }}
+
+Read-only (viewer) accounts live in a second Secret, "{{ template "anywhere.viewerSecretName" . }}"
+(same format). A viewer sees everything an administrator sees but cannot change commands, exec
+presets or licenses, run arbitrary commands, or download support bundles. Add a read-only account
+there, not in the Secret above — a username in both is an administrator when it signs in with
+the password the Secret above gives it:
+
+  kubectl -n {{ .Release.Namespace }} edit secret {{ template "anywhere.viewerSecretName" . }}
+{{- end }}
 
 The Cluster Console is a second sign-in page, at /cluster-console/login, for the people who query
 a cluster rather than operate the fleet: select a cluster there, then use that cluster's own
 PhoenixAI Database username and password. No Anywhere Console account is involved, and the two
 consoles keep separate session cookies, so one browser can hold both sessions at once.
+{{- /* Same reading as secret-config.yaml: absent or null means on, only a false spelling is off. */}}
+{{- $mcp := .Values.mcp | default dict }}
+{{- $mcpOn := true }}
+{{- if and (hasKey $mcp "enabled") (not (kindIs "invalid" $mcp.enabled)) }}
+{{- $mcpOn = eq (include "anywhere.bool" $mcp.enabled) "true" }}
+{{- end }}
+{{- if $mcpOn }}
+
+MCP access is on. AI clients connect to the console's /mcp/anywhere endpoint and sign in in a
+browser; each person manages their clients on the console's MCP access page. Set
+anywhere.mcp.enabled=false to turn it off.
+{{- if not $mcp.publicURL }}
+NOTE: mcp.publicURL is not set, so AI clients can connect only through
+`kubectl port-forward` (http://localhost:{{ .Values.httpPort }}/mcp/anywhere). Set it to the HTTPS
+address your Ingress or load balancer publishes to let clients connect there.
+{{- end }}
+{{- end }}
 {{- include "anywhere.boolWarnings" . }}

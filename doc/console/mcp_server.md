@@ -1,14 +1,14 @@
 ---
 sidebar_position: 4
 sidebar_label: MCP Server
-description: How to enable the PhoenixAI Anywhere MCP Server and connect an AI client, what the AI can do on each endpoint, and the security review checklist — permissions, routes, the command catalog, accounts and the audit record.
+description: How to set up the PhoenixAI Anywhere MCP Server and connect an AI client, what the AI can do on each endpoint, and the security review checklist — permissions, routes, the command catalog, accounts and the audit record.
 ---
 
 # PhoenixAI Anywhere MCP Server
 
 This guide is for the people who run PhoenixAI Anywhere and want to connect an AI client to it:
 a platform administrator who operates PhoenixAI clusters through the Anywhere Console, or a data
-user who works in the Cluster Console. It answers two questions: how to enable the MCP Server
+user who works in the Cluster Console. It answers two questions: how to set up the MCP Server
 and connect a client, and what the AI can do once connected.
 
 ## Overview
@@ -60,11 +60,14 @@ data volume (see [Audit log](#audit-log)).
 
 ## Enable the MCP Server
 
-MCP access is off by default. Nothing MCP-related exists until `mcp.enabled` is `true`: the
-endpoints answer HTTP 404, and the MCP access page does not appear in either console.
+MCP access is on by default: the console serves the OAuth and MCP endpoints as shipped. That
+grants nothing on its own, since no client can connect until a person signs in and approves one.
+Upgrading from a release where MCP access was off restarts the console pod once.
 
-Set the values in your Helm values file, then `helm upgrade` the release. The pod restarts with
-the new configuration.
+One value still has to be set for clients outside the Kubernetes cluster, `mcp.publicURL`, the
+HTTPS address those clients reach the console at. Without it a client can connect only through
+`kubectl port-forward`. Set it in your Helm values file, then `helm upgrade` the release. The
+pod restarts with the new configuration.
 
 With the parent `kube-anywhere` chart (values prefixed with `anywhere.`):
 
@@ -72,7 +75,6 @@ With the parent `kube-anywhere` chart (values prefixed with `anywhere.`):
 anywhere:
   enabled: true
   mcp:
-    enabled: true
     publicURL: "https://anywhere.example.com"
 ```
 
@@ -80,13 +82,16 @@ With the standalone `anywhere-console` chart (no prefix):
 
 ```yaml
 mcp:
-  enabled: true
   publicURL: "https://anywhere.example.com"
 ```
 
+To turn MCP access off, set `mcp.enabled: false` (`anywhere.mcp.enabled: false` with the parent
+chart). The endpoints then answer HTTP 404, and the MCP access page does not appear in either
+console.
+
 | Key | Default | Meaning |
 |---|---|---|
-| `mcp.enabled` | `false` | Turns MCP access on. |
+| `mcp.enabled` | `true` | MCP access. Set it to `false` to turn the endpoints and the MCP access page off. |
 | `mcp.publicURL` | unset | The HTTPS address AI clients reach the console at, with no path (`https://anywhere.example.com`). It must be `https://`: AI clients refuse to sign in over plain http to any host but localhost (Claude Code stops with `Refusing to send credentials to non-https token endpoint`), so the console refuses to start on an `http://` address of any other host. Unset means clients can connect only through `kubectl port-forward`. |
 | `mcp.accessTokenTTL` | `1h` | How long an access token lasts. The client refreshes it silently. |
 | `mcp.refreshTokenTTL` | `720h` (30 days) | How long an unused sign-in stays valid. Each use renews it, so an active client never has to sign in again. Must not be shorter than `accessTokenTTL`. |
@@ -113,6 +118,13 @@ in the Anywhere Console; the first item of the user menu at `/cluster-console/mc
 Cluster Console).
 It prints the exact commands for the endpoint you are signed in to, with the right address
 filled in, and lists your authorizations.
+
+![The MCP access page in the Anywhere Console, the last item in the sidebar](./images/mcp-access-anywhere.jpg)
+
+In a cluster's Cluster Console the same page sits in the user menu instead, and the command it
+prints carries that cluster's own endpoint:
+
+![The MCP access page in a cluster's Cluster Console](./images/mcp-access-cluster.jpg)
 
 ### Claude Code
 
@@ -189,6 +201,20 @@ will act as. The permissions are:
 Whatever the client asked for, only what you tick is granted: a client that requests `sql:write`
 gets it only when you check the box. **Deny** sends the client an error and grants nothing.
 
+On the Anywhere Console endpoint there is nothing to decide. The viewer role is the only
+permission, and it is granted whatever your own role is:
+
+![The consent page for the Anywhere Console endpoint](./images/consent-anywhere.jpg)
+
+A cluster's endpoint is where the choice sits. Read-only SQL is fixed, and **Any SQL statement**
+is the one box you decide:
+
+![The consent page for a cluster's endpoint](./images/consent-cluster.jpg)
+
+Ticking it asks once more, and says what the client could then run:
+
+![The confirmation raised by Any SQL statement](./images/consent-write-confirm.jpg)
+
 If you are signed in to a different cluster's Cluster Console, the page says so and offers to
 sign in to the requested cluster; the browser holds one Cluster Console session at a time, so
 that ends the other one.
@@ -199,6 +225,11 @@ The MCP access page lists **My authorizations**: client, permissions, when it wa
 last used, when the sign-in expires, and a status. An administrator additionally sees **All
 authorizations** across every user. Every row but a revoked one carries a **Revoke** button; the
 client's next request then fails and it has to sign in again.
+
+![All authorizations, an administrator's view across every user, with the Status column outlined](./images/mcp-access-all-authorizations.jpg)
+
+The **Reaches** column separates an authorization on the Anywhere Console endpoint from one on a
+cluster's. A status means:
 
 | Status | What it means | What to do |
 |---|---|---|
@@ -473,7 +504,7 @@ on the cluster network could see it.
 
 ## Security review checklist
 
-This chapter is for a security team deciding whether to enable MCP access. Each section answers
+This chapter is for a security team deciding whether to allow MCP access. Each section answers
 one question a review asks and states where the answer is enforced; it does not repeat the
 narrative above. Everything here describes the console as shipped; where a behavior depends on a
 setting, the setting is named.

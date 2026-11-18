@@ -263,7 +263,7 @@ Between step 1 and step 2, everything the console does as root fails against the
   queries of users who are signed in with their own, unchanged credentials. The console log is
   where it shows:
 
-  ```
+  ```text
   "msg":"query-history: fetch query_detail failed; retrying next interval","err":"access denied: invalid cluster username or password","pod":"<cluster>-fe-0"
   ```
 

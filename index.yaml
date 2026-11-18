@@ -28,9 +28,9 @@ entries:
   anywhere-console:
   - apiVersion: v2
     appVersion: v2.2.0
-    created: "2026-11-17T15:05:52.165544+08:00"
+    created: "2026-11-18T14:49:37.484998+08:00"
     description: Operations, usage, and SQL console
-    digest: 2e1af8d41a0e24c858e71cffb289cc7bd5bda8191a3afba5375cd475da3d5095
+    digest: 661aaf5e3dc0cd8cf9d0ff72cf905d18a3e03283d2f9d482e3e3cfc6dd03fff8
     home: https://github.com/CelerData/phoenixai-kubernetes-operator
     keywords:
     - anywhere
@@ -76,9 +76,9 @@ entries:
   anywhere-operator:
   - apiVersion: v2
     appVersion: 2.2.0
-    created: "2026-11-17T15:05:47.364115+08:00"
+    created: "2026-11-18T14:49:32.920046+08:00"
     description: Operator and CRDs that deploy and manage clusters
-    digest: 721a98d12a9e51e90e67cbb7d773eeb8700a20dd5f1b31d226ad3271660229c4
+    digest: 722d65eab208c50775dffdad96fa5f54fd8e142d355cbb5c4a816bdfcf4e313c
     home: https://github.com/CelerData/phoenixai-kubernetes-operator
     keywords:
     - operator
@@ -121,7 +121,7 @@ entries:
   kube-anywhere:
   - apiVersion: v2
     appVersion: 4.1.7-ee
-    created: "2026-11-17T15:05:45.117728+08:00"
+    created: "2026-11-18T14:49:30.431805+08:00"
     dependencies:
     - alias: operator
       name: anywhere-operator
@@ -136,7 +136,7 @@ entries:
       repository: file://charts/anywhere-console
       version: 2.2.0
     description: 'All-in-one: operator, cluster, optional console'
-    digest: 203d04e7d13aacd19e40065d57e0ade94c4d99da57f35cb4ebb1b8bf0d909dd2
+    digest: 18b7ebd1b068ddabf87faee6f3c200ba50fd1bd4e170228747948487f04c1cd2
     home: https://github.com/CelerData/phoenixai-kubernetes-operator
     keywords:
     - operator
@@ -344,9 +344,9 @@ entries:
   phoenixai:
   - apiVersion: v2
     appVersion: 4.1.7-ee
-    created: "2026-11-17T15:05:49.787254+08:00"
+    created: "2026-11-18T14:49:35.199745+08:00"
     description: Shared-data cluster (FE + CN); needs the operator
-    digest: 9613adda0db541afbb1452ac3891dad3065a4517a68443339c935c3dc9172788
+    digest: 9994b14d2545e5e410dc1d60c266fa92b7d76a9ba20fbce58fcc28d01a519ab7
     home: https://github.com/CelerData/phoenixai-kubernetes-operator
     keywords:
     - operator
@@ -411,9 +411,9 @@ entries:
   warehouse:
   - apiVersion: v2
     appVersion: 4.1.7-ee
-    created: "2026-11-17T15:05:54.658877+08:00"
+    created: "2026-11-18T14:49:39.761191+08:00"
     description: Extra compute warehouse for an existing cluster
-    digest: 6ff85703fae4657c8fb2041a529e7da64e4f3bbc318bccfe163d588994dfd8da
+    digest: 7a5920260179953bbdd5f90f4dbd76222500eb008a159d4af41f880b7ad07939
     home: https://github.com/CelerData/phoenixai-kubernetes-operator
     keywords:
     - operator
@@ -570,4 +570,4 @@ entries:
     urls:
     - https://github.com/CelerData/phoenixai-kubernetes-operator/releases/download/v1.11.4/warehouse-1.11.4.tgz
     version: 1.11.4
-generated: "2026-11-17T15:05:54.657548+08:00"
+generated: "2026-11-18T14:49:39.760396+08:00"

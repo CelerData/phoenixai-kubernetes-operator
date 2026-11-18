@@ -616,7 +616,7 @@ KEDA has not been validated. For the same reason, never set `desiredReplicas: "0
 
 ## 10. Troubleshooting
 
-**`kubectl apply` fails with `... is already managed by the hpa '<name>-cn-autoscaler'`**
+### `kubectl apply` fails with `... is already managed by the hpa '<name>-cn-autoscaler'`
 
 ```text
 admission webhook "vscaledobject.kb.io" denied the request: the workload 'kube-anywhere' of type
@@ -628,7 +628,7 @@ The CR still has an `autoScalingPolicy`, so the operator runs its own HPA for it
 `<name>-cn-autoscaler`, then apply the ScaledObject again. If you want CPU scaling as well, use
 [Recipe 8.4](#84-a-schedule-plus-cpu-based-scaling).
 
-**`READY` is `False`**
+### `READY` is `False`
 
 Run `kubectl describe scaledobject <name> -n <ns>` and read the `Conditions` and `Events` at the
 bottom.
@@ -638,7 +638,7 @@ bottom.
 - `failed to ensure HPA is correctly created for ScaledObject` — usually an invalid cron
   expression. The HPA events name the exact problem (next entry).
 
-**The count does not follow the schedule (`ACTIVE` stays `Unknown`, or the HPA shows `<unknown>`)**
+### The count does not follow the schedule (`ACTIVE` stays `Unknown`, or the HPA shows `<unknown>`)
 
 Read the HPA's events — they carry the error KEDA hit while evaluating your triggers:
 
@@ -658,7 +658,7 @@ $ kubectl logs -n keda deploy/keda-operator | grep -i error
 Use the exact IANA name (`Asia/Shanghai`, `America/New_York`, `Europe/Berlin`, `UTC`); the list is
 at [Wikipedia: tz database time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 
-**The window opened but nothing happened**
+### The window opened but nothing happened
 
 - Check `timezone`. A window written for `Asia/Shanghai` but meant for `UTC` opens eight hours off.
 - Check `maxReplicaCount`: it caps `desiredReplicas`.
@@ -667,7 +667,7 @@ at [Wikipedia: tz database time zones](https://en.wikipedia.org/wiki/List_of_tz_
   raise the replica count but pods do not start, the problem is in scheduling the pods (CPU, memory,
   image pull), not in KEDA — `kubectl describe pod` on a pending pod tells you which.
 
-**The window closed but the nodes are still there**
+### The window closed but the nodes are still there
 
 With only a cron trigger, wait 5 minutes — see [Timing](#65-timing--what-to-expect). If the
 ScaledObject has other triggers (CPU, or the
@@ -676,7 +676,7 @@ trigger's floor; the other triggers may still ask for those nodes, for as long a
 `kubectl describe hpa keda-hpa-<name> -n <ns>` lists every metric with its current value, and the
 HPA events name the trigger behind each change.
 
-**A CN pod keeps being removed and re-added, or the schedule stopped working**
+### A CN pod keeps being removed and re-added, or the schedule stopped working
 
 Check whether a second HPA targets the same CR:
 
@@ -694,7 +694,7 @@ Kubernetes stops both and reports `AmbiguousSelector ... are controlled by multi
 events. The ScaledObject keeps showing `READY True`. Remove `autoScalingPolicy` again: the operator
 deletes its HPA, and KEDA's takes over on its next pass.
 
-**The node count jumps down and back up after a `helm upgrade`**
+### The node count jumps down and back up after a `helm upgrade`
 
 Your Helm values still set `replicas`. Remove it — see the warning in
 [Section 4](#4-find-what-you-want-to-scale).

@@ -1,3 +1,5 @@
+{{- /* rbac.create: off when the platform provisions the grants itself (see values.yaml). */}}
+{{- if eq (include "anywhere.rbacCreate" .) "true" }}
 {{- if include "anywhere.watchNamespaces" . | fromJsonArray | not }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -43,4 +45,5 @@ rules:
   - pods/log
   verbs:
   - get
+{{- end }}
 {{- end }}

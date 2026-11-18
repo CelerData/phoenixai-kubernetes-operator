@@ -112,12 +112,111 @@ watchNamespaces:
 Both values are plain lists — a single namespaced-mode operator is just one entry in each (the
 one-anywhere-per-namespace install remains possible, it is just no longer required).
 
-The RBAC is minimal and read-oriented: `secrets: [get]` (per-cluster credential resolution) and
-`pods/exec: [create]` (the exec feature). Pod topology comes from the operator API, so no other
-Kubernetes verbs are granted. The ServiceAccount and (Cluster)Role/(Cluster)RoleBinding are
-always rendered — anywhere cannot function without them, so there is no `rbac.create`-style
-toggle; what IS configurable is the ServiceAccount's name/annotations/labels (`serviceAccount.*`,
-e.g. for cloud IAM bindings).
+The RBAC is minimal and read-oriented: `secrets: [get]` (per-cluster credential resolution),
+`pods/exec: [create]` (exec presets and reading log files inside the pods), `pods/log: [get]`
+(container logs) and `events: [get, list]` (a resource's Kubernetes events). Pod topology comes
+from the operator API, so no other Kubernetes verbs are granted. The ServiceAccount's
+name/annotations/labels are configurable (`serviceAccount.*`, e.g. for cloud IAM bindings).
+
+By default the chart creates the ServiceAccount and the (Cluster)Role/(Cluster)RoleBinding. Some
+platforms install charts under an identity that may not create RBAC objects, and provision the
+grants and the ServiceAccount themselves. For those, turn either off:
+
+```yaml
+# in my-values.yaml (prefix the keys with `anywhere.` when installing through the parent chart)
+rbac:
+  create: false
+serviceAccount:
+  create: false
+  name: <service-account-name>   # required when create is false: the existing ServiceAccount
+```
+
+With `rbac.create: false`, the ServiceAccount the pod runs as must already hold, in every namespace
+the console serves (all namespaces when `watchNamespaces` is empty), exactly these permissions —
+without them the console starts, but cannot reach the clusters' credentials, pods or events:
+
+| Resource | Verbs |
+|---|---|
+| `secrets` | `get` |
+| `pods/exec` | `create` |
+| `pods/log` | `get` |
+| `events` | `get`, `list` |
+
+Which objects carry the grant follows `watchNamespaces`, the same way the chart's own RBAC does.
+With `watchNamespaces` empty (the default) the console serves every namespace, so the grant is
+cluster-wide:
+
+```yaml
+# e.g. applied by the platform when watchNamespaces is empty (the default)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: <role-name>
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: <role-name>
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: <role-name>
+subjects:
+- kind: ServiceAccount
+  name: <service-account-name>
+  namespace: <release-namespace>
+```
+
+With `watchNamespaces` set, one Role and RoleBinding in each listed namespace is enough:
+
+```yaml
+# e.g. applied by the platform when watchNamespaces is set, once per listed namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: <role-name>
+  namespace: <cluster-namespace>
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: <role-name>
+  namespace: <cluster-namespace>
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: <role-name>
+subjects:
+- kind: ServiceAccount
+  name: <service-account-name>
+  namespace: <release-namespace>
+```
 
 ## External dependencies (object storage / Prometheus)
 
@@ -558,7 +657,9 @@ Prefix each with `anywhere.` when installing through the parent `kube-anywhere` 
 | `license.cacheTTL` | `5m` | how long a cluster's registered-license list is served from anywhere's in-memory cache before its FE is asked again; `"0s"` disables the cache |
 | `inspection.enabledRules` / `.disabledRules` | `[]` / `[]` (all rules run) | CR-inspection rule selection; rule ids and meanings are listed as comments in `values.yaml` |
 | `env` | `[]` | extra container env vars, e.g. `GODEBUG` (anywhere's own configuration is not env-settable — it goes through the rendered config file) |
-| `serviceAccount.name` / `.annotations` / `.labels` | `""` (the `nameOverride` prefix) / `{}` / `{}` | the always-created ServiceAccount the pod runs as (annotations e.g. for cloud IAM bindings) |
+| `rbac.create` | `true` | render the (Cluster)Role and (Cluster)RoleBinding; `false` when the platform grants the ServiceAccount its permissions itself |
+| `serviceAccount.create` | `true` | render the ServiceAccount; `false` when the platform provides one, named by `serviceAccount.name` (then required) |
+| `serviceAccount.name` / `.annotations` / `.labels` | `""` (the `nameOverride` prefix) / `{}` / `{}` | the ServiceAccount the pod runs as (annotations e.g. for cloud IAM bindings; they apply only when the chart creates it) |
 | `podLabels` | `{}` | extra labels on the console pod, e.g. `azure.workload.identity/use: "true"` for AKS workload identity; the chart's own `app` / `version` labels cannot be overridden (the render refuses) |
 | `persistence.size` | `10Gi` | data PVC size; growable via `helm upgrade` (StorageClass must allow expansion), never shrinkable |
 | `persistence.storageClass` | `""` (cluster default) | StorageClass of the chart-rendered PVC |

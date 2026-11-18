@@ -15,9 +15,31 @@ Through the parent chart the alias is "anywhere" too, so nothing changes there.
 
 {{/*
 The ServiceAccount the pod runs as; defaults to the nameOverride prefix like every other resource.
+With serviceAccount.create off the chart cannot make one up: the name must be the one the
+platform provides, so an empty name refuses the render instead of pointing the pod at an account
+that does not exist.
 */}}
 {{- define "anywhere.serviceAccountName" -}}
-{{- default (include "anywhere.name" .) .Values.serviceAccount.name -}}
+{{- $sa := .Values.serviceAccount | default dict -}}
+{{- $name := trim (toString ($sa.name | default "")) -}}
+{{- if and (eq (include "anywhere.serviceAccountCreate" .) "false") (not $name) -}}
+{{- fail "serviceAccount.create is false, so serviceAccount.name must name the existing ServiceAccount the console runs as" -}}
+{{- end -}}
+{{- default (include "anywhere.name" .) $name -}}
+{{- end }}
+
+{{/*
+The two create switches: "true" or "false". Absent means true — an install that predates them
+(helm upgrade --reuse-values) keeps rendering its ServiceAccount and RBAC. A value that is set is
+read through anywhere.bool, so the string "false" turns the switch off.
+*/}}
+{{- define "anywhere.serviceAccountCreate" -}}
+{{- $sa := .Values.serviceAccount | default dict -}}
+{{- if hasKey $sa "create" }}{{ include "anywhere.bool" $sa.create }}{{ else }}true{{ end -}}
+{{- end }}
+{{- define "anywhere.rbacCreate" -}}
+{{- $rbac := .Values.rbac | default dict -}}
+{{- if hasKey $rbac "create" }}{{ include "anywhere.bool" $rbac.create }}{{ else }}true{{ end -}}
 {{- end }}
 
 {{/*
@@ -146,10 +168,10 @@ Usage: include "anywhere.bool" <value>
 {{- end }}
 
 {{/*
-One WARNING line per boolean switch of the config Secret that holds a string which is no
-spelling of a boolean: anywhere.bool reads it as true, which whoever wrote it may not have meant.
-The list must name exactly the switches secret-config.yaml reads through anywhere.bool — the
-render test counts both sides.
+One WARNING line per boolean switch of the chart that holds a string which is no spelling of a
+boolean: anywhere.bool reads it as true, which whoever wrote it may not have meant. The list must
+name exactly the switches secret-config.yaml and the create switches above read through
+anywhere.bool — the render test counts both sides.
 */}}
 {{- define "anywhere.boolWarnings" -}}
 {{- $deps := .Values.dependencies | default dict -}}
@@ -163,6 +185,8 @@ render test counts both sides.
 {{- $_ := set $sw "dependencies.s3.usePathStyle" (index ($deps.s3 | default dict) "usePathStyle") -}}
 {{- $_ := set $sw "mcp.enabled" (index (.Values.mcp | default dict) "enabled") -}}
 {{- $_ := set $sw "queryHistory.enabled" (index (.Values.queryHistory | default dict) "enabled") -}}
+{{- $_ := set $sw "rbac.create" (index (.Values.rbac | default dict) "create") -}}
+{{- $_ := set $sw "serviceAccount.create" (index (.Values.serviceAccount | default dict) "create") -}}
 {{- range $key, $v := $sw }}
 {{- if and (kindIs "string" $v) (not (has (lower $v) $known)) }}
 WARNING: {{ $key }} should be true or false; it is {{ $v | quote }}, which is read as true.

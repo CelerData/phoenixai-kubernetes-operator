@@ -53,6 +53,7 @@ data volume (see [Audit log](#audit-log)).
     GRANT SELECT ON ALL VIEWS IN ALL DATABASES TO USER '<name>'@'%';
     GRANT SELECT ON ALL MATERIALIZED VIEWS IN ALL DATABASES TO USER '<name>'@'%';
     ```
+
 - An MCP client. Claude Code is used in the examples; the JSON form for other clients is below.
 - Optional: query history enabled (for the query history tools) and Prometheus configured (for
   the metrics tools). See [Dependencies](#dependencies).
@@ -218,7 +219,7 @@ All tools take the cluster's `namespace` and `cluster` (from `list_clusters`) un
 are read-only except the three marked **changes state**. Every result is a JSON object; errors
 come back as tool errors with the same message the console would show.
 
-**Cluster inventory**
+#### Cluster inventory
 
 | Tool | What it does |
 |---|---|
@@ -229,7 +230,7 @@ come back as tool errors with the same message the console would show.
 | `get_resource` | One Kubernetes object of the cluster as a credential-masked JSON manifest, optionally with its recent Events. Served kinds: PhoenixAICluster, PhoenixAIWarehouse, StatefulSet, Deployment, Service, ConfigMap, Pod, PersistentVolumeClaim, PodDisruptionBudget, HorizontalPodAutoscaler. Secrets are refused. |
 | `get_component_config` | The rendered `fe.conf` or `cn.conf` a component runs with (per warehouse and CN group for CN), credentials masked. |
 
-**Pods, logs and events**
+#### Pods, logs and events
 
 | Tool | What it does |
 |---|---|
@@ -254,7 +255,7 @@ come back as tool errors with the same message the console would show.
 | `get_query_detail` | One collected query: full SQL, plan, metrics, and whether a profile exists. |
 | `get_query_profile` | A query's runtime profile. With `analyzed: true` the operator tree with each operator's time, rows and memory, laid out by whichever FE still holds the profile (every FE is asked). Without it, the raw text, from query history when it kept one. Paged by bytes, 48 KiB per page at most. Does not need query history for profiles an FE still holds. |
 
-**Commands and configuration**
+#### Commands and configuration
 
 | Tool | What it does |
 |---|---|
@@ -262,7 +263,7 @@ come back as tool errors with the same message the console would show.
 | `run_command` | Run one command from that list by name, under the console's own administrative identity, and return the result table. Only catalog names are accepted, never SQL text; a command with `params` takes its parameters by name. A result of at most 1000 rows that fits one result comes back as rows; a larger one comes back rendered as text (`content`, one field per line), its first page (`maxBytes`, 32 KiB by default, at most 48 KiB) with an `outputId` — page on with `read_command_output`. |
 | `read_command_output` | The rest of a `run_command` result that did not fit one result: the page from `offset` of the rendering `outputId` names, at most `maxBytes`. Page on from `nextOffset` while `truncated` is true. Outputs are kept for 15 minutes in the console process, only for the grant that ran the command; an unknown or expired id is not found — run the command again. |
 
-**Support bundles**
+#### Support bundles
 
 | Tool | What it does |
 |---|---|
@@ -273,7 +274,7 @@ come back as tool errors with the same message the console would show.
 | `create_support_bundle` | **Changes state.** Start collecting a bundle. One bundle at a time across the whole console; collection runs in the background. Download and export stay in the console. |
 | `delete_support_bundle` | **Changes state.** Delete a bundle (cancels one still collecting). Clients that honor the destructive hint ask you first. |
 
-**Exec presets**
+#### Exec presets
 
 | Tool | What it does |
 |---|---|
@@ -377,7 +378,7 @@ Every tool call (including refused and unknown ones) and every sign-in event (co
 token issue and refresh, revocation, reuse detection, lost credential, cluster removal) is one
 JSON line in a file per UTC day on the console's data volume:
 
-```
+```text
 /var/lib/phoenixai-anywhere/audit/mcp-<YYYY-MM-DD>.jsonl
 ```
 
@@ -389,7 +390,7 @@ daily. The console has no page for it.
 
 An administrator reads it through the console's API, newest first:
 
-```
+```bash
 curl -s -H "Authorization: Bearer <admin session token>" \
   "https://anywhere.example.com/api/v1/admin/mcp/audit-events?action=mcp.tool.&limit=100"
 ```

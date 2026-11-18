@@ -631,12 +631,99 @@ env: []
 # ---------------------------------------------------------------------------------------------
 # Identity and naming
 # ---------------------------------------------------------------------------------------------
-# The ServiceAccount the pod runs as. It is always created, together with the (Cluster)Role and
-# (Cluster)RoleBinding granting anywhere its minimal RBAC (secrets get, pods/exec create,
-# events get/list, pods/log get — scoped by watchNamespaces above): anywhere cannot serve
-# clusters without them, so there is no toggle to render a broken install.
+# The ServiceAccount the pod runs as, and the RBAC it holds. By default the chart creates both:
+# the ServiceAccount, and a ClusterRole + ClusterRoleBinding (or, with watchNamespaces set, a
+# Role + RoleBinding in each listed namespace) granting the console its minimal permissions.
+#
+# Some platforms install charts under an identity that may not create RBAC objects or
+# ServiceAccounts, and provision both themselves. For those, set rbac.create and/or
+# serviceAccount.create to false. With serviceAccount.create false, serviceAccount.name is
+# required and must name the existing ServiceAccount, in the release namespace, that the pod runs
+# as. With rbac.create false, that ServiceAccount must already be granted — in every namespace the
+# console serves (all namespaces when watchNamespaces is empty) — exactly these permissions; the
+# console cannot read a cluster's credentials, read log files, run exec presets, collect
+# container logs or show events without them:
+#   secrets    get          (a cluster's root password Secret)
+#   pods/exec  create       (exec presets, and reading log files inside the pods)
+#   pods/log   get          (container logs)
+#   events     get, list    (a resource's Kubernetes events)
+# Which objects carry the grant follows watchNamespaces, the same way the chart's own RBAC does.
+# e.g. with watchNamespaces empty (the default), applied by the platform — the console serves
+# every namespace, so the grant is cluster-wide:
+#   apiVersion: rbac.authorization.k8s.io/v1
+#   kind: ClusterRole
+#   metadata:
+#     name: <role-name>
+#   rules:
+#   - apiGroups: [""]
+#     resources: ["secrets"]
+#     verbs: ["get"]
+#   - apiGroups: [""]
+#     resources: ["pods/exec"]
+#     verbs: ["create"]
+#   - apiGroups: [""]
+#     resources: ["pods/log"]
+#     verbs: ["get"]
+#   - apiGroups: [""]
+#     resources: ["events"]
+#     verbs: ["get", "list"]
+#   ---
+#   apiVersion: rbac.authorization.k8s.io/v1
+#   kind: ClusterRoleBinding
+#   metadata:
+#     name: <role-name>
+#   roleRef:
+#     apiGroup: rbac.authorization.k8s.io
+#     kind: ClusterRole
+#     name: <role-name>
+#   subjects:
+#   - kind: ServiceAccount
+#     name: <service-account-name>
+#     namespace: <release-namespace>
+# e.g. with watchNamespaces set, applied by the platform once per listed namespace:
+#   apiVersion: rbac.authorization.k8s.io/v1
+#   kind: Role
+#   metadata:
+#     name: <role-name>
+#     namespace: <cluster-namespace>
+#   rules:
+#   - apiGroups: [""]
+#     resources: ["secrets"]
+#     verbs: ["get"]
+#   - apiGroups: [""]
+#     resources: ["pods/exec"]
+#     verbs: ["create"]
+#   - apiGroups: [""]
+#     resources: ["pods/log"]
+#     verbs: ["get"]
+#   - apiGroups: [""]
+#     resources: ["events"]
+#     verbs: ["get", "list"]
+#   ---
+#   apiVersion: rbac.authorization.k8s.io/v1
+#   kind: RoleBinding
+#   metadata:
+#     name: <role-name>
+#     namespace: <cluster-namespace>
+#   roleRef:
+#     apiGroup: rbac.authorization.k8s.io
+#     kind: Role
+#     name: <role-name>
+#   subjects:
+#   - kind: ServiceAccount
+#     name: <service-account-name>
+#     namespace: <release-namespace>
+rbac:
+  # Render the (Cluster)Role and (Cluster)RoleBinding above.
+  # e.g. create: false
+  create: true
 serviceAccount:
-  # Empty defaults to the nameOverride prefix, matching every other rendered resource.
+  # Render the ServiceAccount. When false, set name to the ServiceAccount the platform provides.
+  # e.g. create: false
+  create: true
+  # Empty defaults to the nameOverride prefix, matching every other rendered resource. Required
+  # when create is false.
+  # e.g. name: <service-account-name>
   name: ""
   # Optional annotations to add to the serviceaccount manifest (e.g. IAM role bindings).
   annotations: {}

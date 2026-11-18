@@ -11,7 +11,7 @@ the CN nodes of a `PhoenixAICluster` (the `default_warehouse`) and for a `Phoeni
 
 No operator setting is involved. The pieces are:
 
-```
+```text
 FE (leader) /metrics ──ServiceMonitor──▶ Prometheus ◀──PromQL── KEDA ScaledObject
                                                                      │ creates and drives an HPA
   PhoenixAICluster / PhoenixAIWarehouse (scale subresource) ◀────────┘
@@ -82,7 +82,7 @@ kubectl -n <namespace> exec <cluster>-fe-0 -- \
   curl -s http://127.0.0.1:8030/metrics | grep starrocks_fe_warehouse_query_queue
 ```
 
-```
+```text
 starrocks_fe_warehouse_query_queue{field="query_pending_length", warehouse_id="0", warehouse_name="default_warehouse"} 0
 starrocks_fe_warehouse_query_queue{field="query_running_length", warehouse_id="0", warehouse_name="default_warehouse"} 0
 starrocks_fe_warehouse_query_queue{field="earliest_query_wait_time", warehouse_id="0", warehouse_name="default_warehouse"} 0.0

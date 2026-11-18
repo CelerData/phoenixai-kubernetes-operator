@@ -218,6 +218,7 @@ Read it field by field:
     mysql -h127.0.0.1 -P9030 -uroot \
     -e "ADMIN SHOW FRONTEND CONFIG LIKE 'enable_collect_query_detail_info';"
   ```
+
 - **`disk`** — how full the console's data volume is. See "What is kept, and for how long" below.
 
 **In Health checks.** The `query-detail-collect-inconsistent` check reports, at info severity,

@@ -875,7 +875,7 @@ kept on uninstall, so delete those claims too before reinstalling — see
 
 ### `CREATE DATABASE` fails with "The default storage volume does not exist"
 
-```
+```text
 ERROR 5506 (55000): The default storage volume does not exist. A default storage volume can be
 created by following these steps: 1. Create a storage volume. 2. Set the storage volume as default
 ```
